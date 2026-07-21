@@ -80,7 +80,7 @@ export class Exams implements OnInit {
     return {
       subject_id: 0, title: '', description: '', duration: 30, pass_score: 5,
       shuffle: true, shuffle_answers: true, shuffle_mode: 'per_student',
-      access_type: 'private', status: 'draft',
+      access_type: 'private', max_attempts: 0, status: 'draft',
     };
   }
 
@@ -299,6 +299,7 @@ export class Exams implements OnInit {
     fd.append('shuffle_answers', String(!!this.form.shuffle_answers));
     fd.append('shuffle_mode', this.form.shuffle_mode ?? 'per_student');
     fd.append('access_type', this.form.access_type ?? 'private');
+    fd.append('max_attempts', String(this.form.max_attempts ?? 0));
     fd.append('status', this.form.status ?? 'draft');
     fd.append('from_exam_id', String(this.fromExamId || 0));
     fd.append('question_ids', Array.from(this.pickedIds).join(',')); // câu chọn từ ngân hàng

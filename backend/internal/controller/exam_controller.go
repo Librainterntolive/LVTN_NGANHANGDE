@@ -31,6 +31,7 @@ func (ctl *ExamController) Build(c *gin.Context) {
 	passScore, _ := strconv.ParseFloat(c.DefaultPostForm("pass_score", "0"), 64)
 	shuffle := c.PostForm("shuffle") == "true"
 	shuffleAns := c.PostForm("shuffle_answers") == "true"
+	maxAttempts, _ := strconv.Atoi(c.DefaultPostForm("max_attempts", "0"))
 
 	var questionIDs []uint
 	seen := map[uint]bool{}
@@ -99,6 +100,7 @@ func (ctl *ExamController) Build(c *gin.Context) {
 		ShuffleAnswers: shuffleAns,
 		ShuffleMode:    c.DefaultPostForm("shuffle_mode", "per_student"),
 		AccessType:     c.DefaultPostForm("access_type", "private"),
+		MaxAttempts:    maxAttempts,
 		Status:         c.DefaultPostForm("status", "draft"),
 		QuestionIDs:    questionIDs,
 		ClassIDs:       classIDs,

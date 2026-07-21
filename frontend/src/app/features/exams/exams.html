@@ -53,6 +53,10 @@
     </div>
     <label>Thời gian (phút): <input type="number" [(ngModel)]="form.duration" style="width:80px;" /></label>
     <label>Điểm đậu (/10): <input type="number" [(ngModel)]="form.pass_score" style="width:80px;" /></label>
+    <label title="0 = cho làm lại không giới hạn">
+      Số lần được làm: <input type="number" min="0" [(ngModel)]="form.max_attempts" style="width:70px;" />
+      <span style="color:var(--text-2); font-size:13px;">(0 = không giới hạn)</span>
+    </label>
     <select [(ngModel)]="form.access_type">
       <option value="private">private (chỉ lớp được giao)</option>
       <option value="public">public (ai cũng làm)</option>

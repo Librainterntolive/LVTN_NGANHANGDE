@@ -16,6 +16,7 @@ export interface Exam {
   shuffle_answers?: boolean;
   shuffle_mode?: string; // per_student/fixed
   access_type?: string;  // private/public
+  max_attempts?: number; // 0 = không giới hạn số lần làm
   status?: string;       // draft/published/closed
 }
 

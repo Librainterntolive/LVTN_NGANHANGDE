@@ -103,6 +103,7 @@ type ExamInput struct {
 	ShuffleAnswers bool    `json:"shuffle_answers"`
 	ShuffleMode    string  `json:"shuffle_mode"`
 	AccessType     string  `json:"access_type"`
+	MaxAttempts    int     `json:"max_attempts"` // 0 = không giới hạn số lần làm
 	Status         string  `json:"status"`
 	QuestionIDs    []uint  `json:"question_ids"`
 	ClassIDs       []uint  `json:"class_ids"`

@@ -95,6 +95,7 @@ func (s *ExamService) Create(in dto.ExamInput, createdBy uint) (*entity.Exam, er
 		ShuffleAnswers: in.ShuffleAnswers,
 		ShuffleMode:    defaultStr(in.ShuffleMode, "per_student"),
 		AccessType:     defaultStr(in.AccessType, "private"),
+		MaxAttempts:    in.MaxAttempts,
 		Status:         defaultStr(in.Status, "draft"),
 	}
 	if err := s.repo.Create(exam); err != nil {
@@ -124,6 +125,7 @@ func (s *ExamService) Update(id string, in dto.ExamInput) (*entity.Exam, error) 
 	exam.ShuffleAnswers = in.ShuffleAnswers
 	exam.ShuffleMode = defaultStr(in.ShuffleMode, "per_student")
 	exam.AccessType = defaultStr(in.AccessType, "private")
+	exam.MaxAttempts = in.MaxAttempts
 	exam.Status = defaultStr(in.Status, "draft")
 	if err := s.repo.Update(exam); err != nil {
 		return nil, err
@@ -177,6 +179,7 @@ func (s *ExamService) Clone(id string, userID uint) (*entity.Exam, error) {
 		ShuffleAnswers: src.ShuffleAnswers,
 		ShuffleMode:    src.ShuffleMode,
 		AccessType:     "private",
+		MaxAttempts:    src.MaxAttempts,
 		Status:         "draft",
 	}
 	if err := s.repo.Create(clone); err != nil {
