@@ -41,10 +41,32 @@ func (r *ExamRepository) Update(e *entity.Exam) error {
 	return r.db.Save(e).Error
 }
 
+// Delete: xóa đề + toàn bộ dữ liệu phụ thuộc, trong 1 giao dịch.
+// Không dọn thì bảng submissions còn lại các bản ghi trỏ tới đề đã biến mất.
 func (r *ExamRepository) Delete(id string) error {
-	r.db.Where("exam_id = ?", id).Delete(&entity.ExamQuestion{})
-	r.db.Where("exam_id = ?", id).Delete(&entity.ExamClass{})
-	return r.db.Delete(&entity.Exam{}, id).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var subIDs []uint
+		tx.Model(&entity.Submission{}).Where("exam_id = ?", id).Pluck("id", &subIDs)
+		if len(subIDs) > 0 {
+			if err := tx.Where("submission_id IN ?", subIDs).
+				Delete(&entity.SubmissionDetail{}).Error; err != nil {
+				return err
+			}
+		}
+		if err := tx.Where("exam_id = ?", id).Delete(&entity.Submission{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("exam_id = ?", id).Delete(&entity.ExamQuestion{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("exam_id = ?", id).Delete(&entity.ExamClass{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("exam_id = ?", id).Delete(&entity.FolderExam{}).Error; err != nil {
+			return err
+		}
+		return tx.Delete(&entity.Exam{}, id).Error
+	})
 }
 
 // ----- câu hỏi trong đề -----

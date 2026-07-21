@@ -133,13 +133,16 @@ func (s *QuestionService) Create(in dto.QuestionInput, createdBy uint) (*entity.
 	return question, err
 }
 
-func (s *QuestionService) Update(id string, in dto.QuestionInput) (*entity.Question, error) {
+func (s *QuestionService) Update(id string, in dto.QuestionInput, userID uint, role string) (*entity.Question, error) {
 	if err := validateOneCorrect(in.Answers); err != nil {
 		return nil, err
 	}
 	question, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
+	}
+	if !canModify(question.CreatedBy, userID, role) {
+		return nil, ErrNotOwner
 	}
 	// câu đã dùng trong đề thi thì khóa, không cho sửa (bảo toàn đề đã phát hành)
 	if n := s.repo.UsedCount(question.ID); n > 0 {
@@ -164,10 +167,13 @@ func (s *QuestionService) Update(id string, in dto.QuestionInput) (*entity.Quest
 	return s.repo.FindByID(id)
 }
 
-func (s *QuestionService) Delete(id string) error {
+func (s *QuestionService) Delete(id string, userID uint, role string) error {
 	question, err := s.repo.FindByID(id)
 	if err != nil {
 		return errors.New("khong tim thay cau hoi")
+	}
+	if !canModify(question.CreatedBy, userID, role) {
+		return ErrNotOwner
 	}
 	if n := s.repo.UsedCount(question.ID); n > 0 {
 		return errors.New("cau hoi da duoc dung trong " + strconv.FormatInt(n, 10) + " de thi, khong the xoa")

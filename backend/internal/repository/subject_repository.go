@@ -37,3 +37,11 @@ func (r *SubjectRepository) Update(s *entity.Subject) error {
 func (r *SubjectRepository) Delete(id string) error {
 	return r.db.Delete(&entity.Subject{}, id).Error
 }
+
+// CountUsage: số câu hỏi và số đề thi đang thuộc môn này.
+// Dùng để chặn xóa môn còn dữ liệu (xóa sẽ làm mồ côi cả ngân hàng câu hỏi).
+func (r *SubjectRepository) CountUsage(id string) (questions, exams int64) {
+	r.db.Model(&entity.Question{}).Where("subject_id = ?", id).Count(&questions)
+	r.db.Model(&entity.Exam{}).Where("subject_id = ?", id).Count(&exams)
+	return
+}

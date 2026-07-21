@@ -22,11 +22,11 @@ func NewAuthService(userRepo *repository.UserRepository) *AuthService {
 func (s *AuthService) Register(in dto.RegisterInput) (*entity.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, errors.New("khong ma hoa duoc mat khau")
+		return nil, errors.New("mat khau khong hop le (toi da 72 ky tu)")
 	}
 	user := &entity.User{
 		Username:     in.Username,
-		Email:        in.Email,
+		Email:        emailOrNil(in.Email),
 		PasswordHash: string(hash),
 		FullName:     in.FullName,
 		Role:         defaultStr(in.Role, "Student"),

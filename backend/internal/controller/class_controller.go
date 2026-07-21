@@ -69,7 +69,11 @@ func (ctl *ClassController) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	cl, err := ctl.svc.Update(c.Param("id"), in)
+	cl, err := ctl.svc.Update(c.Param("id"), in, getUserID(c), getRole(c))
+	if err == service.ErrNotOwner {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay lop"})
 		return
@@ -78,7 +82,14 @@ func (ctl *ClassController) Update(c *gin.Context) {
 }
 
 func (ctl *ClassController) Delete(c *gin.Context) {
-	ctl.svc.Delete(c.Param("id"))
+	if err := ctl.svc.Delete(c.Param("id"), getUserID(c), getRole(c)); err != nil {
+		status := http.StatusBadRequest
+		if err == service.ErrNotOwner {
+			status = http.StatusForbidden
+		}
+		c.JSON(status, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
 }
 
@@ -99,14 +110,25 @@ func (ctl *ClassController) AddStudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := ctl.svc.AddStudent(c.Param("id"), in.StudentID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Sinh vien da co trong lop hoac khong hop le"})
+	if err := ctl.svc.AddStudent(c.Param("id"), in.StudentID, getUserID(c), getRole(c)); err != nil {
+		if err == service.ErrNotOwner {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "Da them"})
 }
 
 func (ctl *ClassController) RemoveStudent(c *gin.Context) {
-	ctl.svc.RemoveStudent(c.Param("id"), c.Param("studentId"))
+	if err := ctl.svc.RemoveStudent(c.Param("id"), c.Param("studentId"), getUserID(c), getRole(c)); err != nil {
+		status := http.StatusBadRequest
+		if err == service.ErrNotOwner {
+			status = http.StatusForbidden
+		}
+		c.JSON(status, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Da xoa khoi lop"})
 }

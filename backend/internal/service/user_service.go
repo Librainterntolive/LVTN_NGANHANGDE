@@ -26,10 +26,15 @@ func (s *UserService) Create(in dto.UserInput) (*entity.User, error) {
 	if in.Password == "" {
 		return nil, errors.New("can nhap mat khau")
 	}
-	hash, _ := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+	// Bỏ qua lỗi ở đây thì mật khẩu dài quá 72 ký tự sẽ tạo ra tài khoản có
+	// chuỗi băm rỗng - trông như tạo thành công nhưng không bao giờ đăng nhập được.
+	hash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, errors.New("mat khau khong hop le (toi da 72 ky tu)")
+	}
 	user := &entity.User{
 		Username:     in.Username,
-		Email:        in.Email,
+		Email:        emailOrNil(in.Email),
 		PasswordHash: string(hash),
 		FullName:     in.FullName,
 		Role:         defaultStr(in.Role, "Student"),
@@ -47,7 +52,7 @@ func (s *UserService) Update(id string, in dto.UserInput) (*entity.User, error) 
 		return nil, err
 	}
 	user.FullName = in.FullName
-	user.Email = in.Email
+	user.Email = emailOrNil(in.Email)
 	if in.Role != "" {
 		user.Role = in.Role
 	}
@@ -61,7 +66,10 @@ func (s *UserService) Update(id string, in dto.UserInput) (*entity.User, error) 
 		user.LockReason = ""
 	}
 	if in.Password != "" {
-		hash, _ := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+		hash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, errors.New("mat khau khong hop le (toi da 72 ky tu)")
+		}
 		user.PasswordHash = string(hash)
 	}
 	err = s.repo.Update(user)

@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"quiz-backend/internal/dto"
@@ -106,10 +107,13 @@ func (s *ClassService) GetAssignable(role string, userID uint) ([]entity.Class, 
 	return classes, nil
 }
 
-func (s *ClassService) Update(id string, in dto.ClassInput) (*entity.Class, error) {
+func (s *ClassService) Update(id string, in dto.ClassInput, userID uint, role string) (*entity.Class, error) {
 	class, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
+	}
+	if !canModify(class.CreatedBy, userID, role) {
+		return nil, ErrNotOwner
 	}
 	class.Name = in.Name
 	class.Description = in.Description
@@ -118,23 +122,55 @@ func (s *ClassService) Update(id string, in dto.ClassInput) (*entity.Class, erro
 	return class, err
 }
 
-func (s *ClassService) Delete(id string) error {
+func (s *ClassService) Delete(id string, userID uint, role string) error {
+	class, err := s.repo.FindByID(id)
+	if err != nil {
+		return errors.New("khong tim thay lop")
+	}
+	if !canModify(class.CreatedBy, userID, role) {
+		return ErrNotOwner
+	}
 	return s.repo.Delete(id)
+}
+
+// canManageStudents: đổi danh sách sinh viên của lớp.
+// Ngoài chủ lớp và Admin, lớp "dùng chung" (IsPublic) cho phép mọi giảng viên
+// thao tác - đúng với ý nghĩa lớp dùng chung đã thiết kế.
+func (s *ClassService) canManageStudents(classID string, userID uint, role string) (*entity.Class, error) {
+	class, err := s.repo.FindByID(classID)
+	if err != nil {
+		return nil, errors.New("khong tim thay lop")
+	}
+	if !canModify(class.CreatedBy, userID, role) && !class.IsPublic {
+		return nil, ErrNotOwner
+	}
+	return class, nil
 }
 
 func (s *ClassService) GetStudents(classID string) ([]entity.User, error) {
 	return s.repo.FindStudents(classID)
 }
 
-func (s *ClassService) AddStudent(classID string, studentID uint) error {
-	class, err := s.repo.FindByID(classID)
+func (s *ClassService) AddStudent(classID string, studentID uint, userID uint, role string) error {
+	class, err := s.canManageStudents(classID, userID, role)
 	if err != nil {
 		return err
+	}
+	// chỉ thêm được tài khoản sinh viên vào lớp
+	stu, err := s.userRepo.FindByID(strconv.Itoa(int(studentID)))
+	if err != nil {
+		return errors.New("khong tim thay tai khoan")
+	}
+	if stu.Role != "Student" {
+		return errors.New("chi them duoc tai khoan sinh vien vao lop")
 	}
 	return s.repo.AddStudent(class.ID, studentID)
 }
 
-func (s *ClassService) RemoveStudent(classID, studentID string) error {
+func (s *ClassService) RemoveStudent(classID, studentID string, userID uint, role string) error {
+	if _, err := s.canManageStudents(classID, userID, role); err != nil {
+		return err
+	}
 	return s.repo.RemoveStudent(classID, studentID)
 }
 

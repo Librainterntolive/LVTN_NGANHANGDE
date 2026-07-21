@@ -14,7 +14,7 @@ import { MySubmissions } from './features/my-submissions/my-submissions';
 import { MyClasses } from './features/my-classes/my-classes';
 import { MyStorage } from './features/my-storage/my-storage';
 import { Stats } from './features/stats/stats';
-import { authGuard } from './auth/auth.guard';
+import { authGuard, roleGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -25,12 +25,14 @@ export const routes: Routes = [
   { path: 'subjects', component: Subjects },
   { path: 'subjects/:id', component: SubjectDetail },
 
-  // quản lý (cần đăng nhập) - H, I, K
-  { path: 'questions', component: Questions, canActivate: [authGuard] },
-  { path: 'classes', component: Classes, canActivate: [authGuard] },
-  { path: 'exams', component: Exams, canActivate: [authGuard] },
-  { path: 'stats', component: Stats, canActivate: [authGuard] },
-  { path: 'users', component: Users, canActivate: [authGuard] },
+  // quản lý (Giảng viên + Quản trị viên) - H, I, K
+  { path: 'questions', component: Questions, canActivate: [roleGuard('Admin', 'Teacher')] },
+  { path: 'classes', component: Classes, canActivate: [roleGuard('Admin', 'Teacher')] },
+  { path: 'exams', component: Exams, canActivate: [roleGuard('Admin', 'Teacher')] },
+  { path: 'stats', component: Stats, canActivate: [roleGuard('Admin', 'Teacher')] },
+
+  // chỉ Quản trị viên
+  { path: 'users', component: Users, canActivate: [roleGuard('Admin')] },
 
   // sinh viên - J
   { path: 'my-exams', component: MyExams, canActivate: [authGuard] },

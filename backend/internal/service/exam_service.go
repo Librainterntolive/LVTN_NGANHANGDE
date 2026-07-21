@@ -106,13 +106,16 @@ func (s *ExamService) Create(in dto.ExamInput, createdBy uint) (*entity.Exam, er
 	return exam, nil
 }
 
-func (s *ExamService) Update(id string, in dto.ExamInput) (*entity.Exam, error) {
+func (s *ExamService) Update(id string, in dto.ExamInput, userID uint, role string) (*entity.Exam, error) {
 	if n := s.qRepo.CountDraft(in.QuestionIDs); n > 0 {
 		return nil, errors.New("de thi chua cau hoi o trang thai Nhap - hay chuyen sang Chinh thuc truoc")
 	}
 	exam, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
+	}
+	if !canModify(exam.CreatedBy, userID, role) {
+		return nil, ErrNotOwner
 	}
 	exam.SubjectID = in.SubjectID
 	exam.Title = in.Title
@@ -130,8 +133,15 @@ func (s *ExamService) Update(id string, in dto.ExamInput) (*entity.Exam, error) 
 	if err := s.repo.Update(exam); err != nil {
 		return nil, err
 	}
-	s.repo.SetQuestions(exam.ID, in.QuestionIDs)
-	s.repo.SetClasses(exam.ID, in.ClassIDs)
+	// Chỉ thay danh sách khi client CÓ gửi trường tương ứng.
+	// Trước đây gọi PUT mà quên kèm question_ids là xóa sạch câu hỏi của đề.
+	// nil = không gửi -> giữ nguyên; [] = gửi mảng rỗng -> cố ý xóa hết.
+	if in.QuestionIDs != nil {
+		s.repo.SetQuestions(exam.ID, in.QuestionIDs)
+	}
+	if in.ClassIDs != nil {
+		s.repo.SetClasses(exam.ID, in.ClassIDs)
+	}
 	return exam, nil
 }
 
@@ -189,7 +199,14 @@ func (s *ExamService) Clone(id string, userID uint) (*entity.Exam, error) {
 	return clone, nil
 }
 
-func (s *ExamService) Delete(id string) error {
+func (s *ExamService) Delete(id string, userID uint, role string) error {
+	exam, err := s.repo.FindByID(id)
+	if err != nil {
+		return errors.New("khong tim thay de thi")
+	}
+	if !canModify(exam.CreatedBy, userID, role) {
+		return ErrNotOwner
+	}
 	return s.repo.Delete(id)
 }
 

@@ -6,7 +6,9 @@ import "time"
 type User struct {
 	ID           uint      `gorm:"primaryKey" json:"id"`
 	Username     string    `gorm:"size:100;uniqueIndex;not null" json:"username"`
-	Email        string    `gorm:"size:150;uniqueIndex" json:"email"`
+	// Con trỏ để email bỏ trống lưu thành NULL. Nếu lưu chuỗi rỗng thì chỉ mục
+	// duy nhất chỉ cho phép ĐÚNG MỘT tài khoản không có email.
+	Email        *string   `gorm:"size:150;uniqueIndex" json:"email"`
 	PasswordHash string    `gorm:"size:255;not null" json:"-"`
 	FullName     string    `gorm:"size:150" json:"full_name"`
 	Role         string    `gorm:"size:20;not null;default:Student" json:"role"`

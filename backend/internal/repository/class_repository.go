@@ -78,9 +78,17 @@ func (r *ClassRepository) Update(c *entity.Class) error {
 	return r.db.Save(c).Error
 }
 
+// Delete: xóa lớp + danh sách sinh viên + các liên kết giao đề cho lớp
 func (r *ClassRepository) Delete(id string) error {
-	r.db.Where("class_id = ?", id).Delete(&entity.ClassStudent{})
-	return r.db.Delete(&entity.Class{}, id).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("class_id = ?", id).Delete(&entity.ClassStudent{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("class_id = ?", id).Delete(&entity.ExamClass{}).Error; err != nil {
+			return err
+		}
+		return tx.Delete(&entity.Class{}, id).Error
+	})
 }
 
 // StudentCounts: số sinh viên của từng lớp

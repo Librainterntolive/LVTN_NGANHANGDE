@@ -64,17 +64,25 @@ func (ctl *QuestionController) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	q, err := ctl.svc.Update(c.Param("id"), in)
+	q, err := ctl.svc.Update(c.Param("id"), in, getUserID(c), getRole(c))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		status := http.StatusBadRequest
+		if err == service.ErrNotOwner {
+			status = http.StatusForbidden
+		}
+		c.JSON(status, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, q)
 }
 
 func (ctl *QuestionController) Delete(c *gin.Context) {
-	if err := ctl.svc.Delete(c.Param("id")); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctl.svc.Delete(c.Param("id"), getUserID(c), getRole(c)); err != nil {
+		status := http.StatusBadRequest
+		if err == service.ErrNotOwner {
+			status = http.StatusForbidden
+		}
+		c.JSON(status, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})

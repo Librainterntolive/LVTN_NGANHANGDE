@@ -193,7 +193,11 @@ func (ctl *ExamController) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	exam, err := ctl.svc.Update(c.Param("id"), in)
+	exam, err := ctl.svc.Update(c.Param("id"), in, getUserID(c), getRole(c))
+	if err == service.ErrNotOwner {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay de thi"})
 		return
@@ -212,6 +216,13 @@ func (ctl *ExamController) Clone(c *gin.Context) {
 }
 
 func (ctl *ExamController) Delete(c *gin.Context) {
-	ctl.svc.Delete(c.Param("id"))
+	if err := ctl.svc.Delete(c.Param("id"), getUserID(c), getRole(c)); err != nil {
+		status := http.StatusBadRequest
+		if err == service.ErrNotOwner {
+			status = http.StatusForbidden
+		}
+		c.JSON(status, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
 }

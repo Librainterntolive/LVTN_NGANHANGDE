@@ -56,6 +56,9 @@ func (ctl *SubjectController) Update(c *gin.Context) {
 }
 
 func (ctl *SubjectController) Delete(c *gin.Context) {
-	ctl.svc.Delete(c.Param("id"))
+	if err := ctl.svc.Delete(c.Param("id")); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
 }
