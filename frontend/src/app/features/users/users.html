@@ -1,0 +1,88 @@
+<h2>Quản lý người dùng</h2>
+
+@if (error()) { <p style="color:red">{{ error() }}</p> }
+
+<div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:20px; max-width:640px;">
+  <h3 style="margin-top:0;">{{ editingId() ? 'Sửa người dùng' : 'Thêm người dùng' }}</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+    <input [(ngModel)]="form.username" placeholder="Tên đăng nhập" />
+    <input [(ngModel)]="form.full_name" placeholder="Họ tên" />
+    <input [(ngModel)]="form.email" placeholder="Email" />
+    <input [(ngModel)]="form.password" type="password"
+           [placeholder]="editingId() ? 'Mật khẩu (để trống nếu không đổi)' : 'Mật khẩu'" />
+    <select [(ngModel)]="form.role">
+      <option value="Admin">👑 Quản trị</option>
+      <option value="Teacher">🎓 Giảng viên</option>
+      <option value="Student">📖 Sinh viên</option>
+    </select>
+    <select [(ngModel)]="form.status">
+      <option value="active">✅ Hoạt động</option>
+      <option value="locked">🔒 Tạm khóa</option>
+    </select>
+  </div>
+  @if (form.status === 'locked') {
+    <input [(ngModel)]="form.lock_reason" placeholder="Lý do tạm khóa..." style="width:100%; margin-top:8px;" />
+  }
+  <div style="margin-top:10px; display:flex; gap:8px;">
+    <button (click)="save()">{{ editingId() ? 'Cập nhật' : 'Thêm' }}</button>
+    @if (editingId()) { <button (click)="cancel()" class="btn-outline">Hủy</button> }
+  </div>
+</div>
+
+<table style="width:100%;">
+  <thead>
+    <tr><th>ID</th><th>Username</th><th>Họ tên</th><th>Email</th><th>Cấp bậc</th><th>Trạng thái</th><th style="width:270px;"></th></tr>
+  </thead>
+  <tbody>
+    @for (u of users(); track u.id) {
+      <tr>
+        <td>{{ u.id }}</td>
+        <td><b>{{ u.username }}</b></td>
+        <td>{{ u.full_name }}</td>
+        <td>{{ u.email }}</td>
+        <td>
+          <span class="badge"
+                [class.r-admin]="u.role === 'Admin'"
+                [class.r-teacher]="u.role === 'Teacher'"
+                [class.r-student]="u.role === 'Student'">{{ roleLabel(u.role) }}</span>
+        </td>
+        <td>
+          @if (u.status === 'locked') {
+            <span class="badge b-locked" [title]="u.lock_reason || ''">🔒 Tạm khóa</span>
+            @if (u.lock_reason) {
+              <div style="font-size:11px; color:var(--text-3); margin-top:3px;">{{ u.lock_reason }}</div>
+            }
+          } @else {
+            <span class="badge b-active">● Hoạt động</span>
+          }
+        </td>
+        <td>
+          <div class="row-act">
+            <button (click)="edit(u)" class="btn-outline">Sửa</button>
+            @if (u.status === 'locked') {
+              <button (click)="unlock(u)" style="background:#43a047;">Mở khóa</button>
+            } @else {
+              <button (click)="lock(u)" style="background:#fb8c00;">Khóa</button>
+            }
+            <button (click)="remove(u.id)" style="background:#e53935;">Xóa</button>
+          </div>
+        </td>
+      </tr>
+    } @empty { <tr><td colspan="7">Chưa có người dùng.</td></tr> }
+  </tbody>
+</table>
+
+<style>
+  .badge {
+    display:inline-block; padding:3px 12px; border-radius:12px;
+    font-size:12px; font-weight:600; white-space:nowrap;
+  }
+  .b-active  { background:#e8f5e9; color:#2e7d32; }
+  .b-locked  { background:#ffebee; color:#c62828; }
+  .r-admin   { background:var(--accent-soft); color:var(--accent); }
+  .r-teacher { background:#e3f2fd; color:#1565c0; }
+  .r-student { background:#f3e5f5; color:#7b1fa2; }
+
+  .row-act { display:flex; gap:8px; flex-wrap:wrap; }
+  .row-act button { padding:6px 12px; }
+</style>

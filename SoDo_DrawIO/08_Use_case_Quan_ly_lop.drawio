@@ -1,0 +1,19 @@
+<mxfile host="app.diagrams.net">
+<diagram id="d1" name="Trang-1">
+<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0"><root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="AC" value="Giảng viên" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="60" y="310.0" width="36" height="60" as="geometry"/></mxCell>
+<mxCell id="C" value="QUẢN LÝ LỚP HỌC" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="360" y="300.0" width="220" height="80" as="geometry"/></mxCell>
+<mxCell id="ea" value="" style="endArrow=none;html=1;" edge="1" parent="1" source="AC" target="C"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="S0" value="Tạo lớp" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="72.0" width="200" height="76" as="geometry"/></mxCell>
+<mxCell id="es0" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1" source="C" target="S0"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="S1" value="Thêm / xóa sinh viên" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="225.33333333333337" width="200" height="76" as="geometry"/></mxCell>
+<mxCell id="es1" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1" source="C" target="S1"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="S2" value="Xem sinh viên trong lớp" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="378.6666666666667" width="200" height="76" as="geometry"/></mxCell>
+<mxCell id="es2" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1" source="C" target="S2"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="S3" value="Giao đề cho lớp" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="532.0" width="200" height="76" as="geometry"/></mxCell>
+<mxCell id="es3" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1" source="C" target="S3"><mxGeometry relative="1" as="geometry"/></mxCell>
+</root></mxGraphModel>
+</diagram>
+</mxfile>

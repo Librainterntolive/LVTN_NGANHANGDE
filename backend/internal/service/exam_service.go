@@ -1,0 +1,200 @@
+package service
+
+import (
+	"errors"
+	"strconv"
+	"time"
+
+	"quiz-backend/internal/dto"
+	"quiz-backend/internal/entity"
+	"quiz-backend/internal/repository"
+)
+
+type ExamService struct {
+	repo  *repository.ExamRepository
+	qRepo *repository.QuestionRepository
+}
+
+func NewExamService(repo *repository.ExamRepository, qRepo *repository.QuestionRepository) *ExamService {
+	return &ExamService{repo: repo, qRepo: qRepo}
+}
+
+// Preview: trả đề + đầy đủ câu hỏi kèm đáp án (cho GV xem lại, có hiện đáp án đúng)
+func (s *ExamService) Preview(idStr string) (*entity.Exam, []entity.Question, error) {
+	exam, err := s.repo.FindByID(idStr)
+	if err != nil {
+		return nil, nil, err
+	}
+	qids := s.repo.GetQuestionIDs(exam.ID)
+	questions, _ := s.qRepo.FindByIDs(qids)
+
+	// giữ đúng thứ tự theo qids
+	byID := map[uint]entity.Question{}
+	for _, q := range questions {
+		byID[q.ID] = q
+	}
+	ordered := make([]entity.Question, 0, len(qids))
+	for _, id := range qids {
+		if q, ok := byID[id]; ok {
+			ordered = append(ordered, q)
+		}
+	}
+	return exam, ordered, nil
+}
+
+func parseTime(s string) time.Time {
+	if s == "" {
+		return time.Time{}
+	}
+	layouts := []string{"2006-01-02T15:04", "2006-01-02T15:04:05", time.RFC3339}
+	for _, l := range layouts {
+		if t, err := time.Parse(l, s); err == nil {
+			return t
+		}
+	}
+	return time.Time{}
+}
+
+func (s *ExamService) GetAll(keyword, subjectID string) ([]entity.Exam, error) {
+	return s.repo.FindAll(keyword, subjectID)
+}
+
+// đề công khai cho khách dùng thử
+func (s *ExamService) GetPublic() ([]entity.Exam, error) {
+	return s.repo.FindPublic()
+}
+
+// đề đã phát hành cho "ngân hàng đề" (mọi người đăng nhập đều xem được)
+func (s *ExamService) GetBank() ([]entity.Exam, error) {
+	return s.repo.FindPublished()
+}
+
+// GetDetail: trả đề + danh sách câu hỏi + lớp (cho màn hình sửa)
+func (s *ExamService) GetDetail(id string) (*entity.Exam, []uint, []uint, error) {
+	exam, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return exam, s.repo.GetQuestionIDs(exam.ID), s.repo.GetClassIDs(exam.ID), nil
+}
+
+func (s *ExamService) Create(in dto.ExamInput, createdBy uint) (*entity.Exam, error) {
+	if n := s.qRepo.CountDraft(in.QuestionIDs); n > 0 {
+		return nil, errors.New("de thi chua cau hoi o trang thai Nhap - hay chuyen sang Chinh thuc truoc")
+	}
+	exam := &entity.Exam{
+		SubjectID:   in.SubjectID,
+		CreatedBy:   createdBy,
+		Title:       in.Title,
+		Description: in.Description,
+		StartTime:   parseTime(in.StartTime),
+		EndTime:     parseTime(in.EndTime),
+		Duration:       in.Duration,
+		PassScore:      in.PassScore,
+		Shuffle:        in.Shuffle,
+		ShuffleAnswers: in.ShuffleAnswers,
+		ShuffleMode:    defaultStr(in.ShuffleMode, "per_student"),
+		AccessType:     defaultStr(in.AccessType, "private"),
+		Status:         defaultStr(in.Status, "draft"),
+	}
+	if err := s.repo.Create(exam); err != nil {
+		return nil, err
+	}
+	s.repo.SetQuestions(exam.ID, in.QuestionIDs)
+	s.repo.SetClasses(exam.ID, in.ClassIDs)
+	return exam, nil
+}
+
+func (s *ExamService) Update(id string, in dto.ExamInput) (*entity.Exam, error) {
+	if n := s.qRepo.CountDraft(in.QuestionIDs); n > 0 {
+		return nil, errors.New("de thi chua cau hoi o trang thai Nhap - hay chuyen sang Chinh thuc truoc")
+	}
+	exam, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+	exam.SubjectID = in.SubjectID
+	exam.Title = in.Title
+	exam.Description = in.Description
+	exam.StartTime = parseTime(in.StartTime)
+	exam.EndTime = parseTime(in.EndTime)
+	exam.Duration = in.Duration
+	exam.PassScore = in.PassScore
+	exam.Shuffle = in.Shuffle
+	exam.ShuffleAnswers = in.ShuffleAnswers
+	exam.ShuffleMode = defaultStr(in.ShuffleMode, "per_student")
+	exam.AccessType = defaultStr(in.AccessType, "private")
+	exam.Status = defaultStr(in.Status, "draft")
+	if err := s.repo.Update(exam); err != nil {
+		return nil, err
+	}
+	s.repo.SetQuestions(exam.ID, in.QuestionIDs)
+	s.repo.SetClasses(exam.ID, in.ClassIDs)
+	return exam, nil
+}
+
+// Generate: sinh đề tự động theo ma trận (chương × độ khó × số câu).
+// Bốc ngẫu nhiên câu CHÍNH THỨC trong ngân hàng; thiếu câu ở dòng nào thì báo rõ dòng đó.
+func (s *ExamService) Generate(in dto.GenerateExamInput, createdBy uint) (*entity.Exam, int, error) {
+	var qids []uint
+	for i, rule := range in.Rules {
+		if rule.Count <= 0 {
+			continue
+		}
+		ids, err := s.qRepo.PickRandomIDs(in.SubjectID, rule.Chapter, rule.Difficulty, rule.Count, qids)
+		if err != nil {
+			return nil, 0, err
+		}
+		if len(ids) < rule.Count {
+			return nil, 0, errors.New("dong " + strconv.Itoa(i+1) + " cua ma tran: chi con " +
+				strconv.Itoa(len(ids)) + " cau kha dung trong ngan hang (can " + strconv.Itoa(rule.Count) + ")")
+		}
+		qids = append(qids, ids...)
+	}
+	if len(qids) == 0 {
+		return nil, 0, errors.New("ma tran chua co dong nao hop le (so cau > 0)")
+	}
+	in.ExamInput.QuestionIDs = qids
+	exam, err := s.Create(in.ExamInput, createdBy)
+	return exam, len(qids), err
+}
+
+// Clone: nhân bản 1 đề về cho người dùng (GV thấy đề hay thì copy về chỉnh thành đề riêng).
+// Đề mới ở trạng thái nháp, riêng tư, dùng chung danh sách câu hỏi với đề gốc.
+func (s *ExamService) Clone(id string, userID uint) (*entity.Exam, error) {
+	src, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, errors.New("khong tim thay de goc")
+	}
+	clone := &entity.Exam{
+		SubjectID:      src.SubjectID,
+		CreatedBy:      userID,
+		Title:          src.Title + " (bản sao)",
+		Description:    src.Description,
+		Duration:       src.Duration,
+		PassScore:      src.PassScore,
+		Shuffle:        src.Shuffle,
+		ShuffleAnswers: src.ShuffleAnswers,
+		ShuffleMode:    src.ShuffleMode,
+		AccessType:     "private",
+		Status:         "draft",
+	}
+	if err := s.repo.Create(clone); err != nil {
+		return nil, err
+	}
+	s.repo.SetQuestions(clone.ID, s.repo.GetQuestionIDs(src.ID))
+	return clone, nil
+}
+
+func (s *ExamService) Delete(id string) error {
+	return s.repo.Delete(id)
+}
+
+// lấy danh sách id câu hỏi của 1 đề (để gộp khi tạo đề mới)
+func (s *ExamService) GetQuestionIDs(examID string) []uint {
+	exam, err := s.repo.FindByID(examID)
+	if err != nil {
+		return nil
+	}
+	return s.repo.GetQuestionIDs(exam.ID)
+}

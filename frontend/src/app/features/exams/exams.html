@@ -1,0 +1,428 @@
+<!-- ===== Modal xem trước đề ===== -->
+@if (preview(); as p) {
+  <div class="pv-overlay" (click)="closePreview()">
+    <div class="pv-box" (click)="$event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:12px;">
+        <h2 style="margin:0;">📄 {{ p.exam.title }}</h2>
+        <button (click)="closePreview()" class="btn-outline">✕ Đóng</button>
+      </div>
+      <p style="color:var(--text-2); font-size:14px; margin:0 0 14px;">
+        Môn: <b>{{ subjectName(p.exam.subject_id) }}</b> ·
+        {{ p.questions.length }} câu · ⏱ {{ p.exam.duration }} phút · Đậu từ {{ p.exam.pass_score }}đ ·
+        {{ p.exam.status }} · {{ p.exam.access_type }}
+        @if (p.exam.shuffle) { · 🔀 xáo câu }
+        @if (p.exam.shuffle_answers) { · 🔀 xáo đáp án }
+      </p>
+
+      @for (q of p.questions; track q.id; let i = $index) {
+        <div style="border-bottom:1px dashed var(--border); padding:10px 0;">
+          <p style="font-weight:600; margin:0 0 4px;">Câu {{ i + 1 }}: {{ q.content }}</p>
+          <ul style="margin:0; padding-left:20px;">
+            @for (a of q.answers; track a.id) {
+              <li [style.color]="a.is_correct ? '#2e7d32' : 'var(--text-2)'" [style.fontWeight]="a.is_correct ? '700' : 'normal'">
+                {{ a.label }}. {{ a.content }} @if (a.is_correct) { ✔ }
+              </li>
+            }
+          </ul>
+        </div>
+      } @empty { <p>Đề chưa có câu hỏi.</p> }
+    </div>
+  </div>
+}
+
+<h2>Quản lý đề thi</h2>
+
+@if (error()) { <p style="color:red">{{ error() }}</p> }
+@if (message()) { <p style="color:green">{{ message() }}</p> }
+
+<div style="background:var(--surface); border-radius:12px; padding:18px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,.08); max-width:760px;">
+  <h3 style="margin-top:0;">{{ editingId() ? 'Sửa đề thi' : 'Tạo đề thi' }}</h3>
+
+  <!-- Cấu hình đề -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+    <input [(ngModel)]="form.title" placeholder="Tên đề thi" />
+    <div>
+      <select [(ngModel)]="pickLevel" style="width:48%;">
+        <option value="">-- Mọi khối --</option>
+        @for (lv of levels; track lv) { <option [value]="lv">{{ lv }}</option> }
+      </select>
+      <select [(ngModel)]="form.subject_id" (ngModelChange)="onFormSubjectChange()" style="width:48%;">
+        <option [ngValue]="0" disabled>-- Chọn môn --</option>
+        @for (s of subjectsForLevel(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+      </select>
+    </div>
+    <label>Thời gian (phút): <input type="number" [(ngModel)]="form.duration" style="width:80px;" /></label>
+    <label>Điểm đậu (/10): <input type="number" [(ngModel)]="form.pass_score" style="width:80px;" /></label>
+    <select [(ngModel)]="form.access_type">
+      <option value="private">private (chỉ lớp được giao)</option>
+      <option value="public">public (ai cũng làm)</option>
+    </select>
+    <select [(ngModel)]="form.status">
+      <option value="draft">draft (nháp)</option>
+      <option value="published">published (phát hành)</option>
+      <option value="closed">closed (đóng)</option>
+    </select>
+  </div>
+
+  <!-- Tùy chọn xáo trộn -->
+  <div style="background:var(--surface-2); border-radius:8px; padding:10px 14px; margin-bottom:12px;">
+    <b style="font-size:14px;">🔀 Xáo trộn</b>
+    <div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:6px; align-items:center;">
+      <label><input type="checkbox" [(ngModel)]="form.shuffle" /> Xáo thứ tự câu hỏi</label>
+      <label><input type="checkbox" [(ngModel)]="form.shuffle_answers" /> Xáo thứ tự đáp án</label>
+      <label>Kiểu:
+        <select [(ngModel)]="form.shuffle_mode">
+          <option value="per_student">Mỗi học sinh khác nhau</option>
+          <option value="fixed">Cố định (giống nhau)</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <!-- Chế độ chọn câu hỏi (chỉ khi tạo mới) -->
+  @if (!editingId()) {
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <button type="button" class="mode-btn" [class.on]="createMode() === 'manual'" (click)="setMode('manual')">
+        ✋ Chọn câu thủ công
+      </button>
+      <button type="button" class="mode-btn" [class.on]="createMode() === 'matrix'" (click)="setMode('matrix')">
+        🎲 Ma trận đề (sinh tự động)
+      </button>
+    </div>
+  }
+
+  <!-- ===== CHẾ ĐỘ MA TRẬN ===== -->
+  @if (!editingId() && createMode() === 'matrix') {
+    <div class="qp-box">
+      <b style="font-size:14px;">🎲 Ma trận đề</b>
+      <span style="color:var(--text-3); font-size:13px;">— khai báo số câu theo chương × độ khó, hệ thống bốc ngẫu nhiên từ ngân hàng (chỉ lấy câu Chính thức)</span>
+      @if (!form.subject_id) {
+        <p style="color:var(--text-3); font-size:13px; margin:10px 0 0;">👆 Chọn môn học trước để lập ma trận.</p>
+      } @else {
+        <table style="width:100%; margin-top:10px; font-size:14px;">
+          <thead>
+            <tr><th style="text-align:left;">Chương</th><th style="text-align:left;">Độ khó</th><th style="width:90px;">Số câu</th><th style="width:130px;">Khả dụng</th><th style="width:40px;"></th></tr>
+          </thead>
+          <tbody>
+            @for (r of matrixRules(); track $index; let i = $index) {
+              <tr>
+                <td>
+                  <select [(ngModel)]="r.chapter" (ngModelChange)="refreshAvail(i)" style="width:100%;">
+                    <option [ngValue]="'any'">Mọi chương</option>
+                    @for (ch of pickerChapters(); track ch.id) { <option [ngValue]="ch.id">{{ ch.name }}</option> }
+                    <option [ngValue]="'none'">Chưa phân chương</option>
+                  </select>
+                </td>
+                <td>
+                  <select [(ngModel)]="r.difficulty" (ngModelChange)="refreshAvail(i)" style="width:100%;">
+                    <option value="any">Mọi độ khó</option>
+                    <option value="easy">Dễ</option><option value="medium">Trung bình</option><option value="hard">Khó</option>
+                  </select>
+                </td>
+                <td><input type="number" min="1" [(ngModel)]="r.count" style="width:70px;" /></td>
+                <td>
+                  @if (r.avail !== null) {
+                    <span [style.color]="r.avail < r.count ? '#e53935' : '#2e7d32'" style="font-size:13px; font-weight:600;">
+                      {{ r.avail < r.count ? '⚠ còn ' + r.avail : '✓ còn ' + r.avail }} câu
+                    </span>
+                  } @else { <span style="color:var(--text-3); font-size:13px;">—</span> }
+                </td>
+                <td>
+                  <button type="button" (click)="removeRule(i)" [disabled]="matrixRules().length <= 1" class="btn-outline" style="padding:3px 9px;">✕</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <button type="button" (click)="addRule()" class="btn-outline">➕ Thêm dòng</button>
+          <b style="font-size:14px;">Tổng: {{ totalMatrixCount() }} câu</b>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- NGUỒN 1: ngân hàng câu hỏi (chế độ thủ công + khi sửa) -->
+  @if (editingId() || createMode() === 'manual') {
+  <div class="qp-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <b style="font-size:14px;">📚 {{ editingId() ? 'Câu hỏi trong đề' : 'Chọn từ ngân hàng câu hỏi' }}
+        <span class="qp-count">Đã chọn {{ pickedIds.size }} câu</span>
+      </b>
+      <button type="button" (click)="togglePicker()" class="btn-outline" style="padding:4px 12px;">
+        {{ pickerOpen() ? '▲ Thu gọn' : '▼ Duyệt ngân hàng câu hỏi' }}
+      </button>
+    </div>
+
+    <!-- các câu đã chọn -->
+    @if (pickedIds.size > 0) {
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+        @for (p of pickedList(); track p.id) {
+          <span class="qp-pill" [title]="p.content">
+            {{ p.content.length > 40 ? p.content.slice(0, 40) + '…' : p.content }}
+            <b (click)="unpick(p.id)" style="cursor:pointer; margin-left:4px;">✕</b>
+          </span>
+        }
+      </div>
+    }
+
+    @if (pickerOpen()) {
+      @if (!form.subject_id) {
+        <p style="color:var(--text-3); font-size:13px; margin:10px 0 0;">👆 Chọn môn học trước để duyệt câu hỏi.</p>
+      } @else {
+        <!-- bộ lọc -->
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+          <select [(ngModel)]="pickerChapter" (ngModelChange)="reloadPicker()">
+            <option [ngValue]="'all'">Tất cả chương</option>
+            @for (ch of pickerChapters(); track ch.id) { <option [ngValue]="ch.id">{{ ch.name }} ({{ ch.question_count ?? 0 }})</option> }
+            <option [ngValue]="'none'">Chưa phân chương</option>
+          </select>
+          <select [(ngModel)]="pickerDifficulty" (ngModelChange)="reloadPicker()">
+            <option value="">Mọi độ khó</option>
+            <option value="easy">Dễ</option><option value="medium">Trung bình</option><option value="hard">Khó</option>
+          </select>
+          <input [(ngModel)]="pickerKeyword" (keyup.enter)="reloadPicker()" placeholder="🔍 Tìm câu hỏi..." style="flex:1; min-width:160px;" />
+          <button type="button" (click)="reloadPicker()" class="btn-outline">Tìm</button>
+        </div>
+
+        <!-- danh sách câu hỏi -->
+        <div style="max-height:320px; overflow-y:auto; margin-top:8px; border:1px solid var(--border); border-radius:8px;">
+          @for (q of pickerItems(); track q.id) {
+            <label class="qp-row" [class.on]="isPicked(q.id)">
+              <input type="checkbox" [checked]="isPicked(q.id)" (change)="togglePick(q)" />
+              <span style="flex:1;">{{ q.content }}</span>
+              <span class="qp-meta">{{ q.difficulty === 'easy' ? 'Dễ' : q.difficulty === 'hard' ? 'Khó' : 'TB' }}</span>
+              @if (pickerChapterName(q.chapter_id)) { <span class="qp-meta">📖 {{ pickerChapterName(q.chapter_id) }}</span> }
+            </label>
+          } @empty {
+            @if (!pickerLoading()) { <p style="padding:10px; margin:0; color:var(--text-3);">Không có câu hỏi phù hợp.</p> }
+          }
+          @if (pickerLoading()) { <div class="loader" style="margin:10px auto;"></div> }
+          @if (pickerHasMore() && !pickerLoading()) {
+            <button type="button" (click)="loadMorePicker()" class="btn-outline" style="display:block; margin:8px auto;">⬇ Tải thêm ({{ pickerItems().length }}/{{ pickerTotal() }})</button>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  }
+
+  <!-- NGUỒN 2+3: file + đề có sẵn (chỉ khi tạo mới, chế độ thủ công) -->
+  @if (!editingId() && createMode() === 'manual') {
+    <div style="margin-bottom:12px;">
+      <b style="font-size:14px;">📥 Nguồn bổ sung</b> <span style="color:var(--text-3); font-size:13px;">(tùy chọn — sẽ gộp chung với các câu đã chọn ở trên)</span>
+
+      <!-- Nguồn 1: kéo thả file -->
+      <div class="dropzone" [class.over]="dragOver()"
+           (drop)="onDrop($event)" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)">
+        @if (file) {
+          <span>📄 {{ file.name }}</span>
+          <button (click)="clearFile()" class="btn-outline" style="margin-left:10px; padding:3px 10px;">Bỏ</button>
+        } @else {
+          <div>⬇️ Kéo & thả file <b>.xlsx / .csv</b> vào đây, hoặc
+            <label style="color:var(--accent); cursor:pointer; text-decoration:underline;">
+              chọn file
+              <input type="file" accept=".csv,.xlsx" (change)="onFileChange($event)" hidden />
+            </label>
+          </div>
+          <div style="font-size:12px; color:var(--text-3); margin-top:4px;">Câu hỏi trong file sẽ được lưu vào ngân hàng (của bạn) theo môn đã chọn.</div>
+        }
+      </div>
+
+      <!-- File mẫu cho giáo viên -->
+      <div class="tpl-hint">
+        <div>
+          💡 <b>Chưa biết soạn file thế nào?</b> Tải file mẫu Excel về, điền câu hỏi theo mẫu rồi kéo vào ô trên.
+          <div style="font-size:12px; color:var(--text-3); margin-top:4px;">
+            Các cột: <code>subject_id · content (câu hỏi) · A · B · C · D · correct (đáp án đúng, ghi A/B/C/D)</code>
+            — có thể bỏ trống <code>subject_id</code>, hệ thống tự lấy theo môn đã chọn.
+          </div>
+        </div>
+        <button type="button" (click)="downloadTemplate()" class="btn-outline" style="flex-shrink:0;">⬇ Tải file mẫu</button>
+      </div>
+
+      <!-- lấy thêm từ đề có sẵn -->
+      <div style="margin-top:10px;">
+        <label>📄 Lấy thêm từ đề có sẵn:
+          <select [(ngModel)]="fromExamId">
+            <option [ngValue]="0">-- Không --</option>
+            @for (e of exams(); track e.id) {
+              <option [ngValue]="e.id">{{ e.title }} ({{ subjectName(e.subject_id) }})</option>
+            }
+          </select>
+        </label>
+        <div style="font-size:12px; color:var(--text-3);">Câu hỏi của đề này sẽ được gộp chung với file rồi xáo trộn.</div>
+      </div>
+    </div>
+  }
+
+  <!-- Giao cho lớp (bấm để chọn/bỏ) -->
+  <div style="margin-bottom:12px;">
+    <b style="font-size:14px;">🏫 Giao cho lớp</b>
+    <span style="color:var(--text-3); font-size:13px;">— bấm vào lớp để chọn/bỏ, chọn được nhiều lớp (bỏ trống nếu public)</span>
+    <div class="cls-pick">
+      @for (c of classes(); track c.id) {
+        <button type="button" class="cls-pill" [class.on]="selectedClassIds.has(c.id!)" (click)="toggleClass(c.id!)">
+          <span class="cls-check">{{ selectedClassIds.has(c.id!) ? '✓' : '+' }}</span>
+          {{ c.name }}
+          @if (c.is_public) { <span class="cls-pub">dùng chung</span> }
+        </button>
+      } @empty { <i style="color:var(--text-3);">Chưa có lớp của bạn. Tạo lớp ở mục "Lớp học".</i> }
+    </div>
+    @if (selectedClassIds.size > 0) {
+      <p style="font-size:12px; color:var(--text-3); margin:6px 0 0;">Đã chọn {{ selectedClassIds.size }} lớp</p>
+    }
+  </div>
+
+  @if (editingId()) {
+    <button (click)="saveEdit()">Cập nhật</button>
+    <button (click)="cancel()" class="btn-outline" style="margin-left:6px;">Hủy</button>
+  } @else if (createMode() === 'matrix') {
+    <button (click)="generateExam()">🎲 Sinh đề tự động</button>
+  } @else {
+    <button (click)="create()">✨ Tạo đề</button>
+  }
+</div>
+
+<!-- Tìm kiếm + danh sách -->
+<div style="margin-bottom:12px;">
+  <input [(ngModel)]="keyword" placeholder="Tìm theo tên đề thi..." (keyup.enter)="search()" style="width:260px;" />
+  <button (click)="search()">Tìm</button>
+  <button (click)="clearSearch()" class="btn-outline">Xóa lọc</button>
+</div>
+
+<p style="color:var(--text-3); font-size:13px;">Hiển thị {{ displayedExams().length }} / {{ exams().length }} đề — cuộn xuống để xem thêm</p>
+<table style="width:100%;">
+  <thead><tr><th>ID</th><th>Tên đề</th><th>Môn</th><th>Trạng thái</th><th>Truy cập</th><th style="width:250px;"></th></tr></thead>
+  <tbody>
+    @for (e of displayedExams(); track e.id) {
+      <tr class="fade-in">
+        <td>{{ e.id }}</td><td>{{ e.title }}</td><td>{{ subjectName(e.subject_id) }}</td>
+        <td>
+          <span class="badge"
+                [class.b-green]="e.status === 'published'"
+                [class.b-gray]="e.status === 'draft'"
+                [class.b-red]="e.status === 'closed'">{{ statusLabel(e.status) }}</span>
+        </td>
+        <td>
+          <span class="badge"
+                [class.b-blue]="e.access_type === 'public'"
+                [class.b-orange]="e.access_type === 'private'">{{ accessLabel(e.access_type) }}</span>
+        </td>
+        <td>
+          <div class="row-act">
+            <button (click)="showPreview(e.id!)">👁 Xem đề</button>
+            <button (click)="edit(e.id!)" class="btn-outline">Sửa</button>
+            <button (click)="remove(e.id)" style="background:#e53935;">Xóa</button>
+          </div>
+        </td>
+      </tr>
+    } @empty { <tr><td colspan="6">Chưa có đề thi.</td></tr> }
+  </tbody>
+</table>
+@if (hasMoreRows()) {
+  <div appInfiniteScroll (scrolled)="loadMoreRows()" style="height:1px;"></div>
+  <div class="loader"></div>
+}
+
+<style>
+  .dropzone {
+    margin-top:8px; border:2px dashed var(--text-3); border-radius:10px;
+    padding:22px; text-align:center; color:var(--text-2); background:var(--surface-2);
+    transition:border-color .15s, background .15s;
+  }
+  .dropzone.over { border-color:var(--accent); background:var(--accent-soft); }
+
+  /* nút chuyển chế độ tạo đề */
+  .mode-btn {
+    flex:1; padding:10px; border-radius:10px; font-size:14px; cursor:pointer;
+    background:var(--surface-2); color:var(--text-2); border:1.5px solid var(--border);
+    transition:all .15s;
+  }
+  .mode-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .mode-btn.on { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600; }
+
+  /* khung chọn câu hỏi từ ngân hàng */
+  .qp-box {
+    background:var(--surface-2); border-radius:10px;
+    padding:12px 14px; margin-bottom:12px;
+  }
+  .qp-count {
+    background:var(--accent); color:#fff; font-size:12px;
+    padding:2px 10px; border-radius:10px; margin-left:8px; font-weight:600;
+  }
+  .qp-pill {
+    background:var(--surface); border:1px solid var(--border); color:var(--text-2);
+    font-size:12px; padding:3px 10px; border-radius:12px; display:inline-flex; align-items:center;
+  }
+  .qp-row {
+    display:flex; align-items:center; gap:10px; padding:8px 12px;
+    border-bottom:1px solid var(--border); cursor:pointer; font-size:14px;
+    transition:background .1s;
+  }
+  .qp-row:hover { background:var(--accent-soft); }
+  .qp-row.on { background:var(--accent-soft); }
+  .qp-row:last-child { border-bottom:none; }
+  .qp-meta {
+    font-size:11px; color:var(--text-3); background:var(--surface-2);
+    padding:2px 8px; border-radius:8px; white-space:nowrap;
+  }
+
+  /* khung gợi ý tải file mẫu */
+  .tpl-hint {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--accent-soft); border-radius:10px;
+    padding:10px 14px; margin-top:8px; font-size:13px;
+  }
+  .tpl-hint code {
+    background:var(--surface); padding:1px 6px; border-radius:4px; font-size:12px;
+  }
+
+  /* pill chọn lớp */
+  .cls-pick { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .cls-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--surface); color:var(--text-2);
+    border:1.5px solid var(--border); border-radius:20px;
+    padding:7px 14px; font-size:13px; cursor:pointer;
+    transition:all .15s;
+  }
+  .cls-pill:hover { border-color:var(--accent); color:var(--accent); background:var(--surface); }
+  .cls-pill.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .cls-check {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:17px; height:17px; border-radius:50%; font-size:11px; font-weight:700;
+    background:var(--surface-2); color:var(--text-3);
+  }
+  .cls-pill.on .cls-check { background:rgba(255,255,255,.3); color:#fff; }
+  .cls-pub {
+    font-size:10px; background:#e8f5e9; color:#2e7d32;
+    padding:1px 7px; border-radius:8px;
+  }
+  .cls-pill.on .cls-pub { background:rgba(255,255,255,.25); color:#fff; }
+
+  /* badge trạng thái / truy cập */
+  .badge {
+    display:inline-block; padding:3px 12px; border-radius:12px;
+    font-size:12px; font-weight:600; white-space:nowrap;
+  }
+  .b-green  { background:#e8f5e9; color:#2e7d32; }
+  .b-gray   { background:var(--surface-2); color:var(--text-3); }
+  .b-red    { background:#ffebee; color:#c62828; }
+  .b-blue   { background:#e3f2fd; color:#1565c0; }
+  .b-orange { background:#fff3e0; color:#e65100; }
+
+  /* giãn cách các nút thao tác trong bảng */
+  .row-act { display:flex; gap:8px; flex-wrap:wrap; }
+  .row-act button { padding:6px 12px; }
+  .pv-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.45);
+    display:flex; align-items:flex-start; justify-content:center; z-index:1000;
+    padding:30px 16px; overflow:auto;
+  }
+  .pv-box {
+    background:var(--surface); border-radius:12px; padding:22px; width:100%; max-width:720px;
+    box-shadow:0 10px 40px rgba(0,0,0,.3); animation:fadeup .2s ease;
+  }
+</style>

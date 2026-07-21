@@ -1,0 +1,207 @@
+<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+  <h2 style="margin:0;">Quản lý lớp / nhóm</h2>
+  <button (click)="openAdd()">➕ Tạo lớp</button>
+</div>
+
+@if (error()) { <p style="color:red">{{ error() }}</p> }
+
+<!-- Form thêm/sửa lớp (ẩn/hiện) -->
+@if (showForm()) {
+  <div style="background:var(--surface); border-radius:10px; padding:16px; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.08); max-width:560px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0;">{{ editingId() ? 'Sửa lớp' : 'Tạo lớp mới' }}</h3>
+      <button (click)="cancel()" class="btn-outline" style="padding:4px 10px;">✕</button>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+      <input [(ngModel)]="form.name" placeholder="Tên lớp (VD: 12A1 - Toán)" style="flex:1; min-width:200px;" />
+      <input [(ngModel)]="form.description" placeholder="Mô tả (tùy chọn)" style="flex:1; min-width:200px;" />
+    </div>
+    <label style="display:block; margin-top:10px;">
+      <input type="checkbox" [(ngModel)]="form.is_public" />
+      Lớp <b>dùng chung</b> (mọi giáo viên đều có thể giao đề — vd lớp ôn chung)
+    </label>
+    <div style="margin-top:12px;">
+      <button (click)="save()">{{ editingId() ? 'Cập nhật' : 'Tạo lớp' }}</button>
+      <button (click)="cancel()" class="btn-outline" style="margin-left:6px;">Hủy</button>
+    </div>
+    @if (!editingId()) {
+      <p style="font-size:13px; color:var(--text-3); margin:10px 0 0;">
+        💡 Sau khi tạo, chia sẻ <b>mã lớp</b> cho sinh viên để các em tự tham gia.
+      </p>
+    }
+  </div>
+}
+
+<!-- Danh sách lớp dạng thẻ -->
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr)); gap:16px; margin-top:16px;">
+  @for (c of classes(); track c.id) {
+    <div class="class-card fade-in">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+        <h3 style="margin:0; color:var(--accent); font-size:17px;">🏫 {{ c.name }}</h3>
+        @if (c.is_public) { <span class="pub-badge">dùng chung</span> }
+      </div>
+      <p style="color:var(--text-3); font-size:13px; margin:4px 0 10px;">{{ c.description || 'Không có mô tả' }}</p>
+
+      <!-- số liệu nhanh -->
+      <div style="display:flex; gap:14px; margin-bottom:10px;">
+        <span class="stat-chip">👨‍🎓 {{ c.student_count ?? 0 }} SV</span>
+        <span class="stat-chip">📄 {{ c.exam_count ?? 0 }} đề</span>
+      </div>
+
+      <!-- mã lớp + copy -->
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
+        <span style="font-size:12px; color:var(--text-3);">Mã lớp:</span>
+        <span class="code-badge">{{ c.code }}</span>
+        <button (click)="copyCode(c)" class="btn-outline" style="padding:2px 8px; font-size:12px;" title="Sao chép mã lớp">📋</button>
+      </div>
+
+      <p style="font-size:12px; color:var(--text-3); margin:0 0 12px;">👩‍🏫 GV: {{ c.creator_name || '—' }}</p>
+
+      <div style="display:flex; gap:6px;">
+        <button (click)="openDetail(c)" style="flex:2; padding:6px;">Quản lý lớp</button>
+        <button (click)="edit(c)" class="btn-outline" style="flex:1; padding:6px;">Sửa</button>
+        <button (click)="remove(c.id)" style="flex:1; padding:6px; background:#e53935;">Xóa</button>
+      </div>
+    </div>
+  } @empty {
+    <p style="grid-column:1/-1; text-align:center; color:var(--text-3); padding:30px;">
+      Chưa có lớp nào — bấm <b>➕ Tạo lớp</b> để bắt đầu.
+    </p>
+  }
+</div>
+
+<!-- ===== Modal chi tiết lớp: Sinh viên / Đề đã giao ===== -->
+@if (selectedClass(); as c) {
+  <div class="cd-overlay" (click)="closeDetail()">
+    <div class="cd-box" (click)="$event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px;">
+        <div>
+          <h3 style="margin:0;">🏫 {{ c.name }}</h3>
+          <span style="font-size:12px; color:var(--text-3);">Mã lớp:</span>
+          <span class="code-badge">{{ c.code }}</span>
+          <button (click)="copyCode(c)" class="btn-outline" style="padding:2px 8px; font-size:12px;">📋</button>
+        </div>
+        <button (click)="closeDetail()" class="btn-outline">✕ Đóng</button>
+      </div>
+
+      <!-- tab -->
+      <div style="display:flex; gap:8px; margin:12px 0;">
+        <span class="chip" [class.active]="detailTab() === 'students'" (click)="detailTab.set('students')">
+          👨‍🎓 Sinh viên ({{ classStudents().length }})
+        </span>
+        <span class="chip" [class.active]="detailTab() === 'exams'" (click)="detailTab.set('exams')">
+          📄 Đề đã giao ({{ classExams().length }})
+        </span>
+      </div>
+
+      <!-- TAB sinh viên -->
+      @if (detailTab() === 'students') {
+        <!-- tìm & thêm sinh viên -->
+        <div style="position:relative; margin-bottom:12px;">
+          <input [(ngModel)]="studentSearch" placeholder="🔍 Gõ tên / username để thêm sinh viên..." style="width:100%;" />
+          @if (studentSuggestions().length > 0) {
+            <div class="sg-list">
+              @for (u of studentSuggestions(); track u.id) {
+                <div class="sg-row" (click)="addStudent(u)">
+                  <span>{{ u.full_name || u.username }} <small style="color:var(--text-3);">({{ u.username }})</small></span>
+                  <span style="color:var(--accent); font-weight:600;">+ Thêm</span>
+                </div>
+              }
+            </div>
+          } @else if (studentSearch.trim() && allStudents().length === 0) {
+            <p style="font-size:12px; color:var(--text-3); margin:6px 0 0;">
+              Không tải được danh sách sinh viên (cần quyền Admin) — sinh viên vẫn tự tham gia được bằng mã lớp.
+            </p>
+          }
+        </div>
+
+        <!-- danh sách sinh viên -->
+        @for (s of classStudents(); track s.id) {
+          <div class="stu-row">
+            <span style="flex:1;">👤 {{ s.full_name || s.username }} <small style="color:var(--text-3);">({{ s.username }})</small></span>
+            <button (click)="removeStudent(s)" class="btn-outline" style="padding:3px 10px; color:#e53935;">Xóa khỏi lớp</button>
+          </div>
+        } @empty {
+          <p style="color:var(--text-3); text-align:center; padding:14px;">
+            Lớp chưa có sinh viên — chia sẻ mã <b>{{ c.code }}</b> để các em tham gia.
+          </p>
+        }
+      }
+
+      <!-- TAB đề đã giao -->
+      @if (detailTab() === 'exams') {
+        @for (e of classExams(); track e.id) {
+          <div class="stu-row">
+            <span style="flex:1;">📄 {{ e.title }}</span>
+            <span class="exam-badge"
+                  [class.b-green]="e.status === 'published'"
+                  [class.b-gray]="e.status === 'draft'"
+                  [class.b-red]="e.status === 'closed'">{{ examStatusLabel(e.status) }}</span>
+            <span style="font-size:12px; color:var(--text-3);">⏱ {{ e.duration }}p</span>
+          </div>
+        } @empty {
+          <p style="color:var(--text-3); text-align:center; padding:14px;">
+            Chưa giao đề nào cho lớp này — vào mục <b>Đề thi</b> để tạo và giao đề.
+          </p>
+        }
+      }
+    </div>
+  </div>
+}
+
+<style>
+  .class-card {
+    background:var(--surface); border-radius:12px; padding:18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08); transition:transform .15s, box-shadow .15s;
+    border-left:4px solid var(--accent);
+  }
+  .class-card:hover { transform:translateY(-3px); box-shadow:0 8px 18px rgba(0,0,0,.13); }
+  .code-badge {
+    background:#fff3e0; color:#e65100; font-weight:bold; letter-spacing:1px;
+    padding:2px 10px; border-radius:6px; font-family:monospace; font-size:14px;
+  }
+  .pub-badge {
+    font-size:11px; background:#e8f5e9; color:#2e7d32;
+    padding:2px 8px; border-radius:8px; white-space:nowrap;
+  }
+  .stat-chip {
+    background:var(--surface-2); color:var(--text-2); font-size:12px;
+    padding:3px 10px; border-radius:10px; font-weight:600;
+  }
+
+  /* modal chi tiết lớp */
+  .cd-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.45);
+    display:flex; align-items:flex-start; justify-content:center; z-index:1000;
+    padding:40px 16px; overflow:auto;
+  }
+  .cd-box {
+    background:var(--surface); border-radius:12px; padding:20px; width:100%; max-width:620px;
+    box-shadow:0 10px 40px rgba(0,0,0,.3); animation:fadeup .2s ease;
+  }
+  .stu-row {
+    display:flex; align-items:center; gap:10px; padding:8px 4px;
+    border-bottom:1px solid var(--border); font-size:14px;
+  }
+  .stu-row:last-of-type { border-bottom:none; }
+
+  /* gợi ý sinh viên khi gõ tìm */
+  .sg-list {
+    position:absolute; top:100%; left:0; right:0; z-index:10;
+    background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    box-shadow:0 6px 18px rgba(0,0,0,.15); max-height:260px; overflow-y:auto;
+  }
+  .sg-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 12px; cursor:pointer; font-size:14px;
+  }
+  .sg-row:hover { background:var(--accent-soft); }
+
+  .exam-badge {
+    display:inline-block; padding:2px 10px; border-radius:10px;
+    font-size:12px; font-weight:600; white-space:nowrap;
+  }
+  .b-green { background:#e8f5e9; color:#2e7d32; }
+  .b-gray  { background:var(--surface-2); color:var(--text-3); }
+  .b-red   { background:#ffebee; color:#c62828; }
+</style>

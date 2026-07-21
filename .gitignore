@@ -1,0 +1,21 @@
+# Biến môi trường - KHÔNG commit (chứa mật khẩu DB, JWT secret)
+.env
+**/.env
+
+# File rác do IDE/.NET sinh ra
+.NETCoreApp,Version=*.cs
+*.exe
+*.exe~
+
+# Thư mục build / thư viện
+node_modules/
+dist/
+.angular/cache/
+
+# File tạm hệ điều hành
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# File tạm Word (mở file .docx sẽ sinh ra ~$...)
+~$*.docx

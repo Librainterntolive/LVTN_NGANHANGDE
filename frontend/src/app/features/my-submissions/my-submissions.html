@@ -1,0 +1,17 @@
+<h2>Lịch sử làm bài</h2>
+
+<table border="1" cellpadding="6" style="border-collapse:collapse;">
+  <thead>
+    <tr><th>Đề thi</th><th>Điểm</th><th>Kết quả</th><th>Thời gian nộp</th></tr>
+  </thead>
+  <tbody>
+    @for (r of rows(); track r.id) {
+      <tr>
+        <td>{{ r.exam_title }}</td>
+        <td>{{ r.total_score | number:'1.0-2' }}</td>
+        <td [style.color]="r.is_passed ? 'green' : 'red'">{{ r.is_passed ? 'Đậu' : 'Chưa đậu' }}</td>
+        <td>{{ r.submit_time }}</td>
+      </tr>
+    } @empty { <tr><td colspan="4">Bạn chưa làm bài nào.</td></tr> }
+  </tbody>
+</table>

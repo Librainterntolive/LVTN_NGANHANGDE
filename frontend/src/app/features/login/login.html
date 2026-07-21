@@ -1,0 +1,22 @@
+<div style="max-width:320px; margin:40px auto; padding:24px; border:1px solid var(--border); border-radius:8px;">
+  <h2>Đăng nhập</h2>
+
+  @if (error()) {
+    <p style="color:red">{{ error() }}</p>
+  }
+
+  <div style="margin-bottom:12px;">
+    <input [(ngModel)]="username" placeholder="Tên đăng nhập" style="width:100%; padding:8px;" />
+  </div>
+  <div style="margin-bottom:12px;">
+    <input [(ngModel)]="password" type="password" placeholder="Mật khẩu" style="width:100%; padding:8px;"
+           (keyup.enter)="submit()" />
+  </div>
+  <button (click)="submit()" style="width:100%; padding:10px; background:var(--accent); color:#fff; border:none; border-radius:4px;">
+    Đăng nhập
+  </button>
+
+  <p style="margin-top:16px; font-size:13px; color:#666;">
+    Tài khoản thử: <b>admin</b> / <b>admin123</b>
+  </p>
+</div>

@@ -1,0 +1,180 @@
+@if (error()) { <p style="color:red; padding:16px;">{{ error() }}</p> }
+
+<!-- ===== Sau khi nộp: kết quả ===== -->
+@if (result(); as r) {
+  <div class="result-box">
+    <div style="font-size:46px;">{{ r.is_passed ? '🎉' : '📋' }}</div>
+    <h2 style="margin:6px 0;">Kết quả</h2>
+    <p style="font-size:40px; margin:8px 0; color:var(--accent);"><b>{{ r.score | number:'1.0-2' }}</b> <span style="font-size:20px; color:var(--text-3);">/ 10</span></p>
+    <p style="color:var(--text-2);">Đúng {{ r.correct }} / {{ r.total }} câu</p>
+    <p style="font-weight:bold; font-size:18px;" [style.color]="r.is_passed ? '#2e7d32' : '#c62828'">
+      {{ r.is_passed ? 'ĐẬU ✔' : 'CHƯA ĐẬU ✘' }}
+    </p>
+    @if (auth.isLoggedIn()) {
+      <a routerLink="/my-submissions" class="reg-link">Xem lịch sử làm bài</a>
+    } @else {
+      <p style="color:var(--text-3); font-size:14px;">Bạn đang làm với tư cách khách — kết quả không được lưu.</p>
+      <a routerLink="/register" class="reg-link">Đăng ký để lưu kết quả</a>
+    }
+  </div>
+}
+
+<!-- ===== Đang làm bài ===== -->
+@if (data() && !result(); as d) {
+  <!-- thanh trên cố định -->
+  <div class="exam-top">
+    <div class="exam-title">📝 {{ data()!.exam.title }}</div>
+    <div class="exam-progress">Đã làm <b>{{ answeredCount() }}</b>/{{ data()!.questions.length }}</div>
+    @if (remaining() > 0) {
+      <div class="exam-timer" [class.warn]="remaining() <= 30">⏱ {{ formatTime() }}</div>
+    } @else {
+      <div class="exam-timer">Không giới hạn</div>
+    }
+  </div>
+
+  <div class="take-layout">
+    <!-- Cột câu hỏi -->
+    <div class="take-main">
+      @for (q of data()!.questions; track q.id; let i = $index) {
+        <div [id]="'q-' + i" class="q-block" [class.answered]="isAnswered(q.id)">
+          <p class="q-title"><span class="q-num">{{ i + 1 }}</span> {{ q.content }}</p>
+          @for (a of q.answers; track a.id) {
+            <label class="ans" [class.picked]="selected[q.id] === a.id">
+              <input type="radio" [name]="'q' + q.id" [value]="a.id" [(ngModel)]="selected[q.id]" />
+              <span class="ans-label">{{ a.label }}</span> {{ a.content }}
+            </label>
+          }
+        </div>
+      }
+      <button (click)="submitWithConfirm()" class="submit-btn" style="margin-top:8px;">Nộp bài</button>
+    </div>
+
+    <!-- Bảng điều hướng -->
+    <aside class="take-nav">
+      <h3 style="margin:0 0 6px;">Bảng câu hỏi</h3>
+      <p style="font-size:13px; color:var(--text-2); margin:0 0 8px;">
+        Đã làm <b style="color:#2e7d32;">{{ answeredCount() }}</b> / {{ data()!.questions.length }} câu
+      </p>
+      <div class="nav-grid">
+        @for (q of data()!.questions; track q.id; let i = $index) {
+          <button class="nav-cell" [class.done]="isAnswered(q.id)" (click)="goTo(i)" [title]="'Câu ' + (i+1)">
+            {{ i + 1 }}
+          </button>
+        }
+      </div>
+      <div style="font-size:12px; color:var(--text-3); margin:10px 0;">
+        <span class="dot done-dot"></span> Đã làm &nbsp; <span class="dot todo-dot"></span> Chưa làm
+      </div>
+      <button (click)="submitWithConfirm()" class="submit-btn" style="width:100%;">Nộp bài</button>
+    </aside>
+  </div>
+
+  <!-- ===== Modal xác nhận nộp (popup đẹp) ===== -->
+  @if (showConfirm()) {
+    <div class="cf-overlay" (click)="cancelSubmit()">
+      <div class="cf-box" (click)="$event.stopPropagation()">
+        <div style="font-size:38px;">⚠️</div>
+        <h3 style="margin:8px 0;">Còn {{ unansweredCount() }} câu chưa làm</h3>
+        <p style="color:var(--text-2); margin:0 0 16px;">Bạn có chắc chắn muốn nộp bài không?</p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button (click)="cancelSubmit()" class="btn-outline">Tiếp tục làm</button>
+          <button (click)="confirmSubmit()" class="submit-btn">Nộp luôn</button>
+        </div>
+      </div>
+    </div>
+  }
+}
+
+<style>
+  .result-box {
+    max-width:440px; margin:48px auto; padding:30px; text-align:center;
+    background:var(--surface); border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,.12);
+  }
+  .reg-link { display:inline-block; margin-top:8px; padding:9px 20px; background:var(--accent); color:#fff; border-radius:6px; text-decoration:none; }
+  .reg-link:hover { background:var(--accent-hover); text-decoration:none; }
+
+  /* Thanh trên khi thi */
+  .exam-top {
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; gap:16px;
+    background:var(--surface); border-bottom:1px solid #e5e7eb;
+    padding:12px 24px; box-shadow:0 2px 8px rgba(0,0,0,.05);
+  }
+  .exam-title { font-size:18px; font-weight:700; color:var(--accent); flex:1; }
+  .exam-progress { font-size:14px; color:var(--text-2); }
+  .exam-timer {
+    font-size:20px; font-weight:bold; color:var(--accent);
+    background:var(--accent-soft); padding:6px 16px; border-radius:8px;
+  }
+  .exam-timer.warn { color:#c62828; background:#ffebee; animation:pulse 1s infinite; }
+  @keyframes pulse { 50% { transform:scale(1.05); } }
+
+  .take-layout { display:flex; gap:22px; align-items:flex-start; padding:22px; max-width:1080px; margin:0 auto; }
+  .take-main { flex:1; min-width:0; }
+
+  .q-block {
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:18px 20px; margin-bottom:14px; box-shadow:0 1px 4px rgba(0,0,0,.05);
+    transition:box-shadow .15s;
+    scroll-margin-top:70px;       /* chừa chỗ cho thanh trên cố định khi nhảy câu */
+    overflow-wrap:anywhere;        /* không tràn box khi nội dung dài */
+  }
+  .q-block:hover { box-shadow:0 4px 14px rgba(0,0,0,.08); }
+  .q-block.answered { border-color:#a5d6a7; background:var(--surface-2); }
+  .q-title { font-weight:600; margin:0 0 12px; font-size:16px; line-height:1.5; }
+  .q-num {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; background:var(--accent); color:#fff; border-radius:50%;
+    font-size:13px; margin-right:8px;
+  }
+  .ans {
+    display:flex; align-items:center; gap:8px;
+    padding:9px 12px; margin:6px 0; border:1px solid var(--border); border-radius:8px;
+    cursor:pointer; transition:background .12s, border-color .12s;
+  }
+  .ans:hover { background:var(--surface-2); }
+  .ans.picked { border-color:var(--accent); background:var(--accent-soft); }
+  .ans-label {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:24px; height:24px; border-radius:6px; background:var(--border); color:var(--text-2);
+    font-weight:700; font-size:13px; flex-shrink:0;
+  }
+  .ans.picked .ans-label { background:var(--accent); color:#fff; }
+
+  .submit-btn {
+    padding:11px 24px; background:var(--accent); color:#fff; border:none;
+    border-radius:8px; font-weight:600; cursor:pointer;
+  }
+  .submit-btn:hover { background:var(--accent-hover); }
+
+  .take-nav {
+    width:236px; flex-shrink:0; position:sticky; top:78px;
+    background:var(--surface); border-radius:12px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.08);
+  }
+  /* minmax(0,1fr) + padding:0 để ô số không tràn khỏi khung */
+  .nav-grid { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:8px; }
+  .nav-cell {
+    aspect-ratio:1; border:none; border-radius:8px; cursor:pointer;
+    padding:0; min-width:0; width:100%;
+    background:#ffebee; color:#c62828; font-weight:700; font-size:14px; transition:transform .1s;
+  }
+  .nav-cell:hover { transform:scale(1.1); }
+  .nav-cell.done { background:#2e7d32; color:#fff; }
+  .dot { display:inline-block; width:11px; height:11px; border-radius:3px; vertical-align:middle; }
+  .done-dot { background:#2e7d32; } .todo-dot { background:#ffcdd2; }
+
+  /* Modal xác nhận */
+  .cf-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.45);
+    display:flex; align-items:center; justify-content:center; z-index:1000;
+  }
+  .cf-box {
+    background:var(--surface); border-radius:16px; padding:28px; text-align:center; width:90%; max-width:380px;
+    box-shadow:0 12px 40px rgba(0,0,0,.3); animation:fadeup .2s ease;
+  }
+
+  @media (max-width: 800px) {
+    .take-layout { flex-direction:column-reverse; padding:14px; }
+    .take-nav { width:100%; position:static; }
+  }
+</style>

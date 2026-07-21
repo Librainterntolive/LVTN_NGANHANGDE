@@ -1,0 +1,156 @@
+<h2>{{ i18n.t('stats.title') }}</h2>
+
+<!-- ===== 4 thẻ tổng quan màu (kiểu CloudCampus) ===== -->
+@if (overview(); as o) {
+  <div class="tile-row">
+    <div class="s-tile t-blue">
+      <span class="s-ic">👥</span>
+      <div class="s-body">
+        <div class="s-num">{{ o.total_users }}</div>
+        <div class="s-lb">{{ i18n.t('stats.users') }}</div>
+        <div class="s-sub">{{ i18n.t('stats.inSystem') }}</div>
+      </div>
+    </div>
+    <div class="s-tile t-red">
+      <span class="s-ic">❓</span>
+      <div class="s-body">
+        <div class="s-num">{{ o.total_questions }}</div>
+        <div class="s-lb">{{ i18n.t('stats.questions') }}</div>
+        <div class="s-sub">{{ i18n.t('stats.inSystem') }}</div>
+      </div>
+    </div>
+    <div class="s-tile t-green">
+      <span class="s-ic">📝</span>
+      <div class="s-body">
+        <div class="s-num">{{ o.total_exams }}</div>
+        <div class="s-lb">{{ i18n.t('stats.exams') }}</div>
+        <div class="s-sub">{{ i18n.t('stats.inSystem') }}</div>
+      </div>
+    </div>
+    <div class="s-tile t-purple">
+      <span class="s-ic">🖊️</span>
+      <div class="s-body">
+        <div class="s-num">{{ o.total_submissions }}</div>
+        <div class="s-lb">{{ i18n.t('stats.attempts') }}</div>
+        <div class="s-sub">{{ i18n.t('stats.inSystem') }}</div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===== Panel biểu đồ cột: điểm TB theo đề ===== -->
+<div class="panel">
+  <div class="panel-h">📊 {{ i18n.t('stats.chart') }}</div>
+  <div class="panel-b">
+    @if (bars().length) {
+      <div class="chart">
+        @for (s of bars(); track s.exam_id) {
+          <div class="bar-wrap" [title]="s.title + ': ' + round(s.avg_score) + '/10'">
+            <span class="bar-val">{{ round(s.avg_score) }}</span>
+            <div class="bar" [style.height.px]="barH(s)"></div>
+            <span class="bar-lb">{{ s.title }}</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <p style="color:var(--text-3); margin:8px;">{{ i18n.t('stats.noData') }}</p>
+    }
+  </div>
+</div>
+
+<!-- ===== Panel bảng chi tiết ===== -->
+<div class="panel">
+  <div class="panel-h">📋 {{ i18n.t('stats.byExam') }}</div>
+  <div class="panel-b" style="overflow-x:auto;">
+    <table style="width:100%; box-shadow:none;">
+      <thead>
+        <tr>
+          <th>{{ i18n.t('stats.exam') }}</th>
+          <th>{{ i18n.t('stats.attempts') }}</th>
+          <th>{{ i18n.t('stats.avg') }}</th>
+          <th>{{ i18n.t('stats.passed') }}</th>
+          <th>{{ i18n.t('stats.passRate') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (s of examStats(); track s.exam_id) {
+          <tr>
+            <td>{{ s.title }}</td>
+            <td>{{ s.attempts }}</td>
+            <td>{{ round(s.avg_score) }}</td>
+            <td>{{ s.pass_count }}</td>
+            <td>
+              <div style="background:var(--surface-2); border-radius:4px; width:160px; height:18px; position:relative;">
+                <div [style.width.%]="s.pass_rate"
+                     style="background:#4caf50; height:18px; border-radius:4px;"></div>
+                <span style="position:absolute; left:6px; top:0; font-size:12px;">{{ round(s.pass_rate) }}%</span>
+              </div>
+            </td>
+          </tr>
+        } @empty { <tr><td colspan="5">{{ i18n.t('stats.noData') }}</td></tr> }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  /* ---- thẻ màu tổng quan ---- */
+  .tile-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 20px;
+  }
+  .s-tile {
+    display: flex; align-items: center; gap: 14px;
+    border-radius: 12px; padding: 18px 20px; color: #fff;
+    box-shadow: var(--shadow);
+    transition: transform .15s;
+  }
+  .s-tile:hover { transform: translateY(-3px); }
+  .s-ic { font-size: 34px; opacity: .9; }
+  .s-num { font-size: 30px; font-weight: 800; line-height: 1.1; }
+  .s-lb { font-size: 14px; font-weight: 600; }
+  .s-sub { font-size: 11px; opacity: .8; text-transform: uppercase; letter-spacing: .5px; }
+  .t-blue   { background: linear-gradient(135deg, #42a5f5, #1e88e5); }
+  .t-red    { background: linear-gradient(135deg, #ef5350, #e53935); }
+  .t-green  { background: linear-gradient(135deg, #66bb6a, #43a047); }
+  .t-purple { background: linear-gradient(135deg, #ab47bc, #8e24aa); }
+
+  /* ---- panel có thanh tiêu đề màu ---- */
+  .panel {
+    background: var(--surface); border-radius: 12px; overflow: hidden;
+    box-shadow: var(--shadow); margin-bottom: 20px;
+  }
+  .panel-h {
+    background: var(--accent); color: var(--on-accent);
+    padding: 10px 16px; font-weight: 600; font-size: 14px;
+  }
+  .panel-b { padding: 16px; }
+
+  /* ---- biểu đồ cột thuần CSS ---- */
+  .chart {
+    display: flex; align-items: flex-end; gap: 18px;
+    min-height: 200px; padding: 8px 6px 0; overflow-x: auto;
+  }
+  .bar-wrap {
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    min-width: 64px;
+  }
+  .bar {
+    width: 34px; border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, var(--accent-2), var(--accent));
+    animation: grow .5s ease;
+  }
+  @keyframes grow { from { height: 0 !important; } }
+  .bar-val { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .bar-lb {
+    font-size: 11px; color: var(--text-3); margin-top: 6px;
+    max-width: 80px; text-align: center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    .s-num { font-size: 24px; }
+    .s-ic { font-size: 26px; }
+  }
+</style>

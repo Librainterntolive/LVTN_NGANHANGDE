@@ -1,0 +1,305 @@
+<h2 style="margin-bottom:4px;">Kho của tôi</h2>
+<p style="color:var(--text-3); margin-top:0;">Góc học tập cá nhân: lưu đề, theo dõi tiến độ và luyện lại câu hay sai.</p>
+
+<!-- ===== Dải thống kê + streak ===== -->
+@if (stats(); as s) {
+  <div class="stat-strip">
+    <div class="stat-box"><div class="sv">{{ s.saved_exams }}</div><div class="sl">📄 Đề đã lưu</div></div>
+    <div class="stat-box"><div class="sv">{{ s.attempts }}</div><div class="sl">✍️ Lượt làm bài</div></div>
+    <div class="stat-box"><div class="sv">{{ s.avg_score | number:'1.0-1' }}</div><div class="sl">🎯 Điểm TB</div></div>
+    <div class="stat-box"><div class="sv" [style.color]="s.wrong_count > 0 ? '#e65100' : '#2e7d32'">{{ s.wrong_count }}</div><div class="sl">📕 Câu hay sai</div></div>
+    <div class="stat-box streak"><div class="sv">🔥 {{ s.streak_days }}</div><div class="sl">Ngày học liên tiếp</div></div>
+  </div>
+}
+
+<!-- ===== Sổ tay câu sai ===== -->
+<div class="notebook-box">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+    <b style="font-size:16px;">📕 Sổ tay câu sai
+      <span class="nb-count">{{ wrongQuestions().length }} câu</span>
+    </b>
+    <div style="display:flex; gap:8px;">
+      @if (wrongQuestions().length > 0) {
+        <button (click)="startPractice()">🔁 Luyện lại câu sai</button>
+        <button (click)="toggleNotebook()" class="btn-outline">{{ showNotebook() ? 'Ẩn danh sách' : 'Xem danh sách' }}</button>
+      }
+    </div>
+  </div>
+  @if (wrongQuestions().length === 0) {
+    <p style="color:var(--text-3); margin:10px 0 0;">🎉 Bạn chưa có câu sai nào cần luyện. Làm bài thi để hệ thống ghi nhận câu cần ôn.</p>
+  } @else {
+    <p style="color:var(--text-3); font-size:13px; margin:8px 0 0;">
+      Câu trả lời sai sẽ nằm đây đến khi bạn làm đúng <b>2 lần liên tiếp</b>.
+    </p>
+    @if (showNotebook()) {
+      <div style="margin-top:10px;">
+        @for (w of wrongQuestions(); track w.question_id) {
+          <div class="nb-row">
+            <span style="flex:1;">{{ w.content }}</span>
+            <span class="nb-tag">{{ subjectName(w.subject_id) }}</span>
+            <span class="nb-tag" style="background:#ffebee; color:#c62828;">Sai {{ w.wrong_count }}×</span>
+            <span class="nb-tag" style="background:#e8f5e9; color:#2e7d32;">Cần đúng {{ w.need_streak }} lần nữa</span>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+<div class="st-layout">
+  <!-- ===== Cây thư mục ===== -->
+  <aside class="st-tree">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <b>📁 Thư mục</b>
+      <button (click)="newRoot()" style="padding:4px 10px;">+ Mới</button>
+    </div>
+    @for (row of treeRows(); track row.folder.id) {
+      <div class="tree-row" [class.sel]="selected()?.id === row.folder.id"
+           [style.paddingLeft.px]="8 + row.depth * 16">
+        <span class="tw-arrow" (click)="toggle(row.folder.id)">
+          {{ row.hasChildren ? (expanded().has(row.folder.id) ? '▾' : '▸') : '' }}
+        </span>
+        <span class="tw-name" (click)="select(row.folder)">📂 {{ row.folder.name }}</span>
+        <span class="tw-act">
+          <button (click)="newSub(row.folder)" title="Thêm thư mục con">+</button>
+          <button (click)="rename(row.folder)" title="Đổi tên">✏️</button>
+          <button (click)="del(row.folder)" title="Xóa" style="color:#e53935;">🗑</button>
+        </span>
+      </div>
+    } @empty {
+      <p style="color:var(--text-3); font-size:13px;">Chưa có thư mục. Bấm "+ Mới".</p>
+    }
+  </aside>
+
+  <!-- ===== Nội dung ===== -->
+  <div class="st-content">
+    <!-- Đề trong thư mục đang chọn -->
+    <section>
+      <h3 style="margin-top:0;">
+        @if (selected(); as f) { 📂 {{ f.name }} } @else { Đề trong thư mục }
+      </h3>
+      @if (!selected()) {
+        <p style="color:var(--text-3);">👈 Chọn một thư mục bên trái để xem đề đã lưu.</p>
+      } @else {
+        <div class="card-row">
+          @for (e of folderExams(); track e.id) {
+            <div class="ex-card">
+              <h4 style="margin:0 0 4px; color:var(--accent);">📄 {{ e.title }}</h4>
+              <p style="font-size:13px; color:var(--text-3); margin:0 0 8px;">
+                {{ subjectName(e.subject_id) }} · ⏱ {{ e.duration }} phút
+              </p>
+
+              <!-- tiến độ làm bài -->
+              @if (e.attempt_count && e.attempt_count > 0) {
+                <div class="progress-line">
+                  <span class="pg-tag">Đã làm {{ e.attempt_count }}×</span>
+                  <span class="pg-tag pg-best">Cao nhất {{ e.best_score | number:'1.0-1' }}đ</span>
+                  <span class="pg-tag">Gần nhất {{ e.last_score | number:'1.0-1' }}đ</span>
+                </div>
+              } @else {
+                <div class="progress-line"><span class="pg-tag pg-new">Chưa làm</span></div>
+              }
+
+              <!-- ghi chú cá nhân -->
+              @if (e.note) {
+                <p class="note-line" (click)="editNote(e)" title="Bấm để sửa ghi chú">📝 {{ e.note }}</p>
+              }
+
+              <div style="display:flex; gap:6px; margin-top:8px;">
+                <a [routerLink]="['/take', e.exam_id]" class="btn-soft-primary" style="flex:1; text-align:center;">
+                  {{ e.attempt_count ? 'Làm lại' : 'Vào làm' }}
+                </a>
+                <button (click)="editNote(e)" class="btn-outline" title="Ghi chú">📝</button>
+                <button (click)="removeFromFolder(e.exam_id)" class="btn-outline" style="color:#e53935;" title="Bỏ khỏi kho">🗑</button>
+              </div>
+            </div>
+          } @empty {
+            <p style="color:var(--text-3);">Thư mục này chưa có đề. Lưu từ ngân hàng đề bên dưới.</p>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Ngân hàng đề -->
+    <section style="margin-top:24px;">
+      <h3 style="margin-bottom:8px;">🏛️ Ngân hàng đề <span style="color:var(--text-3); font-size:14px;">(đề đã phát hành)</span></h3>
+
+      <!-- lọc + tìm -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <input [value]="bankKeyword()" (input)="bankKeyword.set($any($event.target).value)"
+               placeholder="🔍 Tìm đề theo tên..." style="flex:1; min-width:180px;" />
+        <select [value]="bankSubject()" (change)="bankSubject.set(+$any($event.target).value)">
+          <option [value]="0">-- Mọi môn --</option>
+          @for (s of subjects(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+        </select>
+      </div>
+
+      <div class="card-row">
+        @for (e of filteredBank(); track e.id) {
+          <div class="ex-card">
+            <h4 style="margin:0 0 4px; color:var(--text);">📝 {{ e.title }}</h4>
+            <p style="font-size:13px; color:var(--text-3); margin:0 0 8px;">
+              {{ subjectName(e.subject_id!) }} · ⏱ {{ e.duration }} phút · {{ e.access_type }}
+            </p>
+            <div style="display:flex; gap:6px;">
+              @if (isSaved(e.id)) {
+                <button class="btn-outline" style="flex:1; color:#2e7d32;" disabled>✓ Đã lưu</button>
+              } @else {
+                <button (click)="saveToFolder(e.id!)" style="flex:1;">⬇ Lưu vào kho</button>
+              }
+              @if (isTeacher()) {
+                <button (click)="cloneExam(e.id!)" class="btn-outline" title="Nhân bản về đề của tôi để chỉnh sửa">⧉</button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <p style="color:var(--text-3);">Không có đề nào khớp bộ lọc.</p>
+        }
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ===== Modal luyện lại câu sai ===== -->
+@if (practicing()) {
+  <div class="pr-overlay">
+    <div class="pr-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:14px;">
+        <h3 style="margin:0;">🔁 Luyện lại câu sai ({{ practiceSet().length }} câu)</h3>
+        <button (click)="closePractice()" class="btn-outline">✕ Đóng</button>
+      </div>
+
+      @if (!practiceResults()) {
+        @for (q of practiceSet(); track q.id; let i = $index) {
+          <div class="pr-q">
+            <p style="font-weight:600; margin:0 0 8px;">Câu {{ i + 1 }}: {{ q.content }}</p>
+            @for (a of q.answers; track a.id) {
+              <label class="pr-opt" [class.on]="practiceSelected[q.id] === a.id">
+                <input type="radio" [name]="'pq-' + q.id" [value]="a.id"
+                       [checked]="practiceSelected[q.id] === a.id"
+                       (change)="practiceSelected[q.id] = a.id" />
+                {{ a.label }}. {{ a.content }}
+              </label>
+            }
+          </div>
+        }
+        <button (click)="submitPractice()" style="margin-top:8px;">✅ Nộp &amp; chấm</button>
+      } @else {
+        <!-- kết quả -->
+        <div class="pr-summary">
+          <p style="font-size:16px; margin:0;">
+            Đúng <b style="color:#2e7d32;">{{ practiceCorrectCount() }}</b> / {{ practiceSet().length }} câu.
+            @if (masteredCount() > 0) {
+              <span style="color:#2e7d32;"> 🎓 {{ masteredCount() }} câu đã thành thạo, rời sổ tay!</span>
+            }
+          </p>
+        </div>
+        @for (q of practiceSet(); track q.id; let i = $index) {
+          <div class="pr-q">
+            <p style="font-weight:600; margin:0 0 8px;">
+              @if (resultFor(q.id)?.is_correct) { <span style="color:#2e7d32;">✔</span> }
+              @else { <span style="color:#e53935;">✘</span> }
+              Câu {{ i + 1 }}: {{ q.content }}
+            </p>
+            @for (a of q.answers; track a.id) {
+              <div class="pr-opt"
+                   [style.color]="a.id === resultFor(q.id)?.correct_answer_id ? '#2e7d32' : (practiceSelected[q.id] === a.id ? '#e53935' : 'var(--text-2)')"
+                   [style.fontWeight]="a.id === resultFor(q.id)?.correct_answer_id ? '700' : 'normal'">
+                {{ a.label }}. {{ a.content }}
+                @if (a.id === resultFor(q.id)?.correct_answer_id) { ✔ }
+                @else if (practiceSelected[q.id] === a.id) { ← bạn chọn }
+              </div>
+            }
+          </div>
+        }
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button (click)="startPractice()">🔁 Luyện tiếp</button>
+          <button (click)="closePractice()" class="btn-outline">Xong</button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<style>
+  /* dải thống kê */
+  .stat-strip { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+  .stat-box {
+    flex:1; min-width:120px; background:var(--surface); border-radius:10px; padding:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07); text-align:center;
+  }
+  .stat-box .sv { font-size:24px; font-weight:700; color:var(--accent); }
+  .stat-box .sl { font-size:12px; color:var(--text-3); margin-top:4px; }
+  .stat-box.streak { background:linear-gradient(135deg, #fff3e0, #ffe0b2); }
+  .stat-box.streak .sv { color:#e65100; }
+  .stat-box.streak .sl { color:#bf560a; }
+
+  /* sổ tay câu sai */
+  .notebook-box {
+    background:var(--surface); border-radius:10px; padding:16px; margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07); border-left:4px solid #e65100;
+  }
+  .nb-count { background:#fff3e0; color:#e65100; font-size:13px; padding:2px 10px; border-radius:10px; margin-left:6px; }
+  .nb-row {
+    display:flex; align-items:center; gap:8px; padding:8px 4px;
+    border-bottom:1px solid var(--border); font-size:14px;
+  }
+  .nb-row:last-child { border-bottom:none; }
+  .nb-tag { font-size:11px; padding:2px 8px; border-radius:8px; background:var(--surface-2); color:var(--text-2); white-space:nowrap; }
+
+  .st-layout { display:flex; gap:20px; align-items:flex-start; }
+  .st-tree {
+    width:280px; flex-shrink:0; background:var(--surface); border-radius:10px; padding:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08); position:sticky; top:16px;
+  }
+  .st-content { flex:1; min-width:0; }
+  .tree-row {
+    display:flex; align-items:center; gap:4px; padding:5px 4px; border-radius:6px; font-size:14px;
+  }
+  .tree-row:hover { background:var(--surface-2); }
+  .tree-row.sel { background:var(--accent-soft); }
+  .tw-arrow { width:16px; cursor:pointer; color:var(--text-2); text-align:center; }
+  .tw-name { flex:1; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tw-act { display:none; gap:2px; }
+  .tree-row:hover .tw-act { display:flex; }
+  .tw-act button { background:none; padding:2px 5px; font-size:13px; }
+  .tw-act button:hover { background:var(--border); }
+
+  .card-row { display:flex; flex-wrap:wrap; gap:14px; }
+  .ex-card {
+    background:var(--surface); border-radius:10px; padding:16px; width:240px;
+    box-shadow:0 2px 8px rgba(0,0,0,.07); transition:transform .15s;
+  }
+  .ex-card:hover { transform:translateY(-3px); }
+
+  /* tiến độ */
+  .progress-line { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:6px; }
+  .pg-tag { font-size:11px; padding:2px 8px; border-radius:8px; background:var(--surface-2); color:var(--text-2); }
+  .pg-best { background:#e8f5e9; color:#2e7d32; font-weight:600; }
+  .pg-new  { background:#e3f2fd; color:#1565c0; }
+  .note-line {
+    font-size:12px; color:var(--text-2); background:var(--surface-2);
+    padding:5px 8px; border-radius:6px; margin:0; cursor:pointer;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  /* modal luyện lại */
+  .pr-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.45);
+    display:flex; align-items:flex-start; justify-content:center; z-index:1000;
+    padding:30px 16px; overflow:auto;
+  }
+  .pr-box {
+    background:var(--surface); border-radius:12px; padding:22px; width:100%; max-width:680px;
+    box-shadow:0 10px 40px rgba(0,0,0,.3); animation:fadeup .2s ease;
+  }
+  .pr-q { border-bottom:1px dashed var(--border); padding:12px 0; }
+  .pr-opt { display:block; padding:6px 10px; border-radius:6px; cursor:pointer; margin:2px 0; }
+  .pr-opt.on { background:var(--accent-soft); }
+  .pr-summary { background:var(--surface-2); border-radius:8px; padding:12px 16px; margin-bottom:12px; }
+
+  @media (max-width: 800px) {
+    .st-layout { flex-direction:column; }
+    .st-tree { width:100%; position:static; }
+  }
+</style>

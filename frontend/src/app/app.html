@@ -1,0 +1,144 @@
+<div class="layout" [class.sb-collapsed]="collapsed()" [class.mobile-open]="mobileOpen()">
+
+  <!-- nền mờ khi mở sidebar trên mobile -->
+  @if (mobileOpen()) { <div class="sb-backdrop" (click)="closeMobile()"></div> }
+
+  <!-- ===== Sidebar (ẩn khi đang thi) ===== -->
+  @if (!layout.fullscreen()) {
+  <aside class="sidebar">
+    <!-- Logo + nút thu gọn -->
+    <div class="sb-head">
+      <a routerLink="/" class="brand" (click)="closeMobile()">
+        <span class="brand-badge">QS</span>
+        <span class="brand-tx">
+          <b>Quiz System</b>
+          <small>{{ i18n.t('app.subtitle') }}</small>
+        </span>
+      </a>
+      <button class="sb-toggle" (click)="toggleSidebar()" [title]="collapsed() ? 'Mở rộng' : 'Thu gọn'">
+        {{ collapsed() ? '›' : '‹' }}
+      </button>
+    </div>
+
+    <!-- Ô tìm kiếm menu -->
+    <div class="sb-search">
+      <span class="ic">🔍</span>
+      <input [(ngModel)]="menuQuery" [placeholder]="i18n.t('menu.search')" />
+    </div>
+
+    <nav (click)="closeMobile()">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="side-link" [class.hide]="!mt(i18n.t('menu.home'))" [title]="i18n.t('menu.home')">
+        <span class="ic">🏠</span><span class="tx">{{ i18n.t('menu.home') }}</span>
+      </a>
+      <a routerLink="/subjects" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.subjects'))" [title]="i18n.t('menu.subjects')">
+        <span class="ic">📚</span><span class="tx">{{ i18n.t('menu.subjects') }}</span>
+      </a>
+
+      @if (auth.currentUser(); as u) {
+        <a routerLink="/my-storage" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.storage'))" [title]="i18n.t('menu.storage')">
+          <span class="ic">🗄️</span><span class="tx">{{ i18n.t('menu.storage') }}</span>
+        </a>
+
+        @if (u.role === 'Admin' || u.role === 'Teacher') {
+          <div class="side-group">{{ i18n.t('menu.teaching') }}</div>
+          <a routerLink="/questions" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.questions'))" [title]="i18n.t('menu.questions')"><span class="ic">❓</span><span class="tx">{{ i18n.t('menu.questions') }}</span></a>
+          <a routerLink="/classes" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.classes'))" [title]="i18n.t('menu.classes')"><span class="ic">🏫</span><span class="tx">{{ i18n.t('menu.classes') }}</span></a>
+          <a routerLink="/exams" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.exams'))" [title]="i18n.t('menu.exams')"><span class="ic">📝</span><span class="tx">{{ i18n.t('menu.exams') }}</span></a>
+          <a routerLink="/stats" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.stats'))" [title]="i18n.t('menu.stats')"><span class="ic">📊</span><span class="tx">{{ i18n.t('menu.stats') }}</span></a>
+        }
+        @if (u.role === 'Admin') {
+          <div class="side-group">{{ i18n.t('menu.admin') }}</div>
+          <a routerLink="/users" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.users'))" [title]="i18n.t('menu.users')"><span class="ic">👤</span><span class="tx">{{ i18n.t('menu.users') }}</span></a>
+        }
+        @if (u.role === 'Student') {
+          <div class="side-group">{{ i18n.t('menu.learning') }}</div>
+          <a routerLink="/my-exams" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.myexams'))" [title]="i18n.t('menu.myexams')"><span class="ic">📝</span><span class="tx">{{ i18n.t('menu.myexams') }}</span></a>
+          <a routerLink="/my-classes" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.myclasses'))" [title]="i18n.t('menu.myclasses')"><span class="ic">🏫</span><span class="tx">{{ i18n.t('menu.myclasses') }}</span></a>
+          <a routerLink="/my-submissions" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.history'))" [title]="i18n.t('menu.history')"><span class="ic">🕓</span><span class="tx">{{ i18n.t('menu.history') }}</span></a>
+        }
+      }
+    </nav>
+
+    <!-- Đáy sidebar: ngôn ngữ + chế độ tối + đăng xuất -->
+    <div class="sb-bottom">
+      <button class="side-link as-btn" (click)="i18n.toggle()" [title]="i18n.t('menu.lang')">
+        <span class="ic">{{ i18n.lang() === 'vi' ? '🇻🇳' : '🇬🇧' }}</span>
+        <span class="tx">{{ i18n.t('menu.lang') }}</span>
+      </button>
+      <div class="side-link theme-row" [title]="i18n.t('menu.dark')">
+        <span class="ic">{{ theme.isDark() ? '🌙' : '☀️' }}</span>
+        <span class="tx">{{ i18n.t('menu.dark') }}</span>
+        <label class="switch">
+          <input type="checkbox" [checked]="theme.isDark()" (change)="theme.toggleDark()" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button class="auto-chip" [class.on]="theme.mode() === 'auto'" (click)="theme.setMode('auto')" [title]="i18n.t('menu.auto')">
+        <span class="tx">{{ theme.mode() === 'auto' ? '✓ ' + i18n.t('menu.auto') : i18n.t('menu.auto') }}</span>
+        <span class="ic-only">A</span>
+      </button>
+      @if (auth.currentUser()) {
+        <button class="side-link as-btn" (click)="logout()" [title]="i18n.t('menu.logout')">
+          <span class="ic">🚪</span><span class="tx">{{ i18n.t('menu.logout') }}</span>
+        </button>
+      }
+    </div>
+  </aside>
+  }
+
+  <!-- ===== Khu nội dung ===== -->
+  <div class="main">
+    @if (!layout.fullscreen()) {
+    <header class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="sb-toggle dark" (click)="toggleSidebar()" title="Menu">☰</button>
+        <span class="topbar-title">{{ i18n.t('app.title') }}</span>
+      </div>
+      <div class="user-area">
+        @if (auth.currentUser(); as u) {
+          <span class="avatar">{{ initial() }}</span>
+          <div class="user-meta">
+            <div style="font-weight:600; font-size:14px;">{{ u.full_name || u.username }}</div>
+            <div style="font-size:12px; color:var(--text-3);">{{ u.role }}</div>
+          </div>
+        } @else {
+          <a routerLink="/login" class="btn-soft">{{ i18n.t('auth.login') }}</a>
+          <a routerLink="/register" class="btn-soft-primary">{{ i18n.t('auth.register') }}</a>
+        }
+      </div>
+    </header>
+    }
+
+    <main class="content" [class.fs]="layout.fullscreen()">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<!-- ===== Hộp thoại tùy biến (thay localhost says) ===== -->
+@if (dialog.state(); as d) {
+  <div class="dlg-overlay" (click)="dialog.cancel()">
+    <div class="dlg-box" (click)="$event.stopPropagation()">
+      <h3 style="margin:0 0 10px;">{{ d.title }}</h3>
+      @if (d.message) { <p style="color:var(--text-2); margin:0 0 14px;">{{ d.message }}</p> }
+      @if (d.type === 'prompt') {
+        <input [(ngModel)]="d.value" style="width:100%; margin-bottom:14px;"
+               (keyup.enter)="dialog.ok()" autofocus />
+      }
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button (click)="dialog.cancel()" class="btn-outline">{{ i18n.t('dlg.cancel') }}</button>
+        <button (click)="dialog.ok()">{{ i18n.t('dlg.ok') }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ===== Toast thông báo (góc trái màn hình) ===== -->
+<div class="toast-wrap">
+  @for (t of toast.toasts(); track t.id) {
+    <div class="toast" [class.success]="t.type === 'success'" [class.error]="t.type === 'error'" (click)="toast.dismiss(t.id)">
+      <span>{{ t.type === 'success' ? '✅' : t.type === 'error' ? '⛔' : 'ℹ️' }}</span>
+      <span>{{ t.text }}</span>
+    </div>
+  }
+</div>

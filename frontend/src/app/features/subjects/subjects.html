@@ -1,0 +1,86 @@
+<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+  <h2 style="margin:0;">Môn học <span style="color:var(--text-3); font-size:16px;">({{ filtered().length }} môn)</span></h2>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <input [(ngModel)]="keyword" placeholder="🔍 Tìm môn học..." style="width:220px;" />
+    @if (isStaff()) {
+      <button (click)="openAdd()">➕ Thêm môn</button>
+    }
+  </div>
+</div>
+
+@if (error()) { <p style="color:red">{{ error() }}</p> }
+
+<!-- Form thêm/sửa (ẩn/hiện) -->
+@if (showForm() && isStaff()) {
+  <div style="background:var(--surface); border-radius:10px; padding:16px; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.08);">
+    <h3 style="margin-top:0;">{{ editingId() ? 'Sửa môn học' : 'Thêm môn học' }}</h3>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <input [(ngModel)]="form.name" placeholder="Tên môn học" style="flex:1; min-width:200px;" />
+      <select [(ngModel)]="form.level">
+        @for (lv of levels; track lv) { <option [value]="lv">{{ lv }}</option> }
+      </select>
+      <input [(ngModel)]="form.description" placeholder="Mô tả (tùy chọn)" style="flex:1; min-width:160px;" />
+    </div>
+    <div style="margin-top:10px;">
+      <button (click)="save()">{{ editingId() ? 'Cập nhật' : 'Lưu' }}</button>
+      <button (click)="cancel()" class="btn-outline" style="margin-left:6px;">Hủy</button>
+    </div>
+  </div>
+}
+
+<!-- Chip lọc theo khối (có số đếm) -->
+<div style="margin:14px 0;">
+  <span class="chip" [class.active]="filterLevel === ''" (click)="filterLevel = ''">Tất cả ({{ subjects().length }})</span>
+  @for (lv of levels; track lv) {
+    <span class="chip" [class.active]="filterLevel === lv" (click)="filterLevel = lv">{{ lv }} ({{ countLevel(lv) }})</span>
+  }
+</div>
+
+<!-- Lưới thẻ môn học -->
+<div class="subj-grid">
+  @for (s of filtered(); track s.id) {
+    <div class="subj-card">
+      <div class="subj-top" [style.background]="levelColor(s.level)">
+        <span class="subj-icon">📘</span>
+        <span class="subj-level">{{ s.level || 'Khác' }}</span>
+      </div>
+      <div class="subj-body">
+        <a [routerLink]="['/subjects', s.id]" style="text-decoration:none; color:inherit;">
+          <h3 style="margin:0 0 4px; font-size:16px; color:var(--accent);">{{ s.name }}</h3>
+          <p style="color:var(--text-3); font-size:13px; margin:0 0 10px;">{{ s.description || 'Không có mô tả' }}</p>
+        </a>
+        <a [routerLink]="['/subjects', s.id]" class="btn-soft-primary" style="display:block; text-align:center; margin-bottom:6px;">Xem chi tiết</a>
+        @if (isStaff()) {
+          <div style="display:flex; gap:6px;">
+            <button (click)="edit(s)" class="btn-outline" style="flex:1; padding:5px;">Sửa</button>
+            <button (click)="remove(s.id)" style="flex:1; padding:5px; background:#e53935;">Xóa</button>
+          </div>
+        }
+      </div>
+    </div>
+  } @empty {
+    <p>Không có môn học nào khớp.</p>
+  }
+</div>
+
+<style>
+  .subj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px; margin-top: 6px;
+  }
+  .subj-card {
+    background:var(--surface); border-radius:12px; overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,.08); transition:transform .15s, box-shadow .15s;
+  }
+  .subj-card:hover { transform:translateY(-3px); box-shadow:0 8px 18px rgba(0,0,0,.13); }
+  .subj-top {
+    height: 64px; display:flex; align-items:center; justify-content:space-between;
+    padding: 0 14px; color:#fff;
+  }
+  .subj-icon { font-size: 26px; }
+  .subj-level {
+    background: rgba(255,255,255,.25); padding: 2px 10px; border-radius: 12px; font-size: 12px;
+  }
+  .subj-body { padding: 14px; }
+</style>

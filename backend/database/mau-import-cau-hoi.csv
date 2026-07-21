@@ -1,0 +1,4 @@
+subject_id,content,A,B,C,D,correct,difficulty,chapter_id
+1,Thủ đô của Việt Nam là?,Hà Nội,Huế,Đà Nẵng,Cần Thơ,A,easy,
+1,2 + 3 = ?,4,5,6,7,B,easy,
+1,Ngôn ngữ nào dùng cho backend đề tài này?,Python,Java,Go,PHP,C,medium,

@@ -1,0 +1,32 @@
+<h2>Lớp của tôi</h2>
+
+<!-- Tham gia lớp bằng mã -->
+<div style="background:var(--surface); border-radius:10px; padding:18px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,.08); max-width:460px;">
+  <h3 style="margin-top:0;">Tham gia lớp mới</h3>
+  <p style="font-size:13px; color:var(--text-3); margin-top:0;">Nhập mã lớp do giáo viên cung cấp.</p>
+  <input [(ngModel)]="code" placeholder="VD: ABC123" style="text-transform:uppercase; letter-spacing:1px; margin-right:8px;" (keyup.enter)="join()" />
+  <button (click)="join()">Tham gia</button>
+  @if (message()) { <p style="color:green; margin:8px 0 0;">{{ message() }}</p> }
+  @if (error()) { <p style="color:red; margin:8px 0 0;">{{ error() }}</p> }
+</div>
+
+<!-- Danh sách lớp đã tham gia -->
+<h3>Lớp đã tham gia ({{ classes().length }})</h3>
+<div style="display:flex; flex-wrap:wrap; gap:16px;">
+  @for (c of classes(); track c.id) {
+    <div class="class-card">
+      <h3 style="margin:0 0 4px; color:var(--accent);">🏫 {{ c.name }}</h3>
+      <p style="color:var(--text-3); font-size:13px; margin:0 0 8px;">{{ c.description || 'Không có mô tả' }}</p>
+      <p style="font-size:12px; color:var(--text-3); margin:0;">👩‍🏫 GV: {{ c.creator_name || '—' }}</p>
+    </div>
+  } @empty {
+    <p>Bạn chưa tham gia lớp nào. Nhập mã lớp ở trên để vào lớp.</p>
+  }
+</div>
+
+<style>
+  .class-card {
+    background:var(--surface); border-radius:12px; padding:18px; width:240px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+</style>

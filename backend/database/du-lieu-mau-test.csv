@@ -1,0 +1,21 @@
+subject_id,content,A,B,C,D,correct
+1,"SQL là viết tắt của cụm từ nào?","Structured Query Language","Simple Query Language","Standard Question Language","System Query Logic",A
+1,"Lệnh nào dùng để lấy dữ liệu từ bảng?","INSERT","SELECT","UPDATE","DELETE",B
+1,"Khóa chính (Primary Key) có đặc điểm gì?","Cho phép trùng","Cho phép NULL","Duy nhất và không NULL","Luôn là số",C
+1,"Lệnh nào dùng để thêm dữ liệu vào bảng?","ADD","INSERT INTO","CREATE","APPEND",B
+1,"Mệnh đề WHERE dùng để làm gì?","Sắp xếp dữ liệu","Lọc dữ liệu theo điều kiện","Nhóm dữ liệu","Xóa bảng",B
+1,"Lệnh nào dùng để xóa toàn bộ bảng khỏi CSDL?","DELETE","DROP TABLE","TRUNCATE","REMOVE",B
+1,"JOIN dùng để làm gì?","Kết hợp dữ liệu từ nhiều bảng","Xóa dữ liệu","Tạo chỉ mục","Sao lưu",A
+1,"Hàm nào đếm số dòng trong kết quả?","SUM()","COUNT()","AVG()","MAX()",B
+1,"Khóa ngoại (Foreign Key) dùng để?","Tăng tốc truy vấn","Liên kết hai bảng","Mã hóa dữ liệu","Sắp xếp",B
+1,"Mệnh đề nào dùng để sắp xếp kết quả?","GROUP BY","ORDER BY","HAVING","SORT",B
+1,"Lệnh nào cập nhật dữ liệu đã có?","UPDATE","MODIFY","CHANGE","SET",A
+1,"Chuẩn hóa (Normalization) nhằm mục đích gì?","Tăng dư thừa dữ liệu","Giảm dư thừa và bất thường dữ liệu","Tăng tốc độ ghi","Mã hóa",B
+1,"Kiểu dữ liệu nào lưu chuỗi ký tự?","INT","VARCHAR","DATE","BOOLEAN",B
+1,"Chỉ mục (Index) giúp ích gì?","Tăng tốc độ truy vấn","Giảm dung lượng","Mã hóa dữ liệu","Tạo backup",A
+1,"Mệnh đề GROUP BY dùng để?","Lọc dòng","Nhóm các dòng theo cột","Xóa nhóm","Đổi tên cột",B
+1,"Giao dịch (Transaction) cần đảm bảo tính chất nào?","ACID","HTTP","CRUD","REST",A
+1,"Lệnh nào tạo bảng mới?","NEW TABLE","CREATE TABLE","MAKE TABLE","ADD TABLE",B
+1,"DISTINCT trong SELECT có tác dụng gì?","Loại bỏ dòng trùng lặp","Sắp xếp","Đếm dòng","Gộp bảng",A
+1,"Quan hệ một-nhiều thường được thể hiện bằng?","Khóa ngoại ở bảng nhiều","Hai khóa chính","Bảng trung gian bắt buộc","Chỉ mục",A
+1,"Hàm AVG() trả về giá trị gì?","Tổng","Giá trị trung bình","Lớn nhất","Số dòng",B

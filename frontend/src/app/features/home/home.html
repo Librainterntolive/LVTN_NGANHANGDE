@@ -1,0 +1,136 @@
+@if (auth.currentUser(); as u) {
+  <!-- ===== Banner chào mừng (đã đăng nhập) ===== -->
+  <div class="welcome">
+    <h2 style="color:#fff; margin:0 0 6px;">Chào mừng, {{ u.full_name || u.username }} 🎉</h2>
+    <p style="margin:0; color:var(--accent-soft);">
+      @if (u.role === 'Student') {
+        Vào làm bài thi được giao, xem lại kết quả, hoặc làm thử các đề công khai bên dưới.
+      } @else {
+        Tạo đề thi, quản lý ngân hàng câu hỏi, import câu hỏi và theo dõi thống kê — tất cả ở một nơi.
+      }
+    </p>
+  </div>
+
+  <h3>Bắt đầu ngay</h3>
+  <div class="tiles">
+    @if (u.role === 'Admin' || u.role === 'Teacher') {
+      <a routerLink="/exams" class="tile">
+        <div class="tile-ic">📝</div><div class="tile-tt">Tạo bài tập / đề thi</div>
+        <div class="tile-sub">Soạn đề, chọn câu hỏi, giao cho lớp</div>
+      </a>
+      <a routerLink="/questions" class="tile">
+        <div class="tile-ic">🏛️</div><div class="tile-tt">Ngân hàng câu hỏi chung</div>
+        <div class="tile-sub">Kho câu hỏi từ các thầy cô</div>
+      </a>
+      <a routerLink="/questions" class="tile">
+        <div class="tile-ic">⬆️</div><div class="tile-tt">Import câu hỏi</div>
+        <div class="tile-sub">Tải lên Excel / CSV (trong Ngân hàng câu hỏi)</div>
+      </a>
+      <a routerLink="/classes" class="tile">
+        <div class="tile-ic">🏫</div><div class="tile-tt">Lớp học</div>
+        <div class="tile-sub">Quản lý lớp & gán sinh viên</div>
+      </a>
+      <a routerLink="/stats" class="tile">
+        <div class="tile-ic">📊</div><div class="tile-tt">Thống kê</div>
+        <div class="tile-sub">Điểm, tỉ lệ đậu theo đề</div>
+      </a>
+      <a routerLink="/subjects" class="tile">
+        <div class="tile-ic">📚</div><div class="tile-tt">Môn học</div>
+        <div class="tile-sub">Quản lý môn & khối</div>
+      </a>
+    }
+    @if (u.role === 'Admin') {
+      <a routerLink="/users" class="tile">
+        <div class="tile-ic">👤</div><div class="tile-tt">Người dùng</div>
+        <div class="tile-sub">Tạo & phân quyền tài khoản</div>
+      </a>
+    }
+    @if (u.role === 'Student') {
+      <a routerLink="/my-exams" class="tile">
+        <div class="tile-ic">📝</div><div class="tile-tt">Đề thi của tôi</div>
+        <div class="tile-sub">Vào làm bài được giao</div>
+      </a>
+      <a routerLink="/my-classes" class="tile">
+        <div class="tile-ic">🏫</div><div class="tile-tt">Lớp của tôi</div>
+        <div class="tile-sub">Tham gia lớp bằng mã</div>
+      </a>
+      <a routerLink="/my-submissions" class="tile">
+        <div class="tile-ic">🕓</div><div class="tile-tt">Lịch sử làm bài</div>
+        <div class="tile-sub">Xem điểm các lần thi</div>
+      </a>
+      <a routerLink="/subjects" class="tile">
+        <div class="tile-ic">📚</div><div class="tile-tt">Môn học</div>
+        <div class="tile-sub">Xem danh sách môn</div>
+      </a>
+    }
+  </div>
+} @else {
+  <!-- ===== Hero (khách chưa đăng nhập) ===== -->
+  <section style="text-align:center; padding:36px 16px 18px;">
+    <h1 style="font-size:38px; color:var(--accent); margin:0 0 12px;">Nền tảng thi trắc nghiệm trực tuyến</h1>
+    <p style="font-size:17px; color:var(--text-2); max-width:660px; margin:0 auto 24px;">
+      Tạo ngân hàng câu hỏi, tổ chức thi, chấm điểm tự động. Khách có thể <b>làm thử miễn phí</b> không cần đăng nhập.
+    </p>
+    <a routerLink="/login" class="btn-soft-primary" style="font-size:16px; padding:12px 28px;">Bắt đầu ngay</a>
+    <a routerLink="/register" class="btn-soft" style="font-size:16px; padding:12px 28px; border:2px solid var(--accent); border-radius:6px;">Đăng ký</a>
+  </section>
+
+  <div class="tiles">
+    <div class="tile" style="cursor:default;">
+      <div class="tile-ic">🎓</div><div class="tile-tt">Sinh viên</div>
+      <div class="tile-sub">Làm bài, xem điểm mọi lúc mọi nơi</div>
+    </div>
+    <div class="tile" style="cursor:default;">
+      <div class="tile-ic">👩‍🏫</div><div class="tile-tt">Giảng viên</div>
+      <div class="tile-sub">Tạo câu hỏi, ra đề, xem thống kê</div>
+    </div>
+    <div class="tile" style="cursor:default;">
+      <div class="tile-ic">🛠️</div><div class="tile-tt">Quản trị</div>
+      <div class="tile-sub">Quản lý người dùng & dữ liệu</div>
+    </div>
+  </div>
+}
+
+<!-- ===== Đề thi dùng thử (luôn hiển thị) ===== -->
+<section style="margin-top:28px;">
+  <h3>Đề thi dùng thử</h3>
+  <p style="color:var(--text-3); margin-top:0;">Làm thử ngay không cần đăng nhập.</p>
+  <div class="tiles">
+    @for (e of publicExams(); track e.id) {
+      <a [routerLink]="['/take', e.id]" class="tile">
+        <div class="tile-ic">📄</div>
+        <div class="tile-tt">{{ e.title }}</div>
+        <div class="tile-sub">⏱ {{ e.duration }} phút</div>
+      </a>
+    } @empty {
+      <p style="color:var(--text-3);">Chưa có đề công khai.</p>
+    }
+  </div>
+</section>
+
+<style>
+  .welcome {
+    background: linear-gradient(110deg, var(--accent), var(--accent-2));
+    border-radius: 12px; padding: 22px 26px; margin-bottom: 22px;
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px; margin: 12px 0 8px;
+  }
+  .tile {
+    background: var(--surface); border-radius: 12px; padding: 22px 18px;
+    text-align: center; text-decoration: none; color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    transition: transform .15s, box-shadow .15s;
+    display: block;
+  }
+  .tile:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,.12); text-decoration: none; }
+  .tile-ic {
+    width: 56px; height: 56px; margin: 0 auto 10px;
+    background: var(--accent-soft); border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  .tile-tt { font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .tile-sub { font-size: 13px; color: var(--text-3); }
+</style>
