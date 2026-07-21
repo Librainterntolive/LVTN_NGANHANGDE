@@ -18,12 +18,41 @@ func (r *SubmissionRepository) Create(s *entity.Submission) error {
 	return r.db.Create(s).Error
 }
 
-func (r *SubmissionRepository) Update(s *entity.Submission) error {
-	return r.db.Save(s).Error
+// CountAttempts: số lần sinh viên đã vào làm đề này (tính cả bài đang làm dở)
+func (r *SubmissionRepository) CountAttempts(examID, userID uint) int64 {
+	var n int64
+	r.db.Model(&entity.Submission{}).
+		Where("exam_id = ? AND user_id = ?", examID, userID).Count(&n)
+	return n
 }
 
-func (r *SubmissionRepository) CreateDetail(d *entity.SubmissionDetail) error {
-	return r.db.Create(d).Error
+// FindInProgress: phiên làm bài đang mở của sinh viên (nil nếu không có).
+// Đây là nguồn "giờ bắt đầu" đáng tin cậy - lưu ở server, client không sửa được.
+func (r *SubmissionRepository) FindInProgress(examID, userID uint) *entity.Submission {
+	var s entity.Submission
+	err := r.db.Where("exam_id = ? AND user_id = ? AND status = ?",
+		examID, userID, "in_progress").Order("id desc").First(&s).Error
+	if err != nil {
+		return nil
+	}
+	return &s
+}
+
+// SubmitTx: lưu bài + toàn bộ chi tiết trong 1 giao dịch.
+// Nếu lỗi giữa chừng thì rollback, không để lại bài chấm dở trong CSDL.
+func (r *SubmissionRepository) SubmitTx(s *entity.Submission, details []entity.SubmissionDetail) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(s).Error; err != nil {
+			return err
+		}
+		if len(details) == 0 {
+			return nil
+		}
+		for i := range details {
+			details[i].SubmissionID = s.ID
+		}
+		return tx.Create(&details).Error
+	})
 }
 
 // FindAnswer: lấy 1 đáp án để chấm

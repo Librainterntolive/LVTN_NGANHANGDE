@@ -23,15 +23,21 @@ func (ctl *SubmissionController) GetMyExams(c *gin.Context) {
 }
 
 func (ctl *SubmissionController) Take(c *gin.Context) {
-	exam, questions, err := ctl.svc.Take(c.Param("id"))
+	exam, questions, session, err := ctl.svc.Take(c.Param("id"), getUserIDPtr(c))
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
+	res := gin.H{
 		"exam":      gin.H{"id": exam.ID, "title": exam.Title, "duration": exam.Duration},
 		"questions": questions,
-	})
+	}
+	// Khách làm thử không có phiên -> không có đồng hồ do server giữ
+	if session != nil {
+		res["submission_id"] = session.SubmissionID
+		res["remaining_seconds"] = session.RemainingSeconds
+	}
+	c.JSON(http.StatusOK, res)
 }
 
 func (ctl *SubmissionController) Submit(c *gin.Context) {

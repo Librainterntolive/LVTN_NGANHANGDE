@@ -11,12 +11,30 @@ Kiến trúc phân tầng: **Controller → Service → Repository** (có DTO, R
 2. Sửa `DB_USER`, `DB_PASSWORD`, `DB_NAME` cho đúng máy bạn.
 
 ## 3. Chạy backend
-```bash
+```powershell
 cd backend
 go mod tidy        # tải thư viện (lần đầu)
-go run ./cmd       # chạy server (điểm khởi động ở cmd/main.go)
+.\run.ps1          # chạy server (điểm khởi động ở cmd/main.go)
 ```
 Server chạy tại http://localhost:8081
+
+### Vì sao dùng `run.ps1` thay cho `go run ./cmd`?
+`go run` biên dịch ra một file `.exe` **mới trong thư mục tạm mỗi lần chạy**, nên
+Windows Defender phải quét lại từ đầu mỗi lần. `run.ps1` biên dịch ra một file cố
+định (`bin/server.exe`) và bỏ qua bước biên dịch nếu mã nguồn không đổi.
+
+Đo thực tế trên máy (thời gian từ lúc gõ lệnh đến khi API trả lời):
+
+| Cách chạy | Thời gian |
+|---|---|
+| `go run ./cmd` | 11.468 ms |
+| `.\run.ps1` (có sửa code) | 2.752 ms |
+| `.\run.ps1` (không sửa code) | 921 ms |
+
+Hai công tắc trong `.env` cũng ảnh hưởng tốc độ:
+- `AUTO_MIGRATE` — chỉ đặt `true` khi vừa sửa `internal/entity/entity.go`, chạy 1
+  lần cho bảng được cập nhật rồi đặt lại `false`.
+- `GIN_MODE=release` — bỏ việc in ~60 dòng route ra console mỗi lần khởi động.
 Thử: http://localhost:8081/api/ping → `{"message":"pong"}`
 
 Tài khoản mẫu: **admin / admin123** (Admin), **sv01 / 123456** (Student).

@@ -96,6 +96,7 @@ type Exam struct {
 	ShuffleAnswers bool    `json:"shuffle_answers"`                                // xáo thứ tự đáp án
 	ShuffleMode    string  `gorm:"size:20;default:per_student" json:"shuffle_mode"` // per_student / fixed
 	AccessType     string  `gorm:"size:20;default:private" json:"access_type"`
+	MaxAttempts    int     `gorm:"default:0" json:"max_attempts"` // số lần được làm; 0 = không giới hạn
 	Status      string    `gorm:"size:20;default:draft" json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
 }

@@ -9,6 +9,10 @@ export interface TakeQuestion { id: number; content: string; answers: TakeAnswer
 export interface TakeExamData {
   exam: { id: number; title: string; duration: number };
   questions: TakeQuestion[];
+  // Phiên làm bài do server cấp (khách làm thử không có).
+  // remaining_seconds = -1 nghĩa là đề không giới hạn thời gian.
+  submission_id?: number;
+  remaining_seconds?: number;
 }
 export interface SubmitResult {
   submission_id: number;

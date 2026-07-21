@@ -39,15 +39,23 @@ export class TakeExam implements OnInit, OnDestroy {
     this.service.take(this.examId).subscribe({
       next: (d) => {
         this.data.set(d);
-        this.startTimer(d.exam.duration);
+        this.startTimer(d);
       },
       error: (e) => this.error.set(e?.error?.error ?? 'Không tải được đề'),
     });
   }
 
-  startTimer(durationMinutes: number) {
-    if (!durationMinutes || durationMinutes <= 0) return; // không giới hạn
-    this.remaining.set(durationMinutes * 60);
+  // Số giây còn lại do SERVER cấp (tính từ giờ bắt đầu lưu trong CSDL).
+  // Nhờ vậy tải lại trang không làm mới đồng hồ. Chỉ khi server không cấp
+  // phiên (khách làm thử) mới tạm tính theo duration của đề.
+  startTimer(d: TakeExamData) {
+    const fromServer = d.remaining_seconds;
+    if (fromServer === -1) return; // đề không giới hạn thời gian
+
+    const seconds = fromServer ?? (d.exam.duration ?? 0) * 60;
+    if (seconds <= 0) return;
+
+    this.remaining.set(seconds);
     this.timer = setInterval(() => {
       const left = this.remaining() - 1;
       this.remaining.set(left);

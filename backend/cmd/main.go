@@ -21,6 +21,13 @@ func main() {
 	// Kết nối CSDL
 	config.ConnectDatabase()
 
+	// Gin đọc GIN_MODE lúc nạp package - trước khi godotenv chạy - nên phải
+	// đặt lại bằng tay. Chế độ release bỏ việc in ra ~60 dòng route mỗi lần
+	// khởi động (in ra console Windows khá chậm).
+	if os.Getenv("GIN_MODE") != "debug" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	// Gin
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{

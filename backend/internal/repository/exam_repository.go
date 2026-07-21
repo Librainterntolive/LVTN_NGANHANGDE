@@ -96,6 +96,18 @@ func (r *ExamRepository) FindPublic() ([]entity.Exam, error) {
 	return exams, err
 }
 
+// IsAssignedToStudent: sinh viên có thuộc lớp nào được giao đề này không?
+// Dùng để chặn người ngoài lớp mở đề private dù biết ID đề.
+func (r *ExamRepository) IsAssignedToStudent(examID, studentID uint) bool {
+	var n int64
+	r.db.Model(&entity.ExamClass{}).
+		Where("exam_id = ? AND class_id IN (?)", examID,
+			r.db.Model(&entity.ClassStudent{}).Select("class_id").
+				Where("student_id = ?", studentID),
+		).Count(&n)
+	return n > 0
+}
+
 // đề thi sinh viên được phép làm
 func (r *ExamRepository) FindAvailableForStudent(studentID interface{}) ([]entity.Exam, error) {
 	var exams []entity.Exam
