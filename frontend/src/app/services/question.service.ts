@@ -25,6 +25,14 @@ export interface Question {
   answers: Answer[];
 }
 
+// Kết quả import: subject_ids là các môn đã nhận câu hỏi, dùng để mở đúng môn
+// cho người dùng thấy kết quả ngay sau khi import.
+export interface ImportResult {
+  imported: number;
+  subject_ids?: number[] | null;
+  errors: string[] | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class QuestionService {
   private http = inject(HttpClient);
@@ -64,10 +72,10 @@ export class QuestionService {
   }
 
   // K - import câu hỏi từ file CSV hoặc Excel
-  importFile(file: File): Observable<{ imported: number; errors: string[] | null }> {
+  importFile(file: File): Observable<ImportResult> {
     const form = new FormData();
     form.append('file', file);
-    return this.http.post<{ imported: number; errors: string[] | null }>(`${this.url}/import`, form);
+    return this.http.post<ImportResult>(`${this.url}/import`, form);
   }
 
   // tải file Excel mẫu

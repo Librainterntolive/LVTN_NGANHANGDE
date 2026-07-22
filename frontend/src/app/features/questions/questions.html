@@ -28,7 +28,15 @@ Tùy chọn thêm: difficulty (easy/medium/hard) | chapter_id (mã chương)</pr
     </div>
     @if (importResult(); as r) {
       <div style="border:1px solid #4caf50; border-radius:6px; padding:10px;">
-        <p style="color:green; margin:0;">Đã import thành công <b>{{ r.imported }}</b> câu hỏi.</p>
+        <p style="color:green; margin:0;">
+          Đã import thành công <b>{{ r.imported }}</b> câu hỏi
+          @if (importedSubjectNames()) { vào môn <b>{{ importedSubjectNames() }}</b> }.
+        </p>
+        @if (r.imported > 0) {
+          <p style="color:var(--text-2); font-size:13px; margin:6px 0 0;">
+            Danh sách bên dưới đã chuyển sang môn này để bạn xem kết quả ngay.
+          </p>
+        }
         @if (r.errors && r.errors.length) {
           <p style="color:#e65100; margin:8px 0 4px;">Một số dòng bị bỏ qua:</p>
           <ul style="margin:0;">

@@ -96,15 +96,19 @@ func mapColumns(header []string) map[string]int {
 
 // Import: đọc file (.csv/.xlsx), nhận diện cột, tạo câu hỏi.
 // defaultSubjectID > 0: dùng khi dòng không có subject_id hợp lệ.
-// Trả về danh sách ID câu hỏi đã tạo + danh sách lỗi.
-func (s *ImportService) Import(r io.Reader, ext string, createdBy uint, defaultSubjectID uint) ([]uint, []string) {
+// Trả về: ID câu hỏi đã tạo, các môn học đã nhận câu hỏi, danh sách lỗi.
+// subjectIDs để giao diện biết mở môn nào cho người dùng thấy kết quả ngay.
+func (s *ImportService) Import(r io.Reader, ext string, createdBy uint, defaultSubjectID uint) ([]uint, []uint, []string) {
 	var ids []uint
+	var subjectIDs []uint
+	seenSubject := map[uint]bool{}
+
 	rows, err := readRows(r, ext)
 	if err != nil {
-		return ids, []string{"Khong doc duoc file: " + err.Error()}
+		return ids, subjectIDs, []string{"Khong doc duoc file: " + err.Error()}
 	}
 	if len(rows) < 2 {
-		return ids, []string{"File khong co du lieu (can dong tieu de + it nhat 1 dong)"}
+		return ids, subjectIDs, []string{"File khong co du lieu (can dong tieu de + it nhat 1 dong)"}
 	}
 
 	colMap := mapColumns(rows[0])
@@ -184,8 +188,12 @@ func (s *ImportService) Import(r io.Reader, ext string, createdBy uint, defaultS
 			continue
 		}
 		ids = append(ids, q.ID)
+		if !seenSubject[q.SubjectID] {
+			seenSubject[q.SubjectID] = true
+			subjectIDs = append(subjectIDs, q.SubjectID)
+		}
 	}
-	return ids, errs
+	return ids, subjectIDs, errs
 }
 
 // GenerateTemplate: tạo file Excel mẫu để giáo viên tải về điền

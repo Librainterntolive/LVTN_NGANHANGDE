@@ -58,7 +58,7 @@ func (ctl *ExamController) Build(c *gin.Context) {
 		}
 		f, _ := fh.Open()
 		defer f.Close()
-		ids, errs := ctl.importSvc.Import(f, ext, getUserID(c), uint(subjectID))
+		ids, _, errs := ctl.importSvc.Import(f, ext, getUserID(c), uint(subjectID))
 		fileErrs = errs
 		add(ids)
 	}

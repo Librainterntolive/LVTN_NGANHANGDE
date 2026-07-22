@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { QuestionService, Question } from '../../services/question.service';
+import { QuestionService, Question, ImportResult } from '../../services/question.service';
 import { SubjectService, Subject } from '../../services/subject.service';
 import { ChapterService, Chapter } from '../../services/chapter.service';
 import { AuthService } from '../../services/auth.service';
@@ -55,7 +55,7 @@ export class Questions implements OnInit {
   // import từ file (gộp từ trang Import cũ)
   showImport = signal<boolean>(false);
   importFile: File | null = null;
-  importResult = signal<{ imported: number; errors: string[] | null } | null>(null);
+  importResult = signal<ImportResult | null>(null);
 
   ngOnInit() {
     this.subjectService.getAll().subscribe({ next: (d) => this.subjects.set(d ?? []) });
@@ -211,9 +211,30 @@ export class Questions implements OnInit {
       this.error.set('File quá lớn (tối đa 50MB)'); return;
     }
     this.qService.importFile(this.importFile).subscribe({
-      next: (r) => { this.importResult.set(r); this.loadChapters(); this.reload(); },
+      next: (r) => {
+        this.importResult.set(r);
+        // Danh sách chỉ hiện khi đã chọn môn. Sau khi import thì tự mở môn vừa
+        // nhận câu hỏi, nếu không người dùng nhìn vào màn hình trống và tưởng
+        // import hỏng (rồi bấm lại nhiều lần, tạo ra câu trùng).
+        const first = r.subject_ids?.[0];
+        if (first && this.subjectId !== first) {
+          this.subjectId = first;
+          this.chapterFilter.set('all');
+        }
+        this.loadChapters();
+        this.reload();
+      },
       error: (e) => this.error.set(e?.error?.error ?? 'Import thất bại'),
     });
+  }
+
+  // tên các môn vừa nhận câu hỏi (hiện trong thông báo kết quả import)
+  importedSubjectNames(): string {
+    const ids = this.importResult()?.subject_ids ?? [];
+    const names = ids
+      .map((id) => this.subjects().find((s) => s.id === id)?.name)
+      .filter((n): n is string => !!n);
+    return names.join(', ');
   }
 
   downloadTemplate() {

@@ -47,8 +47,13 @@ func (ctl *ImportController) Import(c *gin.Context) {
 	}
 	defer f.Close()
 
-	ids, errs := ctl.svc.Import(f, ext, getUserID(c), 0)
-	c.JSON(http.StatusOK, gin.H{"imported": len(ids), "errors": errs})
+	ids, subjectIDs, errs := ctl.svc.Import(f, ext, getUserID(c), 0)
+	c.JSON(http.StatusOK, gin.H{
+		"imported": len(ids),
+		// môn đã nhận câu hỏi -> giao diện mở đúng môn đó cho người dùng thấy ngay
+		"subject_ids": subjectIDs,
+		"errors":      errs,
+	})
 }
 
 // Template: tải file Excel mẫu để giáo viên điền
