@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+54,Xác suất của một biến cố luôn nằm trong khoảng nào?,Từ 0 đến 1,Từ -1 đến 1,Từ 0 đến 100,Từ 1 đến vô cùng,A,easy
+54,Xác suất của biến cố chắc chắn bằng bao nhiêu?,0,"0,5",1,Vô cùng,C,easy
+54,Xác suất của biến cố không thể bằng bao nhiêu?,0,"0,5",1,-1,A,easy
+54,"Gieo một con xúc xắc cân đối, xác suất xuất hiện mặt 6 chấm là bao nhiêu?",1/6,1/2,1/3,1/12,A,easy
+54,"Gieo một đồng xu cân đối, xác suất xuất hiện mặt ngửa là bao nhiêu?",1/2,1/3,1/4,1,A,easy
+54,Hai biến cố xung khắc là hai biến cố như thế nào?,Không thể cùng xảy ra,Luôn cùng xảy ra,Độc lập với nhau,Có xác suất bằng nhau,A,easy
+54,"Công thức cộng xác suất cho hai biến cố xung khắc A, B là gì?",P(A hoặc B) = P(A) + P(B),P(A hoặc B) = P(A)·P(B),P(A hoặc B) = P(A) - P(B),P(A hoặc B) = P(A)/P(B),A,easy
+54,Hai biến cố độc lập thỏa mãn công thức nào?,P(A và B) = P(A)·P(B),P(A và B) = P(A) + P(B),P(A và B) = 0,P(A và B) = 1,A,medium
+54,Xác suất có điều kiện P(A|B) được tính bằng công thức nào?,P(A và B)/P(B),P(A)·P(B),P(A) + P(B),P(B)/P(A),A,medium
+54,Công thức Bayes dùng để làm gì?,Tính xác suất hậu nghiệm khi biết thông tin mới,Tính kỳ vọng,Tính phương sai,Ước lượng khoảng tin cậy,A,hard
+54,Biến ngẫu nhiên rời rạc là gì?,Biến nhận hữu hạn hoặc đếm được các giá trị,Biến nhận mọi giá trị trong một khoảng,Biến luôn dương,Biến không đổi,A,medium
+54,Kỳ vọng của biến ngẫu nhiên biểu thị điều gì?,Giá trị trung bình theo xác suất,Độ phân tán,Giá trị lớn nhất,Xác suất lớn nhất,A,easy
+54,Phương sai đo lường điều gì?,Mức độ phân tán của biến ngẫu nhiên quanh kỳ vọng,Giá trị trung bình,Giá trị lớn nhất,Xác suất xảy ra,A,easy
+54,Độ lệch chuẩn có quan hệ gì với phương sai?,Là căn bậc hai của phương sai,Là bình phương phương sai,Bằng phương sai,Là nghịch đảo phương sai,A,easy
+54,Phân phối nhị thức mô tả tình huống nào?,Số lần thành công trong n phép thử độc lập với xác suất p không đổi,Số lần thất bại liên tiếp,Thời gian chờ đợi,Biến liên tục đối xứng,A,medium
+54,"Kỳ vọng của phân phối nhị thức B(n,p) bằng bao nhiêu?",np,np(1-p),n/p,p/n,A,medium
+54,"Phương sai của phân phối nhị thức B(n,p) bằng bao nhiêu?",np,np(1-p),n^2p,p(1-p),B,medium
+54,Phân phối chuẩn có đồ thị hàm mật độ hình dạng nào?,Hình chuông đối xứng,Đường thẳng,Hình chữ nhật,Hình tam giác,A,easy
+54,Phân phối chuẩn tắc có kỳ vọng và phương sai bằng bao nhiêu?,0 và 1,1 và 0,1 và 1,0 và 0,A,medium
+54,Quy tắc 3-sigma cho biết điều gì?,"Khoảng 99,7% giá trị nằm trong khoảng trung bình cộng trừ 3 độ lệch chuẩn",Toàn bộ giá trị nằm trong 3 đơn vị,Xác suất bằng 3 lần độ lệch,Trung bình bằng 3 lần phương sai,A,medium
+54,Phân phối Poisson mô tả điều gì?,Số lần xảy ra biến cố hiếm trong khoảng thời gian hoặc không gian nhất định,Số lần thành công trong n phép thử,Thời gian sống của thiết bị,Biến ngẫu nhiên liên tục đối xứng,A,medium
+54,Tổng thể trong thống kê là gì?,Tập hợp toàn bộ các phần tử cần nghiên cứu,Một phần được chọn ra để khảo sát,Giá trị trung bình,Số liệu thu thập được,A,easy
+54,Mẫu trong thống kê là gì?,Tập con được chọn từ tổng thể để nghiên cứu,Toàn bộ tổng thể,Kết quả tính toán,Sai số đo lường,A,easy
+54,Trung bình mẫu được dùng để làm gì?,Ước lượng trung bình tổng thể,Tính phương sai tổng thể,Xác định phân phối,Kiểm định giả thuyết duy nhất,A,easy
+54,Trung vị là giá trị nào?,Giá trị chia dãy số liệu đã sắp xếp thành hai phần bằng nhau,Giá trị xuất hiện nhiều nhất,Giá trị trung bình cộng,Giá trị lớn nhất,A,easy
+54,Mốt (Mode) là gì?,Giá trị xuất hiện với tần số lớn nhất,Giá trị ở giữa dãy,Trung bình cộng,Hiệu giữa max và min,A,easy
+54,"Khi dữ liệu có giá trị ngoại lai lớn, nên dùng đại lượng nào để đại diện?",Trung vị,Trung bình cộng,Phương sai,Tổng,A,medium
+54,Ước lượng điểm là gì?,Dùng một giá trị duy nhất để ước lượng tham số tổng thể,Dùng một khoảng giá trị,Kiểm định giả thuyết,Vẽ biểu đồ phân phối,A,medium
+54,Khoảng tin cậy 95% có ý nghĩa gì?,"Với độ tin cậy 95%, tham số tổng thể nằm trong khoảng đó",95% dữ liệu nằm trong khoảng,Sai số là 95%,Xác suất sai bằng 95%,A,medium
+54,Khi tăng độ tin cậy thì độ rộng khoảng tin cậy thay đổi thế nào?,Rộng ra,Hẹp lại,Không đổi,Bằng 0,A,hard

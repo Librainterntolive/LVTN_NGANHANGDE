@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+70,Quản trị là gì?,"Quá trình hoạch định, tổ chức, lãnh đạo và kiểm soát để đạt mục tiêu",Việc ra lệnh cho nhân viên,Hoạt động kế toán tài chính,Công việc bán hàng,A,easy
+70,Bốn chức năng cơ bản của quản trị là gì?,"Hoạch định, tổ chức, lãnh đạo và kiểm soát","Mua, bán, sản xuất, phân phối","Tuyển dụng, đào tạo, đánh giá, sa thải","Lập kế hoạch, thực hiện, báo cáo, tổng kết",A,easy
+70,Hoạch định là chức năng gì?,Xác định mục tiêu và cách thức đạt được mục tiêu,Phân công công việc,Động viên nhân viên,Đo lường kết quả,A,easy
+70,Chức năng tổ chức trong quản trị nghĩa là gì?,"Phân công công việc, sắp xếp nguồn lực và thiết lập cơ cấu",Đặt ra mục tiêu,Kiểm tra kết quả,Tuyển dụng nhân sự,A,easy
+70,Chức năng kiểm soát nhằm mục đích gì?,Đo lường kết quả và điều chỉnh sai lệch so với kế hoạch,Phân công nhiệm vụ,Xác định mục tiêu,Tuyển thêm nhân viên,A,easy
+70,Nhà quản trị cấp cao thường tập trung vào công việc gì?,Xây dựng chiến lược và định hướng dài hạn,Giám sát công nhân trực tiếp,Xử lý công việc hàng ngày,Ghi chép sổ sách,A,easy
+70,Nhà quản trị cấp cơ sở có nhiệm vụ chính là gì?,Trực tiếp giám sát và điều hành người thực hiện công việc,Hoạch định chiến lược công ty,Đàm phán với đối tác lớn,Quyết định cơ cấu tổ chức,A,medium
+70,Kỹ năng nào quan trọng nhất với nhà quản trị cấp cao?,Kỹ năng tư duy chiến lược,Kỹ năng kỹ thuật chuyên môn,Kỹ năng vận hành máy móc,Kỹ năng ghi chép,A,medium
+70,Kỹ năng nhân sự quan trọng với cấp quản trị nào?,Mọi cấp quản trị,Chỉ cấp cao,Chỉ cấp cơ sở,Không cấp nào,A,medium
+70,Thuyết quản trị khoa học gắn với tên tuổi ai?,Frederick Taylor,Henri Fayol,Max Weber,Elton Mayo,A,medium
+70,Thuyết quản trị khoa học của Taylor nhấn mạnh điều gì?,Chuẩn hóa thao tác và tăng năng suất lao động,Quan hệ con người trong tổ chức,Cơ cấu hành chính quan liêu,Trách nhiệm xã hội,A,medium
+70,Henri Fayol đóng góp gì cho quản trị học?,Đưa ra các chức năng và nguyên tắc quản trị tổng quát,Nghiên cứu thao tác lao động,Thí nghiệm Hawthorne,Lý thuyết nhu cầu,A,medium
+70,Thuyết quan hệ con người ra đời từ nghiên cứu nào?,Thí nghiệm Hawthorne của Elton Mayo,Nghiên cứu thời gian thao tác của Taylor,Mô hình quan liêu của Weber,Lý thuyết hệ thống,A,hard
+70,Tháp nhu cầu Maslow có mấy bậc?,Năm bậc,Ba bậc,Bốn bậc,Bảy bậc,A,easy
+70,Nhu cầu ở đáy tháp Maslow là gì?,Nhu cầu sinh lý cơ bản,Nhu cầu an toàn,Nhu cầu được tôn trọng,Nhu cầu tự thể hiện,A,easy
+70,Nhu cầu ở đỉnh tháp Maslow là gì?,Nhu cầu tự thể hiện bản thân,Nhu cầu xã hội,Nhu cầu an toàn,Nhu cầu sinh lý,A,easy
+70,Thuyết hai yếu tố của Herzberg phân biệt điều gì?,Yếu tố duy trì và yếu tố động viên,Nhu cầu vật chất và tinh thần,Lãnh đạo và quản lý,Mục tiêu ngắn hạn và dài hạn,A,hard
+70,"Theo Herzberg, tiền lương thuộc nhóm yếu tố nào?",Yếu tố duy trì,Yếu tố động viên,Yếu tố lãnh đạo,Yếu tố tổ chức,A,hard
+70,Thuyết X và thuyết Y của McGregor nói về điều gì?,Hai quan niệm trái ngược về bản chất người lao động,Hai mô hình cơ cấu tổ chức,Hai phương pháp kiểm soát,Hai chiến lược cạnh tranh,A,medium
+70,"Theo thuyết Y, người lao động được nhìn nhận thế nào?","Chủ động, sáng tạo và sẵn sàng nhận trách nhiệm","Lười biếng, cần bị giám sát chặt",Chỉ quan tâm tiền lương,Không có tham vọng,A,medium
+70,Cơ cấu tổ chức trực tuyến có ưu điểm gì?,"Đơn giản, quyền hạn trách nhiệm rõ ràng",Tận dụng chuyên gia tối đa,Linh hoạt cao nhất,Phù hợp doanh nghiệp rất lớn,A,medium
+70,Cơ cấu tổ chức chức năng có đặc điểm gì?,"Nhóm theo chuyên môn, tận dụng chuyên gia nhưng dễ thiếu phối hợp",Mỗi người một cấp trên duy nhất,Không có phòng ban,Phù hợp mọi quy mô,A,medium
+70,Cơ cấu ma trận có nhược điểm gì?,Nhân viên chịu sự chỉ đạo của nhiều cấp trên gây xung đột,Quá đơn giản,Không tận dụng được chuyên gia,Chi phí thấp nhất,A,hard
+70,Tầm hạn quản trị là gì?,Số lượng cấp dưới mà một nhà quản trị có thể giám sát hiệu quả,Phạm vi địa lý hoạt động,Thời gian làm việc,Ngân sách được cấp,A,medium
+70,Tầm hạn quản trị rộng dẫn tới điều gì?,"Ít cấp quản lý, tổ chức phẳng hơn",Nhiều cấp quản lý,Tổ chức cao và hẹp,Chi phí quản lý tăng,A,hard
+70,Ủy quyền trong quản trị là gì?,Giao quyền hạn và trách nhiệm cho cấp dưới thực hiện công việc,Từ bỏ hoàn toàn trách nhiệm,Chuyển việc khó cho người khác,Tăng cường kiểm soát,A,medium
+70,Nguyên tắc thống nhất chỉ huy nghĩa là gì?,Mỗi cấp dưới chỉ nhận lệnh từ một cấp trên trực tiếp,Mọi quyết định do một người ban hành,Nhân viên tự quyết định,Chỉ huy theo nhóm,A,medium
+70,Ra quyết định trong điều kiện rủi ro nghĩa là gì?,Biết được xác suất xảy ra của các kết quả,Biết chắc chắn kết quả,Hoàn toàn không có thông tin,Không cần cân nhắc,A,hard
+70,Quá trình ra quyết định hợp lý bắt đầu bằng bước nào?,Xác định vấn đề cần giải quyết,Chọn phương án,Thực hiện quyết định,Đánh giá kết quả,A,medium
+70,Lãnh đạo khác quản lý ở điểm nào?,"Lãnh đạo tạo tầm nhìn và truyền cảm hứng, quản lý tổ chức thực hiện",Hai khái niệm hoàn toàn giống nhau,Quản lý quan trọng hơn,Lãnh đạo chỉ có ở cấp cao,A,medium

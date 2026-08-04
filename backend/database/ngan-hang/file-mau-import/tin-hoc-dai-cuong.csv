@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+50,Đơn vị nhỏ nhất biểu diễn thông tin trong máy tính là gì?,Bit,Byte,Kilobyte,Word,A,easy
+50,1 Byte bằng bao nhiêu bit?,4 bit,8 bit,16 bit,32 bit,B,easy
+50,Bộ phận nào được xem là bộ não của máy tính?,RAM,Ổ cứng,CPU,Card màn hình,C,easy
+50,RAM có đặc điểm gì?,Lưu trữ vĩnh viễn,Mất dữ liệu khi tắt máy,Chỉ đọc không ghi,Chậm hơn ổ cứng,B,easy
+50,Phần mềm nào sau đây là hệ điều hành?,Microsoft Word,Google Chrome,Windows 11,Photoshop,C,easy
+50,Hệ đếm nhị phân sử dụng những chữ số nào?,0 và 1,0 đến 7,0 đến 9,0 đến F,A,easy
+50,Số nhị phân 1010 có giá trị thập phân là bao nhiêu?,8,10,12,14,B,medium
+50,Số thập phân 13 đổi sang nhị phân là gì?,1011,1101,1110,1001,B,medium
+50,Thiết bị nào là thiết bị nhập?,Máy in,Màn hình,Bàn phím,Loa,C,easy
+50,Phần mở rộng nào dùng cho tệp Microsoft Word?,xlsx,docx,pptx,pdf,B,easy
+50,"Trong Excel, công thức tính tổng ô A1 đến A10 là gì?",=SUM(A1:A10),=TOTAL(A1:A10),=ADD(A1:A10),=COUNT(A1:A10),A,easy
+50,Hàm nào trong Excel dùng để đếm số ô chứa số?,SUM,COUNT,AVERAGE,MAX,B,easy
+50,"Trong Excel, ký hiệu $A$1 thể hiện kiểu địa chỉ nào?",Tương đối,Tuyệt đối,Hỗn hợp,Không hợp lệ,B,medium
+50,Địa chỉ IPv4 gồm bao nhiêu bit?,16 bit,32 bit,64 bit,128 bit,B,medium
+50,Giao thức nào dùng để truyền tải trang web?,FTP,SMTP,HTTP,SSH,C,easy
+50,DNS có chức năng gì?,Cấp phát IP động,Phân giải tên miền thành địa chỉ IP,Mã hóa dữ liệu,Chặn truy cập trái phép,B,medium
+50,Mạng LAN là viết tắt của cụm từ nào?,Local Area Network,Large Access Network,Linked Access Node,Local Access Number,A,easy
+50,Đơn vị đo dung lượng nào lớn nhất?,Megabyte,Gigabyte,Terabyte,Kilobyte,C,easy
+50,Phần mềm mã nguồn mở có đặc điểm gì?,Luôn phải trả phí,Được công khai mã nguồn,Chỉ chạy trên Windows,Không được sửa đổi,B,easy
+50,Tổ hợp phím Ctrl + C dùng để làm gì?,Cắt,Sao chép,Dán,Hoàn tác,B,easy
+50,Tổ hợp phím Ctrl + Z dùng để làm gì?,Sao chép,Dán,Hoàn tác thao tác vừa thực hiện,Lưu tệp,C,easy
+50,ROM có đặc điểm nào?,Ghi xóa tự do,"Chủ yếu chỉ đọc, không mất khi tắt máy",Nhanh hơn RAM,Dung lượng rất lớn,B,medium
+50,Virus máy tính là gì?,Một loại phần cứng,Chương trình gây hại có khả năng lây lan,Một giao thức mạng,Một hệ điều hành,B,easy
+50,Thư mục dùng để làm gì?,Chạy chương trình,Tổ chức và chứa các tệp tin,Kết nối Internet,Tăng tốc CPU,B,easy
+50,Phần mở rộng exe biểu thị loại tệp nào?,Tệp văn bản,Tệp thực thi,Tệp hình ảnh,Tệp nén,B,easy
+50,Chức năng chính của hệ điều hành là gì?,Soạn thảo văn bản,Quản lý tài nguyên và điều phối hoạt động máy tính,Thiết kế đồ họa,Duyệt web,B,medium
+50,Bộ nhớ đệm Cache có vai trò gì?,Lưu trữ lâu dài,Tăng tốc truy xuất dữ liệu cho CPU,Hiển thị hình ảnh,Lưu phím bấm,B,medium
+50,Đâu là trình duyệt web?,Windows Explorer,Mozilla Firefox,Microsoft Excel,Notepad,B,easy
+50,Thuật ngữ phần cứng chỉ điều gì?,Các chương trình máy tính,Các bộ phận vật lý của máy tính,Dữ liệu người dùng,Kết nối mạng,B,easy
+50,Thuật toán là gì?,Một ngôn ngữ lập trình,Dãy hữu hạn các bước giải quyết một bài toán,Một thiết bị phần cứng,Một hệ điều hành,B,medium

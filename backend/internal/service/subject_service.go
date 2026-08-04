@@ -17,7 +17,12 @@ func NewSubjectService(repo *repository.SubjectRepository) *SubjectService {
 	return &SubjectService{repo: repo}
 }
 
-func (s *SubjectService) GetAll() ([]entity.Subject, error) {
+// GetAll: mặc định chỉ trả môn đang dùng.
+// includeHidden = true (màn hình quản lý môn học) thì trả cả môn đã tạm ẩn.
+func (s *SubjectService) GetAll(includeHidden bool) ([]entity.Subject, error) {
+	if includeHidden {
+		return s.repo.FindAllIncludingHidden()
+	}
 	return s.repo.FindAll()
 }
 
@@ -26,7 +31,10 @@ func (s *SubjectService) GetByID(id string) (*entity.Subject, error) {
 }
 
 func (s *SubjectService) Create(in dto.SubjectInput) (*entity.Subject, error) {
-	subject := &entity.Subject{Name: in.Name, Level: defaultStr(in.Level, "Khác"), Description: in.Description}
+	subject := &entity.Subject{
+		Name: in.Name, Level: defaultStr(in.Level, "Khác"),
+		Description: in.Description, Hidden: in.Hidden,
+	}
 	err := s.repo.Create(subject)
 	return subject, err
 }
@@ -39,6 +47,7 @@ func (s *SubjectService) Update(id string, in dto.SubjectInput) (*entity.Subject
 	subject.Name = in.Name
 	subject.Level = defaultStr(in.Level, "Khác")
 	subject.Description = in.Description
+	subject.Hidden = in.Hidden
 	err = s.repo.Update(subject)
 	return subject, err
 }

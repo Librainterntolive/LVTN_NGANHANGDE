@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+68,Kế toán là gì?,"Việc thu thập, xử lý và cung cấp thông tin kinh tế tài chính của đơn vị",Hoạt động bán hàng,Quản lý nhân sự,Nghiên cứu thị trường,A,easy
+68,Phương trình kế toán cơ bản là gì?,Tài sản = Nợ phải trả + Vốn chủ sở hữu,Tài sản = Doanh thu - Chi phí,Vốn = Tài sản + Nợ,Doanh thu = Chi phí + Lợi nhuận,A,easy
+68,Tài sản trong kế toán là gì?,Nguồn lực doanh nghiệp kiểm soát và mang lại lợi ích kinh tế tương lai,Số tiền doanh nghiệp nợ,Vốn góp của chủ sở hữu,Doanh thu bán hàng,A,easy
+68,Tài sản ngắn hạn bao gồm những khoản nào?,"Tiền, các khoản phải thu, hàng tồn kho","Nhà xưởng, máy móc",Bằng phát minh sáng chế,Đầu tư dài hạn,A,easy
+68,Tài sản dài hạn gồm những khoản nào?,"Tài sản cố định hữu hình, vô hình và đầu tư dài hạn",Tiền mặt tại quỹ,Hàng tồn kho,Phải thu khách hàng,A,easy
+68,Nợ phải trả là gì?,Nghĩa vụ hiện tại doanh nghiệp phải thanh toán,Tài sản của doanh nghiệp,Vốn góp của cổ đông,Lợi nhuận giữ lại,A,easy
+68,Vốn chủ sở hữu được xác định thế nào?,Tài sản trừ nợ phải trả,Tài sản cộng nợ phải trả,Doanh thu trừ chi phí,Tổng tài sản,A,medium
+68,Nguyên tắc ghi sổ kép nghĩa là gì?,"Mỗi nghiệp vụ được ghi ít nhất vào hai tài khoản, tổng Nợ bằng tổng Có",Ghi hai lần vào cùng một tài khoản,Ghi sổ hai lần trong tháng,Có hai kế toán cùng ghi,A,medium
+68,Tài khoản tài sản tăng thì ghi vào bên nào?,Bên Nợ,Bên Có,Cả hai bên,Không ghi,A,medium
+68,Tài khoản nợ phải trả tăng thì ghi vào bên nào?,Bên Có,Bên Nợ,Cả hai bên,Không ghi,A,medium
+68,Tài khoản doanh thu tăng thì ghi vào bên nào?,Bên Có,Bên Nợ,Tùy trường hợp,Không ghi sổ,A,medium
+68,Tài khoản chi phí tăng thì ghi vào bên nào?,Bên Nợ,Bên Có,Cả hai bên,Không ghi,A,medium
+68,Định khoản kế toán là gì?,"Xác định tài khoản ghi Nợ, tài khoản ghi Có và số tiền cho một nghiệp vụ",Kiểm kê hàng hóa,Lập báo cáo tài chính,Tính giá thành,A,easy
+68,Báo cáo tài chính cơ bản gồm những báo cáo nào?,"Bảng cân đối kế toán, báo cáo kết quả kinh doanh, báo cáo lưu chuyển tiền tệ và thuyết minh",Chỉ bảng cân đối kế toán,Chỉ báo cáo doanh thu,Sổ cái và sổ nhật ký,A,medium
+68,Bảng cân đối kế toán phản ánh điều gì?,Tình hình tài sản và nguồn vốn tại một thời điểm,Kết quả kinh doanh trong kỳ,Dòng tiền vào ra,Kế hoạch kinh doanh,A,medium
+68,Báo cáo kết quả hoạt động kinh doanh phản ánh điều gì?,"Doanh thu, chi phí và lợi nhuận trong một kỳ",Tài sản tại thời điểm,Số dư tiền mặt,Danh sách khách hàng,A,medium
+68,Nguyên tắc cơ sở dồn tích nghĩa là gì?,"Ghi nhận doanh thu chi phí khi phát sinh, không phụ thuộc thời điểm thu chi tiền",Chỉ ghi khi thu được tiền,Ghi vào cuối năm,Ghi theo giá thị trường,A,hard
+68,Nguyên tắc thận trọng trong kế toán yêu cầu gì?,"Không đánh giá cao hơn giá trị tài sản và thu nhập, không thấp hơn nợ phải trả và chi phí",Ghi nhận mọi khoản lãi dự kiến,Bỏ qua các khoản lỗ nhỏ,Luôn ghi giá trị cao nhất,A,hard
+68,Nguyên tắc phù hợp trong kế toán nghĩa là gì?,Chi phí phải được ghi nhận phù hợp với doanh thu tạo ra trong cùng kỳ,Số liệu phải khớp với ngân hàng,Tài sản phải bằng nguồn vốn,Doanh thu bằng chi phí,A,hard
+68,Khấu hao tài sản cố định là gì?,Phân bổ dần giá trị tài sản cố định vào chi phí trong thời gian sử dụng,Bán tài sản cố định,Sửa chữa tài sản,Mua mới tài sản,A,medium
+68,Phương pháp khấu hao đường thẳng có đặc điểm gì?,Mức khấu hao bằng nhau qua các năm sử dụng,Khấu hao nhanh những năm đầu,Khấu hao theo sản lượng,Không khấu hao,A,medium
+68,Hàng tồn kho bao gồm những gì?,"Nguyên vật liệu, sản phẩm dở dang và thành phẩm",Tiền gửi ngân hàng,Tài sản cố định,Nợ phải thu,A,easy
+68,Phương pháp tính giá xuất kho FIFO nghĩa là gì?,Hàng nhập trước xuất trước,Hàng nhập sau xuất trước,Tính theo giá bình quân,Tính theo giá thị trường,A,medium
+68,Doanh thu được ghi nhận khi nào?,"Khi chuyển giao phần lớn rủi ro và lợi ích, xác định được giá trị",Khi ký hợp đồng,Khi nhận đơn hàng,Khi sản xuất xong,A,hard
+68,Lợi nhuận gộp được tính như thế nào?,Doanh thu thuần trừ giá vốn hàng bán,Doanh thu trừ toàn bộ chi phí,Lợi nhuận sau thuế,Doanh thu cộng thu nhập khác,A,medium
+68,Lợi nhuận sau thuế là gì?,Lợi nhuận trước thuế trừ thuế thu nhập doanh nghiệp,Doanh thu trừ giá vốn,Lợi nhuận gộp,Tổng doanh thu,A,easy
+68,Giá vốn hàng bán phản ánh điều gì?,Chi phí trực tiếp tạo ra sản phẩm đã bán,Chi phí bán hàng và quản lý,Chi phí lãi vay,Thuế phải nộp,A,medium
+68,Chi phí bán hàng gồm những khoản nào?,"Chi phí quảng cáo, vận chuyển, lương nhân viên bán hàng",Chi phí nguyên vật liệu trực tiếp,Lương công nhân sản xuất,Khấu hao nhà xưởng sản xuất,A,medium
+68,Sổ nhật ký chung dùng để làm gì?,Ghi chép các nghiệp vụ kinh tế phát sinh theo trình tự thời gian,Tổng hợp số dư cuối kỳ,Lập báo cáo tài chính,Theo dõi khách hàng,A,medium
+68,Sổ cái dùng để làm gì?,Ghi chép và tổng hợp theo từng tài khoản kế toán,Ghi theo thứ tự thời gian,Lưu hóa đơn chứng từ,Theo dõi tồn kho chi tiết,A,medium

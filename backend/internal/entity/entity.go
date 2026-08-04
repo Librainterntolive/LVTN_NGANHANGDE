@@ -23,6 +23,7 @@ type Subject struct {
 	Name        string    `gorm:"size:150;not null" json:"name"`
 	Level       string    `gorm:"size:50;default:Khác" json:"level"` // Khối 10/11/12, Đại học, Khác
 	Description string    `gorm:"size:255" json:"description"`
+	Hidden      bool      `gorm:"default:false" json:"hidden"` // true = tạm ẩn, không hiện trong danh sách chọn môn
 	CreatedAt   time.Time `json:"created_at"`
 }
 

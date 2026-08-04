@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+64,HTML là ngôn ngữ dùng để làm gì?,Xây dựng cấu trúc nội dung trang web,Định dạng giao diện,Xử lý logic phía máy chủ,Quản lý cơ sở dữ liệu,A,easy
+64,CSS được dùng để làm gì?,Định dạng và trình bày giao diện trang web,Tạo cấu trúc trang,Xử lý sự kiện người dùng,Kết nối cơ sở dữ liệu,A,easy
+64,JavaScript chủ yếu dùng để làm gì?,Tạo tương tác động cho trang web,Định dạng màu sắc,Tạo bảng dữ liệu,Cấu hình máy chủ,A,easy
+64,Thẻ nào dùng để tạo tiêu đề lớn nhất trong HTML?,h1,h6,title,head,A,easy
+64,Thẻ nào dùng để tạo liên kết trong HTML?,a,link,href,url,A,easy
+64,Thuộc tính nào của thẻ a xác định địa chỉ liên kết?,href,src,link,url,A,easy
+64,Thẻ nào dùng để chèn hình ảnh?,img,image,picture,src,A,easy
+64,Thuộc tính alt của thẻ img có tác dụng gì?,Hiển thị văn bản thay thế khi ảnh không tải được,Đặt kích thước ảnh,Đặt viền ảnh,Tạo liên kết cho ảnh,A,medium
+64,Thẻ nào dùng để tạo danh sách không thứ tự?,ul,ol,li,dl,A,easy
+64,Thẻ form trong HTML dùng để làm gì?,Tạo biểu mẫu thu thập dữ liệu từ người dùng,Định dạng văn bản,Chèn video,Tạo bảng,A,easy
+64,Phương thức GET và POST khác nhau ở điểm nào?,"GET gửi dữ liệu qua URL, POST gửi trong thân yêu cầu",POST nhanh hơn GET,GET bảo mật hơn POST,Không có khác biệt,A,medium
+64,"Trong CSS, selector nào chọn phần tử theo id?",Dấu thăng #,Dấu chấm .,Dấu sao *,Dấu hai chấm :,A,easy
+64,"Trong CSS, selector nào chọn phần tử theo class?",Dấu chấm .,Dấu thăng #,Dấu sao *,Dấu gạch dưới _,A,easy
+64,Thuộc tính CSS nào dùng để đổi màu chữ?,color,background-color,font-size,text-align,A,easy
+64,Mô hình hộp (Box Model) trong CSS gồm những thành phần nào?,"Content, padding, border và margin","Header, body, footer","Width, height, color","Top, right, bottom, left",A,medium
+64,Thuộc tính display: flex dùng để làm gì?,Bố trí phần tử theo mô hình flexbox linh hoạt,Ẩn phần tử,Cố định vị trí,Tạo hiệu ứng chuyển động,A,medium
+64,Responsive design nghĩa là gì?,Giao diện tự điều chỉnh phù hợp với nhiều kích thước màn hình,Trang web tải nhanh,Trang có nhiều hiệu ứng,Trang hỗ trợ nhiều ngôn ngữ,A,easy
+64,Media query trong CSS dùng để làm gì?,Áp dụng style theo điều kiện kích thước màn hình hoặc thiết bị,Chèn hình ảnh,Tạo hoạt ảnh,Nhúng video,A,medium
+64,DOM là gì?,Mô hình đối tượng tài liệu biểu diễn cấu trúc trang web,Một ngôn ngữ lập trình,Một giao thức mạng,Một hệ quản trị CSDL,A,medium
+64,Phương thức nào trong JavaScript dùng để lấy phần tử theo id?,document.getElementById(),document.querySelectorAll(),document.createElement(),document.write(),A,easy
+64,Sự kiện onclick trong JavaScript xảy ra khi nào?,Khi người dùng nhấp chuột vào phần tử,Khi trang tải xong,Khi di chuột qua,Khi nhấn phím,A,easy
+64,Từ khóa nào khai báo biến có phạm vi khối trong JavaScript hiện đại?,let,var,function,global,A,medium
+64,Sự khác nhau giữa let và var là gì?,"let có phạm vi khối, var có phạm vi hàm",var mới hơn let,let không gán lại được,Không có khác biệt,A,medium
+64,Từ khóa const trong JavaScript nghĩa là gì?,Khai báo hằng không gán lại giá trị mới,Khai báo biến toàn cục,Khai báo hàm,Khai báo mảng,A,easy
+64,JSON là gì?,Định dạng trao đổi dữ liệu dạng văn bản dựa trên cú pháp đối tượng JavaScript,Một ngôn ngữ lập trình,Một cơ sở dữ liệu,Một giao thức mạng,A,easy
+64,API REST sử dụng phương thức HTTP nào để lấy dữ liệu?,GET,POST,PUT,DELETE,A,easy
+64,Phương thức HTTP nào dùng để tạo mới tài nguyên theo chuẩn REST?,POST,GET,HEAD,OPTIONS,A,easy
+64,Mã trạng thái HTTP 404 nghĩa là gì?,Không tìm thấy tài nguyên,Thành công,Lỗi máy chủ,Không có quyền truy cập,A,easy
+64,Mã trạng thái HTTP 200 nghĩa là gì?,Yêu cầu thành công,Chuyển hướng,Lỗi phía máy khách,Lỗi máy chủ,A,easy
+64,Mã trạng thái HTTP 500 nghĩa là gì?,Lỗi phía máy chủ,Không tìm thấy trang,Thành công,Chưa xác thực,A,easy

@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+53,Dãy số hội tụ là dãy có tính chất gì?,Có giới hạn hữu hạn khi n tiến tới vô cùng,Luôn tăng,Bị chặn trên,Có vô hạn số hạng,A,easy
+53,Dãy số bị chặn và đơn điệu thì có tính chất gì?,Hội tụ,Phân kỳ,Không xác định,Tuần hoàn,A,medium
+53,Giới hạn của dãy 1/n khi n tiến tới vô cùng bằng bao nhiêu?,0,1,Vô cùng,Không tồn tại,A,easy
+53,"Hàm số f(x) liên tục trên đoạn đóng [a,b] thì có tính chất gì?",Đạt giá trị lớn nhất và nhỏ nhất trên đoạn đó,Luôn có đạo hàm,Luôn đơn điệu,Luôn khả tích trên mọi khoảng,A,medium
+53,Định lý giá trị trung gian phát biểu điều gì?,Hàm liên tục nhận mọi giá trị giữa f(a) và f(b),Hàm luôn có cực trị,Đạo hàm luôn tồn tại,Tích phân luôn hội tụ,A,medium
+53,Điểm gián đoạn loại một của hàm số là gì?,Điểm mà giới hạn trái và phải tồn tại hữu hạn nhưng khác nhau hoặc khác giá trị hàm,Điểm hàm số không xác định,Điểm có đạo hàm vô cùng,Điểm cực trị,A,hard
+53,Đạo hàm của hàm hợp f(g(x)) được tính bằng công thức nào?,f'(g(x))·g'(x),f'(x)·g'(x),f'(g'(x)),f(g'(x)),A,medium
+53,Đạo hàm của y = cos(x) là gì?,sin(x),-sin(x),cos(x),-cos(x),B,easy
+53,Đạo hàm của y = tan(x) là gì?,1/cos^2(x),1/sin^2(x),-1/cos^2(x),cot(x),A,medium
+53,Nguyên hàm của cos(x) là gì?,sin(x) + C,-sin(x) + C,cos(x) + C,-cos(x) + C,A,easy
+53,Nguyên hàm của e^x là gì?,e^x + C,x·e^x + C,e^x/x + C,ln(x) + C,A,easy
+53,Tích phân xác định có tính chất nào sau đây?,Đổi cận thì đổi dấu,Luôn dương,Bằng đạo hàm,Không phụ thuộc hàm số,A,medium
+53,Hàm số khả tích Riemann trên đoạn khi nào?,Khi tổng Riemann hội tụ về một giới hạn khi chia nhỏ đoạn,Khi hàm số liên tục tại mọi điểm,Khi hàm số đơn điệu,Khi hàm số có đạo hàm,A,hard
+53,Chuỗi hình học có công bội q hội tụ khi nào?,Khi |q| < 1,Khi |q| > 1,Khi q = 1,Với mọi q,A,medium
+53,Tổng của chuỗi hình học 1 + q + q^2 + ... với |q| < 1 bằng bao nhiêu?,1/(1-q),1/(1+q),q/(1-q),1-q,A,medium
+53,Tiêu chuẩn D'Alembert dùng để xét gì?,Sự hội tụ của chuỗi số dương qua tỷ số hai số hạng liên tiếp,Tính liên tục của hàm,Sự tồn tại đạo hàm,Giá trị tích phân,A,hard
+53,Chuỗi đan dấu hội tụ theo tiêu chuẩn Leibniz khi nào?,Khi dãy trị tuyệt đối giảm và tiến tới 0,Khi các số hạng đều dương,Khi tổng riêng bị chặn,Khi có hữu hạn số hạng,A,hard
+53,Chuỗi lũy thừa có bán kính hội tụ R nghĩa là gì?,Chuỗi hội tụ khi |x| < R và phân kỳ khi |x| > R,Chuỗi luôn hội tụ,Chuỗi hội tụ tại mọi điểm,Chuỗi chỉ hội tụ tại x = R,A,hard
+53,Khai triển Maclaurin là trường hợp riêng của khai triển Taylor tại điểm nào?,x = 0,x = 1,x = -1,x tiến tới vô cùng,A,medium
+53,Khai triển Maclaurin của e^x có dạng nào?,1 + x + x^2/2! + x^3/3! + ...,1 - x + x^2 - x^3 + ...,x - x^3/3! + x^5/5! - ...,1 + x + x^2 + x^3 + ...,A,hard
+53,"Hàm số nhiều biến f(x,y) liên tục tại điểm khi nào?",Khi giới hạn tại điểm đó tồn tại và bằng giá trị hàm,Khi có đạo hàm riêng,Khi bị chặn,Khi đơn điệu theo x,A,medium
+53,"Vi phân toàn phần của hàm z = f(x,y) là gì?",dz = (∂f/∂x)dx + (∂f/∂y)dy,dz = f'(x)dx,dz = (∂f/∂x)(∂f/∂y),dz = dx + dy,A,hard
+53,Cực trị của hàm hai biến được tìm bằng cách nào?,Giải hệ đạo hàm riêng bằng 0 rồi xét ma trận Hess,Chỉ giải đạo hàm riêng theo x,Tính tích phân kép,Tìm hạng ma trận,A,hard
+53,Tích phân kép dùng để tính đại lượng nào?,Thể tích khối trụ cong hoặc diện tích miền phẳng,Độ dài đường cong,Đạo hàm riêng,Giá trị riêng,A,medium
+53,Tích phân đường loại một dùng để tính gì?,Độ dài cung hoặc khối lượng dây cong,Công của lực,Thông lượng qua mặt,Thể tích khối,A,hard
+53,Công thức Green liên hệ giữa loại tích phân nào?,Tích phân đường trên đường cong kín và tích phân kép trên miền phẳng,Tích phân đơn và tích phân kép,Tích phân mặt và tích phân bội ba,Đạo hàm và tích phân,A,hard
+53,Phương trình vi phân tuyến tính cấp một có dạng nào?,y' + p(x)y = q(x),y' = f(x)g(y),y'' + ay' + by = 0,y' = y^2,A,medium
+53,Phương trình vi phân tuyến tính thuần nhất cấp hai hệ số hằng có phương trình đặc trưng dạng nào?,k^2 + ak + b = 0,k + a = 0,k^3 + a = 0,ak + b = 0,A,hard
+53,"Nếu phương trình đặc trưng có hai nghiệm thực phân biệt k1, k2 thì nghiệm tổng quát là gì?",y = C1·e^(k1x) + C2·e^(k2x),y = (C1 + C2x)e^(kx),y = C1·sin(kx) + C2·cos(kx),y = C1x + C2,A,hard
+53,Giới hạn một phía của hàm số là gì?,Giới hạn khi x tiến tới điểm chỉ từ bên trái hoặc bên phải,Giới hạn tại vô cực,Giới hạn của dãy số,Giá trị của hàm tại điểm,A,medium

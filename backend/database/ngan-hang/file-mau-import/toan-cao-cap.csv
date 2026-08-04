@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+51,Đạo hàm của hàm số y = x^3 là gì?,3x^2,x^2,3x,x^4/4,A,easy
+51,Đạo hàm của hàm số y = sin(x) là gì?,cos(x),-cos(x),sin(x),-sin(x),A,easy
+51,Đạo hàm của hàm số y = e^x là gì?,x·e^(x-1),e^x,e^x/x,ln(x),B,easy
+51,Đạo hàm của hàm số y = ln(x) là gì?,1/x,ln(x)/x,x,e^x,A,easy
+51,Nguyên hàm của f(x) = 2x là gì?,x^2 + C,2 + C,x^2/2 + C,2x^2 + C,A,easy
+51,Tích phân của f(x) = 1/x trên miền x > 0 là gì?,ln|x| + C,1/x^2 + C,-1/x^2 + C,x + C,A,easy
+51,Giới hạn của (sin x)/x khi x tiến tới 0 bằng bao nhiêu?,0,1,Vô cùng,Không tồn tại,B,medium
+51,Giới hạn của (1 + 1/n)^n khi n tiến tới vô cùng bằng bao nhiêu?,1,e,0,Vô cùng,B,medium
+51,Hàm số liên tục tại điểm x0 khi nào?,Giới hạn tại x0 tồn tại và bằng giá trị hàm số tại x0,Hàm số có đạo hàm tại x0,Hàm số xác định tại x0,Hàm số đơn điệu quanh x0,A,medium
+51,Nếu hàm số có đạo hàm tại một điểm thì tại đó hàm số có tính chất gì?,Liên tục,Đơn điệu tăng,Đạt cực trị,Có tiệm cận,A,medium
+51,Điều kiện cần để hàm số đạt cực trị tại điểm trong là gì?,Đạo hàm bằng 0 hoặc không tồn tại,Đạo hàm cấp hai dương,Hàm số liên tục,Hàm số bị chặn,A,medium
+51,Nếu f'(x0) = 0 và f''(x0) > 0 thì tại x0 hàm số đạt gì?,Cực tiểu,Cực đại,Điểm uốn,Không có kết luận,A,medium
+51,Đạo hàm của tích u·v được tính theo công thức nào?,u'v + uv',u'v',u'v - uv',(u'v)/v^2,A,easy
+51,Đạo hàm của thương u/v được tính theo công thức nào?,(u'v - uv')/v^2,(u'v + uv')/v^2,u'/v',(uv' - u'v)/v^2,A,medium
+51,Quy tắc L'Hospital dùng để tính giới hạn dạng nào?,Dạng vô định 0/0 hoặc vô cùng trên vô cùng,Mọi loại giới hạn,Chỉ giới hạn tại vô cực,Chỉ giới hạn một phía,A,medium
+51,Khai triển Taylor của hàm số dùng để làm gì?,Xấp xỉ hàm số bằng đa thức quanh một điểm,Tìm nghiệm phương trình,Tính diện tích hình phẳng,Giải hệ phương trình,A,medium
+51,Vi phân của hàm số y = f(x) được ký hiệu và tính như thế nào?,dy = f'(x)dx,dy = f(x)dx,dy = f''(x)dx,dy = dx/f'(x),A,medium
+51,Tích phân xác định từ a đến b của f(x) biểu diễn ý nghĩa hình học gì?,Diện tích hình thang cong giới hạn bởi đồ thị và trục hoành,Độ dài đường cong,Thể tích khối tròn xoay,Hệ số góc tiếp tuyến,A,medium
+51,Công thức Newton - Leibniz phát biểu điều gì?,Tích phân xác định bằng hiệu nguyên hàm tại hai cận,Đạo hàm của tích phân bằng hàm dưới dấu tích phân,Tổng Riemann hội tụ,Tích phân từng phần,A,medium
+51,Phương pháp tích phân từng phần dựa trên công thức nào?,∫udv = uv - ∫vdu,∫udv = uv + ∫vdu,∫uv = ∫u·∫v,∫u/v = ∫u/∫v,A,medium
+51,Hàm số y = x^2 có tính chất gì trên toàn trục số?,Là hàm chẵn,Là hàm lẻ,Không chẵn không lẻ,Vừa chẵn vừa lẻ,A,easy
+51,Hàm số y = x^3 có tính chất gì?,Là hàm chẵn,Là hàm lẻ,Tuần hoàn,Bị chặn,B,easy
+51,Chuỗi số hội tụ khi nào?,Khi dãy tổng riêng có giới hạn hữu hạn,Khi số hạng tổng quát tiến tới 0,Khi có vô hạn số hạng,Khi các số hạng đều dương,A,hard
+51,Chuỗi điều hòa 1 + 1/2 + 1/3 + ... có tính chất gì?,Phân kỳ,Hội tụ về 1,Hội tụ về e,Hội tụ về 2,A,hard
+51,Điều kiện cần để chuỗi hội tụ là gì?,Số hạng tổng quát tiến tới 0,Các số hạng dương,Dãy số tăng,Có hữu hạn số hạng,A,medium
+51,"Đạo hàm riêng của hàm nhiều biến f(x,y) theo x nghĩa là gì?","Đạo hàm theo x, coi y là hằng số",Đạo hàm theo cả hai biến,Tổng các đạo hàm,Tích các đạo hàm,A,medium
+51,Gradient của hàm số nhiều biến là gì?,Vector gồm các đạo hàm riêng,Đạo hàm cấp hai,Một số thực,Ma trận vuông,A,medium
+51,Phương trình vi phân cấp một có dạng tổng quát nào?,"F(x, y, y') = 0","F(x, y) = 0","F(x, y, y'') = 0",y = f(x),A,medium
+51,Nghiệm tổng quát của phương trình vi phân y' = y là gì?,y = Ce^x,y = Cx,y = C + x,y = C/x,A,medium
+51,Phương trình vi phân tách biến có dạng nào?,y' = f(x)·g(y),y' + p(x)y = q(x),y'' + ay' + by = 0,y' = y^2 + x^2,A,medium

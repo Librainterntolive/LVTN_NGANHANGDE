@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+60,Cấu trúc dữ liệu là gì?,Cách tổ chức và lưu trữ dữ liệu để sử dụng hiệu quả,Một ngôn ngữ lập trình,Một loại phần cứng,Một hệ điều hành,A,easy
+60,Độ phức tạp thời gian của thuật toán tìm kiếm tuyến tính là bao nhiêu?,O(n),O(log n),O(1),O(n^2),A,easy
+60,Độ phức tạp thời gian của tìm kiếm nhị phân là bao nhiêu?,O(log n),O(n),O(n log n),O(1),A,medium
+60,Điều kiện để áp dụng tìm kiếm nhị phân là gì?,Dãy phải được sắp xếp,Dãy phải có số chẵn phần tử,Dãy phải là số nguyên,Không có điều kiện,A,easy
+60,Ngăn xếp (Stack) hoạt động theo nguyên tắc nào?,Vào sau ra trước (LIFO),Vào trước ra trước (FIFO),Ưu tiên cao ra trước,Ngẫu nhiên,A,easy
+60,Hàng đợi (Queue) hoạt động theo nguyên tắc nào?,Vào trước ra trước (FIFO),Vào sau ra trước (LIFO),Theo độ ưu tiên,Ngẫu nhiên,A,easy
+60,Thao tác thêm phần tử vào Stack gọi là gì?,Push,Pop,Enqueue,Insert,A,easy
+60,Thao tác lấy phần tử ra khỏi Stack gọi là gì?,Pop,Push,Dequeue,Delete,A,easy
+60,Danh sách liên kết đơn có đặc điểm gì?,Mỗi nút chứa dữ liệu và con trỏ tới nút kế tiếp,Mỗi nút có hai con trỏ,Các phần tử liên tiếp trong bộ nhớ,Kích thước cố định,A,medium
+60,Ưu điểm của danh sách liên kết so với mảng là gì?,"Thêm xóa phần tử linh hoạt, không cần dịch chuyển",Truy cập ngẫu nhiên nhanh hơn,Tốn ít bộ nhớ hơn,Dễ sắp xếp hơn,A,medium
+60,Nhược điểm của danh sách liên kết là gì?,"Không truy cập trực tiếp theo chỉ số, phải duyệt tuần tự",Không thêm được phần tử,Kích thước cố định,Không lưu được số,A,medium
+60,Cây nhị phân là cây mà mỗi nút có tối đa bao nhiêu con?,2,1,3,Không giới hạn,A,easy
+60,Cây nhị phân tìm kiếm (BST) có tính chất gì?,"Nút trái nhỏ hơn nút gốc, nút phải lớn hơn nút gốc",Mọi nút đều bằng nhau,Chỉ có nút trái,Các nút sắp xếp ngẫu nhiên,A,medium
+60,Độ phức tạp tìm kiếm trung bình trên cây nhị phân tìm kiếm cân bằng là bao nhiêu?,O(log n),O(n),O(n^2),O(1),A,medium
+60,Duyệt cây theo thứ tự giữa (inorder) trên BST cho kết quả gì?,Dãy các giá trị tăng dần,Dãy giảm dần,Dãy ngẫu nhiên,Chỉ nút gốc,A,hard
+60,Duyệt cây theo thứ tự trước (preorder) đi theo trình tự nào?,Gốc - trái - phải,Trái - gốc - phải,Trái - phải - gốc,Phải - gốc - trái,A,medium
+60,Duyệt cây theo thứ tự sau (postorder) đi theo trình tự nào?,Trái - phải - gốc,Gốc - trái - phải,Trái - gốc - phải,Phải - trái - gốc,A,medium
+60,Đồ thị gồm những thành phần cơ bản nào?,Đỉnh và cạnh,Nút và lá,Hàng và cột,Khóa và giá trị,A,easy
+60,Thuật toán duyệt đồ thị theo chiều rộng gọi là gì?,BFS,DFS,Dijkstra,Kruskal,A,easy
+60,Thuật toán BFS sử dụng cấu trúc dữ liệu nào?,Hàng đợi,Ngăn xếp,Cây nhị phân,Bảng băm,A,medium
+60,Thuật toán DFS thường sử dụng cấu trúc dữ liệu nào?,Ngăn xếp hoặc đệ quy,Hàng đợi,Danh sách liên kết đôi,Bảng băm,A,medium
+60,Thuật toán Dijkstra dùng để giải bài toán gì?,Tìm đường đi ngắn nhất từ một đỉnh tới các đỉnh khác,Sắp xếp mảng,Tìm cây khung nhỏ nhất,Duyệt đồ thị,A,medium
+60,Thuật toán Kruskal dùng để làm gì?,Tìm cây khung nhỏ nhất của đồ thị,Tìm đường đi ngắn nhất,Sắp xếp dữ liệu,Tìm kiếm nhị phân,A,hard
+60,Độ phức tạp trung bình của thuật toán sắp xếp nhanh (QuickSort) là bao nhiêu?,O(n log n),O(n^2),O(n),O(log n),A,medium
+60,Độ phức tạp xấu nhất của QuickSort là bao nhiêu?,O(n^2),O(n log n),O(n),O(log n),A,hard
+60,Thuật toán sắp xếp nổi bọt (Bubble Sort) có độ phức tạp bao nhiêu?,O(n^2),O(n log n),O(n),O(log n),A,easy
+60,Thuật toán sắp xếp trộn (Merge Sort) có độ phức tạp là gì?,O(n log n) trong mọi trường hợp,O(n^2),O(n),O(log n),A,medium
+60,Thuật toán sắp xếp nào ổn định (stable)?,Merge Sort,Quick Sort,Heap Sort,Selection Sort,A,hard
+60,Bảng băm (Hash Table) cho phép tìm kiếm với độ phức tạp trung bình bao nhiêu?,O(1),O(n),O(log n),O(n log n),A,medium
+60,Xung đột (collision) trong bảng băm là gì?,Hai khóa khác nhau cho cùng một giá trị băm,Bảng băm bị đầy,Khóa bị trùng lặp,Hàm băm bị lỗi,A,medium

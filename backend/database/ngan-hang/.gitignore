@@ -1,0 +1,3 @@
+# File sinh tự động bằng build.py - không commit, chạy lại là có
+out/
+__pycache__/

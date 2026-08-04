@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+67,Kinh tế vĩ mô nghiên cứu đối tượng nào?,Nền kinh tế như một tổng thể,Hành vi của từng doanh nghiệp,Quyết định của người tiêu dùng cá nhân,Cách định giá một sản phẩm,A,easy
+67,GDP là gì?,Tổng giá trị hàng hóa dịch vụ cuối cùng được sản xuất trong lãnh thổ một nước trong một thời kỳ,Tổng thu nhập của người dân một nước ở mọi nơi,Tổng tài sản quốc gia,Tổng ngân sách nhà nước,A,easy
+67,GNP khác GDP ở điểm nào?,"GNP tính theo quyền sở hữu công dân, GDP tính theo lãnh thổ",GNP luôn lớn hơn GDP,Hai chỉ tiêu giống nhau,GDP tính cả nước ngoài,A,medium
+67,GDP danh nghĩa khác GDP thực tế ở điểm nào?,GDP thực tế đã loại trừ ảnh hưởng của biến động giá,GDP danh nghĩa chính xác hơn,Hai chỉ tiêu bằng nhau,GDP thực tế tính theo giá hiện hành,A,medium
+67,GDP bình quân đầu người phản ánh điều gì?,Mức sống trung bình của dân cư một nước,Tổng sản lượng quốc gia,Tỷ lệ thất nghiệp,Mức lạm phát,A,easy
+67,Phương pháp tính GDP theo chi tiêu gồm những thành phần nào?,"Tiêu dùng, đầu tư, chi tiêu chính phủ và xuất khẩu ròng","Lương, lãi, tiền thuê, lợi nhuận","Nông nghiệp, công nghiệp, dịch vụ",Thuế và trợ cấp,A,medium
+67,Xuất khẩu ròng được tính như thế nào?,Xuất khẩu trừ nhập khẩu,Xuất khẩu cộng nhập khẩu,Nhập khẩu trừ xuất khẩu,Tổng kim ngạch thương mại,A,easy
+67,Lạm phát là gì?,Sự tăng lên của mức giá chung trong nền kinh tế,Sự tăng giá của một mặt hàng,Sự giảm sản lượng,Sự tăng thất nghiệp,A,easy
+67,Chỉ số nào thường dùng để đo lạm phát?,Chỉ số giá tiêu dùng CPI,GDP thực tế,Tỷ lệ thất nghiệp,Cán cân thương mại,A,easy
+67,Lạm phát do cầu kéo xảy ra khi nào?,Khi tổng cầu tăng vượt khả năng cung ứng của nền kinh tế,Khi chi phí sản xuất tăng,Khi sản lượng giảm,Khi tiền lương giảm,A,medium
+67,Lạm phát do chi phí đẩy xảy ra khi nào?,"Khi chi phí đầu vào như nguyên liệu, tiền lương tăng",Khi tổng cầu tăng mạnh,Khi cung tiền giảm,Khi xuất khẩu tăng,A,medium
+67,Tác hại của lạm phát cao là gì?,"Làm giảm sức mua đồng tiền, méo mó phân bổ nguồn lực",Tăng thu nhập thực tế,Khuyến khích tiết kiệm,Ổn định kinh tế,A,easy
+67,Giảm phát (deflation) là hiện tượng gì?,Mức giá chung giảm liên tục,Lạm phát giảm tốc,Sản lượng tăng,Thất nghiệp giảm,A,medium
+67,Thất nghiệp được định nghĩa là gì?,"Người trong độ tuổi lao động, có khả năng và mong muốn làm việc nhưng chưa có việc làm",Người không đi làm,Người đã nghỉ hưu,Học sinh sinh viên,A,easy
+67,Thất nghiệp tự nhiên bao gồm loại nào?,Thất nghiệp tạm thời và thất nghiệp cơ cấu,Thất nghiệp chu kỳ,Thất nghiệp do khủng hoảng,Thất nghiệp toàn phần,A,hard
+67,Thất nghiệp chu kỳ xảy ra do nguyên nhân gì?,Suy thoái kinh tế làm tổng cầu giảm,Người lao động chuyển việc,Thay đổi cơ cấu ngành,Công nghệ mới,A,medium
+67,Đường Phillips mô tả mối quan hệ giữa hai yếu tố nào?,Lạm phát và thất nghiệp,GDP và dân số,Lãi suất và tỷ giá,Thuế và chi tiêu,A,hard
+67,Chính sách tài khóa do cơ quan nào thực hiện?,Chính phủ,Ngân hàng trung ương,Doanh nghiệp nhà nước,Tổ chức quốc tế,A,easy
+67,Công cụ của chính sách tài khóa là gì?,Thuế và chi tiêu công,Lãi suất và cung tiền,Tỷ giá hối đoái,Hạn ngạch xuất nhập khẩu,A,easy
+67,Chính sách tài khóa mở rộng gồm biện pháp nào?,Tăng chi tiêu công hoặc giảm thuế,Giảm chi tiêu và tăng thuế,Tăng lãi suất,Giảm cung tiền,A,medium
+67,Chính sách tài khóa mở rộng được áp dụng khi nào?,"Khi nền kinh tế suy thoái, thất nghiệp cao",Khi lạm phát quá cao,Khi kinh tế tăng trưởng nóng,Khi ngân sách bội thu lớn,A,medium
+67,Chính sách tiền tệ do cơ quan nào thực hiện?,Ngân hàng trung ương,Quốc hội,Bộ Tài chính,Doanh nghiệp,A,easy
+67,Công cụ của chính sách tiền tệ gồm những gì?,"Lãi suất, tỷ lệ dự trữ bắt buộc và nghiệp vụ thị trường mở",Thuế và chi tiêu công,Hạn ngạch nhập khẩu,Trợ cấp doanh nghiệp,A,medium
+67,Chính sách tiền tệ thắt chặt có tác dụng gì?,"Giảm cung tiền, kiềm chế lạm phát",Tăng cung tiền kích thích kinh tế,Giảm thuế cho doanh nghiệp,Tăng chi tiêu chính phủ,A,medium
+67,Khi ngân hàng trung ương tăng lãi suất thì điều gì thường xảy ra?,"Đầu tư và tiêu dùng giảm, lạm phát hạ nhiệt",Đầu tư tăng mạnh,Lạm phát tăng,Cung tiền tăng,A,medium
+67,Tỷ lệ dự trữ bắt buộc tăng có tác dụng gì?,Giảm khả năng cho vay của ngân hàng thương mại,Tăng cung tiền,Giảm lãi suất,Tăng lạm phát,A,hard
+67,Cung tiền M1 bao gồm những thành phần nào?,Tiền mặt lưu thông và tiền gửi không kỳ hạn,Chỉ tiền mặt,Toàn bộ tiền gửi tiết kiệm,Trái phiếu chính phủ,A,hard
+67,Tổng cầu (AD) của nền kinh tế gồm những thành phần nào?,"Tiêu dùng, đầu tư, chi tiêu chính phủ và xuất khẩu ròng",Chỉ tiêu dùng hộ gia đình,Sản lượng doanh nghiệp,Cung tiền và lãi suất,A,medium
+67,Đường tổng cầu có độ dốc như thế nào?,Dốc xuống từ trái sang phải,Dốc lên,Nằm ngang,Thẳng đứng,A,medium
+67,Cán cân thương mại thặng dư nghĩa là gì?,Xuất khẩu lớn hơn nhập khẩu,Nhập khẩu lớn hơn xuất khẩu,Ngân sách bội thu,Dự trữ ngoại hối giảm,A,easy

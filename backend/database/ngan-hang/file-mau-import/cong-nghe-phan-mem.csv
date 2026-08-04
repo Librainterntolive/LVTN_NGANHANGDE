@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+65,Công nghệ phần mềm là gì?,Ngành áp dụng phương pháp kỹ thuật có hệ thống vào phát triển và bảo trì phần mềm,Việc viết mã chương trình,Thiết kế phần cứng máy tính,Quản trị mạng,A,easy
+65,Vòng đời phát triển phần mềm gồm những giai đoạn cơ bản nào?,"Phân tích, thiết kế, cài đặt, kiểm thử và bảo trì",Viết mã và chạy thử,Mua và cài đặt,Thiết kế và bán hàng,A,easy
+65,Mô hình thác nước (Waterfall) có đặc điểm gì?,"Các giai đoạn tuần tự, giai đoạn sau bắt đầu khi giai đoạn trước hoàn tất",Lặp đi lặp lại liên tục,Phát triển song song mọi giai đoạn,Không cần tài liệu,A,easy
+65,Nhược điểm chính của mô hình thác nước là gì?,Khó thay đổi yêu cầu khi đã sang giai đoạn sau,Tốn quá nhiều nhân lực,Không có tài liệu,Không kiểm thử được,A,medium
+65,Mô hình Agile nhấn mạnh điều gì?,"Phát triển lặp, thích ứng thay đổi và hợp tác với khách hàng",Tài liệu đầy đủ trước khi lập trình,Kế hoạch cố định không đổi,Bàn giao một lần duy nhất,A,easy
+65,Scrum là gì?,Một khung làm việc thuộc Agile chia công việc thành các Sprint,Một ngôn ngữ lập trình,Một công cụ kiểm thử,Một mô hình cơ sở dữ liệu,A,easy
+65,Sprint trong Scrum thường kéo dài bao lâu?,1 đến 4 tuần,1 ngày,6 tháng,1 năm,A,medium
+65,Vai trò Product Owner trong Scrum có nhiệm vụ gì?,Quản lý và sắp xếp ưu tiên danh sách yêu cầu sản phẩm,Viết mã chương trình,Kiểm thử phần mềm,Quản trị máy chủ,A,medium
+65,Scrum Master có vai trò gì?,Hỗ trợ nhóm tuân thủ Scrum và loại bỏ trở ngại,Quyết định mọi yêu cầu,Trực tiếp lập trình,Ký hợp đồng với khách hàng,A,medium
+65,Daily Standup trong Scrum có mục đích gì?,Đồng bộ tiến độ và phát hiện trở ngại hàng ngày,Báo cáo cho cấp trên,Đánh giá năng lực cá nhân,Lập kế hoạch dài hạn,A,medium
+65,Đặc tả yêu cầu phần mềm (SRS) là gì?,Tài liệu mô tả đầy đủ chức năng và ràng buộc của hệ thống,Mã nguồn chương trình,Kế hoạch kiểm thử,Sổ tay người dùng,A,medium
+65,Yêu cầu chức năng khác yêu cầu phi chức năng ở điểm nào?,"Yêu cầu chức năng mô tả hệ thống làm gì, phi chức năng mô tả làm tốt đến đâu",Không có khác biệt,Phi chức năng quan trọng hơn,Chức năng chỉ có trong Agile,A,medium
+65,Ví dụ nào là yêu cầu phi chức năng?,Hệ thống phải phản hồi dưới 2 giây,Người dùng đăng nhập bằng tài khoản,Hệ thống cho phép tạo đề thi,Giáo viên nhập điểm,A,medium
+65,Biểu đồ Use Case dùng để mô tả gì?,Chức năng hệ thống từ góc nhìn người sử dụng,Cấu trúc lớp đối tượng,Trình tự thời gian của thông điệp,Trạng thái của đối tượng,A,easy
+65,Biểu đồ lớp (Class Diagram) mô tả gì?,Cấu trúc tĩnh gồm các lớp và quan hệ giữa chúng,Luồng công việc,Trình tự tương tác,Trạng thái hệ thống,A,easy
+65,Biểu đồ tuần tự (Sequence Diagram) mô tả gì?,Trình tự trao đổi thông điệp giữa các đối tượng theo thời gian,Cấu trúc dữ liệu,Chức năng người dùng,Kiến trúc triển khai,A,medium
+65,Biểu đồ hoạt động (Activity Diagram) dùng để mô tả gì?,Luồng xử lý và các bước của một quy trình,Quan hệ giữa các lớp,Trạng thái đối tượng,Cấu hình phần cứng,A,medium
+65,UML là gì?,Ngôn ngữ mô hình hóa thống nhất dùng trong phân tích thiết kế phần mềm,Một ngôn ngữ lập trình,Một hệ quản trị CSDL,Một công cụ kiểm thử,A,easy
+65,Kiến trúc ba lớp gồm những tầng nào?,"Trình diễn, nghiệp vụ và dữ liệu","Nhập, xử lý, xuất","Client, server, router","Frontend, backend, database server",A,medium
+65,Mô hình MVC gồm những thành phần nào?,"Model, View, Controller","Module, Version, Class","Method, Variable, Constant","Main, View, Config",A,easy
+65,"Trong MVC, Model có nhiệm vụ gì?",Quản lý dữ liệu và logic nghiệp vụ,Hiển thị giao diện,Điều phối yêu cầu người dùng,Cấu hình máy chủ,A,medium
+65,Nguyên tắc SOLID trong thiết kế hướng đối tượng gồm mấy nguyên tắc?,5,3,4,7,A,medium
+65,Nguyên tắc trách nhiệm đơn (Single Responsibility) nghĩa là gì?,Mỗi lớp chỉ nên có một lý do để thay đổi,Một lớp làm được mọi việc,Lớp phải kế thừa nhiều lớp,Mọi phương thức đều công khai,A,medium
+65,Design Pattern là gì?,Giải pháp mẫu đã được kiểm chứng cho vấn đề thiết kế thường gặp,Mẫu giao diện người dùng,Một loại biểu đồ UML,Quy trình phát triển phần mềm,A,easy
+65,Mẫu Singleton đảm bảo điều gì?,Một lớp chỉ có duy nhất một thể hiện trong toàn hệ thống,Nhiều đối tượng cùng loại,Đối tượng tự động hủy,Kế thừa nhiều tầng,A,medium
+65,Mẫu Factory dùng để làm gì?,Tạo đối tượng mà không cần chỉ rõ lớp cụ thể,Quản lý kết nối CSDL,Đồng bộ luồng,Ghi nhật ký hệ thống,A,medium
+65,Kiểm thử hộp đen (Black-box testing) dựa trên điều gì?,"Chức năng và đầu vào đầu ra, không quan tâm mã nguồn bên trong",Cấu trúc mã nguồn,Sơ đồ luồng điều khiển,Độ phủ câu lệnh,A,medium
+65,Kiểm thử hộp trắng (White-box testing) dựa trên điều gì?,Cấu trúc bên trong của mã nguồn,Chỉ giao diện người dùng,Ý kiến khách hàng,Tài liệu yêu cầu,A,medium
+65,Kiểm thử đơn vị (Unit Test) kiểm tra đối tượng nào?,Từng hàm hoặc thành phần nhỏ nhất một cách độc lập,Toàn bộ hệ thống,Giao diện người dùng,Hiệu năng máy chủ,A,easy
+65,Kiểm thử tích hợp (Integration Test) nhằm mục đích gì?,Kiểm tra sự phối hợp giữa các thành phần đã tích hợp,Kiểm tra từng hàm riêng lẻ,Đo tốc độ phản hồi,Kiểm tra giao diện màu sắc,A,medium

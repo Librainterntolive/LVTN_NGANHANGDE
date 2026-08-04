@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+59,Hàm nào là điểm bắt đầu thực thi của chương trình C?,main(),start(),begin(),init(),A,easy
+59,Câu lệnh nào dùng để in ra màn hình trong C?,printf(),print(),cout,echo,A,easy
+59,Kiểu dữ liệu int trong C thường chiếm bao nhiêu byte?,2 byte,4 byte,8 byte,1 byte,B,easy
+59,Ký tự kết thúc câu lệnh trong C là gì?,Dấu chấm phẩy,Dấu phẩy,Dấu chấm,Dấu hai chấm,A,easy
+59,Toán tử nào dùng để so sánh bằng trong C?,==,=,equals,===,A,easy
+59,Toán tử % trong C có ý nghĩa gì?,Lấy phần dư của phép chia,Tính phần trăm,Chia lấy nguyên,Lũy thừa,A,easy
+59,Vòng lặp nào luôn thực hiện ít nhất một lần?,do-while,while,for,if,A,medium
+59,Từ khóa nào dùng để thoát khỏi vòng lặp?,break,continue,return,exit,A,easy
+59,Từ khóa continue có tác dụng gì?,Bỏ qua phần còn lại của lần lặp hiện tại,Thoát khỏi vòng lặp,Kết thúc chương trình,Quay lại đầu hàm,A,medium
+59,Mảng trong C có chỉ số bắt đầu từ đâu?,0,1,-1,Tùy khai báo,A,easy
+59,Con trỏ trong C lưu trữ cái gì?,Địa chỉ của biến khác,Giá trị của biến,Tên biến,Kiểu dữ liệu,A,medium
+59,Toán tử & trước tên biến có ý nghĩa gì?,Lấy địa chỉ của biến,Lấy giá trị của biến,Phép AND logic,Khai báo con trỏ,A,medium
+59,Toán tử * trước tên con trỏ có ý nghĩa gì?,Lấy giá trị tại địa chỉ con trỏ trỏ tới,Lấy địa chỉ,Phép nhân,Khai báo mảng,A,medium
+59,Hàm malloc() trong C dùng để làm gì?,Cấp phát bộ nhớ động,Giải phóng bộ nhớ,Sao chép chuỗi,So sánh chuỗi,A,medium
+59,Hàm free() dùng để làm gì?,Giải phóng vùng nhớ đã cấp phát động,Cấp phát bộ nhớ,Xóa biến,Đóng tệp,A,medium
+59,Chuỗi trong C kết thúc bằng ký tự nào?,Ký tự null \0,Ký tự xuống dòng,Dấu cách,Dấu chấm phẩy,A,medium
+59,Hàm strlen() trả về giá trị gì?,Độ dài chuỗi không tính ký tự kết thúc,Kích thước bộ nhớ chuỗi,Số từ trong chuỗi,Ký tự đầu tiên,A,medium
+59,Hàm strcpy() dùng để làm gì?,Sao chép chuỗi,So sánh chuỗi,Nối chuỗi,Tìm ký tự,A,easy
+59,Struct trong C dùng để làm gì?,Nhóm nhiều biến khác kiểu thành một kiểu dữ liệu mới,Định nghĩa hàm,Khai báo mảng,Tạo vòng lặp,A,medium
+59,Sự khác nhau cơ bản giữa struct và union là gì?,Union dùng chung một vùng nhớ cho mọi thành viên,Struct không lưu được số,Union không khai báo được,Không có khác biệt,A,hard
+59,Biến cục bộ có phạm vi hoạt động ở đâu?,Trong khối lệnh hoặc hàm khai báo nó,Toàn bộ chương trình,Chỉ trong hàm main,Trong tệp header,A,easy
+59,Từ khóa static khi khai báo biến cục bộ có tác dụng gì?,Biến giữ giá trị giữa các lần gọi hàm,Biến bị xóa sau mỗi lần gọi,Biến trở thành hằng số,Biến chuyển thành con trỏ,A,hard
+59,Từ khóa const có ý nghĩa gì?,Khai báo hằng số không thay đổi giá trị,Khai báo biến toàn cục,Cấp phát động,Khai báo hàm,A,easy
+59,Truyền tham số theo tham chiếu trong C được thực hiện bằng cách nào?,Truyền địa chỉ qua con trỏ,Truyền trực tiếp giá trị,Dùng từ khóa ref,Không thực hiện được,A,medium
+59,Đệ quy là gì?,Hàm tự gọi lại chính nó,Vòng lặp vô hạn,Gọi hàm từ hàm khác,Khai báo hàm nhiều lần,A,easy
+59,Điều kiện bắt buộc để đệ quy không bị lặp vô hạn là gì?,Phải có điều kiện dừng,Phải dùng vòng lặp,Phải khai báo static,Phải có con trỏ,A,medium
+59,Thư viện nào cần include để dùng printf và scanf?,stdio.h,stdlib.h,string.h,math.h,A,easy
+59,Thư viện math.h cung cấp hàm nào?,"sqrt, pow, sin, cos","printf, scanf","malloc, free","strlen, strcpy",A,easy
+59,"Trong C++, từ khóa nào dùng để khai báo lớp?",class,struct only,object,define,A,easy
+59,Tính đóng gói (encapsulation) trong OOP nghĩa là gì?,Che giấu dữ liệu bên trong và chỉ cho truy cập qua phương thức công khai,Kế thừa từ lớp cha,Một hàm nhiều dạng,Tạo nhiều đối tượng,A,medium

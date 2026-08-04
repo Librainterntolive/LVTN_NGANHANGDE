@@ -30,6 +30,7 @@ type SubjectInput struct {
 	Name        string `json:"name" binding:"required"`
 	Level       string `json:"level"`
 	Description string `json:"description"`
+	Hidden      bool   `json:"hidden"` // true = tạm ẩn khỏi danh sách chọn môn
 }
 
 // ===== Question =====

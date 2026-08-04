@@ -14,7 +14,16 @@ func NewSubjectRepository(db *gorm.DB) *SubjectRepository {
 	return &SubjectRepository{db: db}
 }
 
+// FindAll: danh sách môn đang dùng (bỏ qua môn đã tạm ẩn).
 func (r *SubjectRepository) FindAll() ([]entity.Subject, error) {
+	var subjects []entity.Subject
+	err := r.db.Where("hidden = ?", false).Order("id asc").Find(&subjects).Error
+	return subjects, err
+}
+
+// FindAllIncludingHidden: kể cả môn đã ẩn (cho màn hình quản lý môn học,
+// để Admin còn thấy mà bật lại).
+func (r *SubjectRepository) FindAllIncludingHidden() ([]entity.Subject, error) {
 	var subjects []entity.Subject
 	err := r.db.Order("id asc").Find(&subjects).Error
 	return subjects, err

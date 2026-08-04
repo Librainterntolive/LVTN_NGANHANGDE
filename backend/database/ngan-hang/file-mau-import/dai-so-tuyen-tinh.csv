@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+52,Ma trận là gì?,Bảng số hình chữ nhật gồm các phần tử sắp xếp theo hàng và cột,Một hệ phương trình,Một vector đặc biệt,Một hàm số nhiều biến,A,easy
+52,Ma trận vuông là ma trận có đặc điểm gì?,Số hàng bằng số cột,Mọi phần tử bằng nhau,Định thức bằng 0,Chỉ có một hàng,A,easy
+52,Ma trận chuyển vị của A ký hiệu A^T được tạo bằng cách nào?,Đổi hàng thành cột,Nhân với -1,Lấy nghịch đảo,Nhân với ma trận đơn vị,A,easy
+52,Điều kiện để nhân được hai ma trận A và B là gì?,Số cột của A bằng số hàng của B,A và B cùng cỡ,A và B đều vuông,Định thức khác 0,A,medium
+52,Phép nhân ma trận có tính chất nào?,Kết hợp nhưng không giao hoán,Giao hoán,Không kết hợp,Luôn cho ma trận đơn vị,A,medium
+52,Định thức chỉ tính được cho loại ma trận nào?,Ma trận vuông,Mọi ma trận,Ma trận có một hàng,Ma trận không vuông,A,easy
+52,"Định thức ma trận cấp 2 [[a,b],[c,d]] bằng bao nhiêu?",ad - bc,ad + bc,ab - cd,ac - bd,A,easy
+52,Nếu đổi chỗ hai hàng của ma trận thì định thức thay đổi thế nào?,Đổi dấu,Không đổi,Bằng 0,Nhân đôi,A,medium
+52,Nếu ma trận có hai hàng giống nhau thì định thức bằng bao nhiêu?,0,1,Không xác định,Bằng tích các phần tử,A,medium
+52,Ma trận khả nghịch khi nào?,Khi định thức khác 0,Khi định thức bằng 0,Khi là ma trận không,Khi có nhiều hàng hơn cột,A,medium
+52,Ma trận nghịch đảo A^(-1) thỏa mãn điều gì?,A·A^(-1) = I,A·A^(-1) = 0,A + A^(-1) = I,A^(-1) = A^T,A,medium
+52,Hạng của ma trận là gì?,Số hàng độc lập tuyến tính tối đa,Số phần tử khác 0,Số hàng của ma trận,Định thức của ma trận,A,medium
+52,Hệ phương trình tuyến tính có nghiệm duy nhất khi nào (theo Cramer)?,Khi định thức ma trận hệ số khác 0,Khi định thức bằng 0,Khi số ẩn nhiều hơn số phương trình,Khi hệ thuần nhất,A,medium
+52,Hệ phương trình thuần nhất luôn có nghiệm nào?,Nghiệm tầm thường (tất cả bằng 0),Vô nghiệm,Nghiệm duy nhất khác 0,Vô số nghiệm luôn luôn,A,medium
+52,Phương pháp Gauss dùng để làm gì?,Giải hệ phương trình tuyến tính bằng biến đổi sơ cấp,Tính đạo hàm,Tìm giá trị riêng,Tính tích phân,A,easy
+52,Phép biến đổi sơ cấp trên hàng gồm những thao tác nào?,"Đổi chỗ hai hàng, nhân hàng với số khác 0, cộng bội của hàng này vào hàng khác",Chỉ đổi chỗ hai hàng,Chỉ nhân hàng với số,Xóa một hàng bất kỳ,A,medium
+52,Không gian vector là gì?,Tập hợp có phép cộng và nhân vô hướng thỏa mãn các tiên đề nhất định,Tập hợp các ma trận vuông,Tập hợp các số thực,Tập nghiệm của một phương trình,A,medium
+52,Hệ vector độc lập tuyến tính khi nào?,Khi tổ hợp tuyến tính bằng vector không chỉ khi mọi hệ số bằng 0,Khi các vector vuông góc,Khi có cùng độ dài,Khi số vector bằng số chiều,A,hard
+52,Cơ sở của không gian vector là gì?,Hệ vector độc lập tuyến tính và sinh ra toàn bộ không gian,Mọi hệ vector trong không gian,Vector có độ dài bằng 1,Vector không,A,hard
+52,Số chiều của không gian vector bằng gì?,Số vector trong một cơ sở,Số vector bất kỳ,Số phần tử của không gian,Hạng của ma trận đơn vị,A,medium
+52,Tích vô hướng của hai vector bằng 0 nghĩa là gì?,Hai vector vuông góc,Hai vector cùng phương,Hai vector bằng nhau,Một vector bằng không,A,easy
+52,"Độ dài (chuẩn) của vector u = (3, 4) bằng bao nhiêu?",5,7,12,25,A,easy
+52,Giá trị riêng của ma trận A là số λ thỏa mãn điều gì?,Ax = λx với x khác vector không,Ax = 0,A = λI,det(A) = λ,A,hard
+52,Phương trình đặc trưng của ma trận A là gì?,det(A - λI) = 0,det(A) = 0,A - λI = 0,Ax = 0,A,hard
+52,Vector riêng ứng với giá trị riêng λ là gì?,Nghiệm khác không của hệ (A - λI)x = 0,Vector không,Cột của ma trận A,Hàng của ma trận A,A,hard
+52,Ma trận đối xứng có đặc điểm gì?,A = A^T,A = -A^T,A·A^T = 0,det(A) = 1,A,medium
+52,Ma trận tam giác trên có đặc điểm gì?,Các phần tử dưới đường chéo chính bằng 0,Các phần tử trên đường chéo bằng 0,Mọi phần tử bằng 0,Là ma trận đơn vị,A,easy
+52,Định thức của ma trận tam giác bằng gì?,Tích các phần tử trên đường chéo chính,Tổng các phần tử đường chéo,0,1,A,medium
+52,Vết (trace) của ma trận vuông là gì?,Tổng các phần tử trên đường chéo chính,Tích các phần tử đường chéo,Định thức của ma trận,Hạng của ma trận,A,medium
+52,Hai ma trận bằng nhau khi nào?,Cùng cỡ và các phần tử tương ứng bằng nhau,Cùng định thức,Cùng hạng,Cùng vết,A,easy

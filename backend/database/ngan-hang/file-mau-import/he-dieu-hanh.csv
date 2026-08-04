@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+63,Hệ điều hành có chức năng chính nào?,Quản lý tài nguyên và cung cấp môi trường cho ứng dụng chạy,Soạn thảo văn bản,Thiết kế đồ họa,Biên dịch mã nguồn,A,easy
+63,Tiến trình (process) là gì?,Chương trình đang được thực thi,Tệp chương trình trên đĩa,Một dòng lệnh,Một vùng nhớ trống,A,easy
+63,Luồng (thread) khác tiến trình ở điểm nào?,Các luồng trong cùng tiến trình chia sẻ không gian địa chỉ,Luồng chậm hơn tiến trình,Luồng không thực thi được,Không có khác biệt,A,medium
+63,Trạng thái nào không phải trạng thái của tiến trình?,Đã biên dịch,Sẵn sàng (Ready),Đang chạy (Running),Chờ (Waiting),A,medium
+63,Bộ lập lịch CPU có nhiệm vụ gì?,Quyết định tiến trình nào được sử dụng CPU tiếp theo,Cấp phát bộ nhớ,Quản lý tệp tin,Điều khiển thiết bị vào ra,A,easy
+63,Thuật toán lập lịch FCFS hoạt động thế nào?,Tiến trình đến trước được phục vụ trước,Tiến trình ngắn nhất trước,Tiến trình ưu tiên cao trước,Chia đều thời gian,A,easy
+63,Thuật toán lập lịch SJF có ưu điểm gì?,Thời gian chờ trung bình nhỏ nhất,Công bằng nhất,Đơn giản nhất,Phù hợp thời gian thực,A,medium
+63,Thuật toán Round Robin dựa trên nguyên tắc nào?,Mỗi tiến trình được cấp một lượng tử thời gian luân phiên,Tiến trình ngắn chạy trước,Ưu tiên cao chạy trước,Chạy đến khi hoàn thành,A,medium
+63,Hiện tượng đói tài nguyên (starvation) là gì?,Tiến trình chờ mãi không được cấp tài nguyên,Hai tiến trình chờ nhau,Bộ nhớ bị đầy,CPU quá tải,A,medium
+63,Deadlock (bế tắc) xảy ra khi nào?,Các tiến trình chờ nhau giải phóng tài nguyên và không tiến trình nào tiếp tục được,CPU hoạt động 100%,Bộ nhớ bị phân mảnh,Tiến trình bị lỗi,A,medium
+63,Bốn điều kiện cần để xảy ra deadlock gồm gì?,"Loại trừ tương hỗ, giữ và chờ, không trưng dụng, chờ vòng tròn","Đói tài nguyên, phân mảnh, tràn bộ đệm, quá tải","CPU, RAM, đĩa, mạng","Đọc, ghi, xóa, sửa",A,hard
+63,Semaphore dùng để làm gì?,Đồng bộ hóa truy cập tài nguyên chia sẻ giữa các tiến trình,Cấp phát bộ nhớ,Lập lịch CPU,Quản lý tệp tin,A,medium
+63,Vùng găng (critical section) là gì?,Đoạn mã truy cập tài nguyên chia sẻ cần được bảo vệ,Vùng nhớ hệ điều hành,Phần khởi động máy,Vùng đĩa dự phòng,A,medium
+63,Bộ nhớ ảo (virtual memory) có tác dụng gì?,Cho phép chạy chương trình lớn hơn bộ nhớ vật lý thực có,Tăng tốc độ CPU,Giảm dung lượng đĩa,Bảo vệ khỏi virus,A,medium
+63,Phân trang (paging) là kỹ thuật gì?,Chia bộ nhớ thành các khối cố định để quản lý,Chia đĩa thành phân vùng,Nén dữ liệu bộ nhớ,Sao lưu bộ nhớ,A,medium
+63,Lỗi trang (page fault) xảy ra khi nào?,Khi trang cần truy cập không có trong bộ nhớ chính,Khi CPU quá tải,Khi đĩa bị đầy,Khi tiến trình kết thúc,A,medium
+63,Thuật toán thay trang LRU dựa trên nguyên tắc nào?,Thay trang lâu nhất chưa được sử dụng,Thay trang vào trước,Thay trang ngẫu nhiên,Thay trang lớn nhất,A,medium
+63,Hiện tượng thrashing là gì?,Hệ thống dành phần lớn thời gian để hoán chuyển trang thay vì xử lý,CPU chạy quá nhanh,Đĩa cứng bị hỏng,Bộ nhớ bị rò rỉ,A,hard
+63,Phân mảnh ngoài (external fragmentation) là gì?,Bộ nhớ trống bị chia nhỏ rải rác không dùng được cho yêu cầu lớn,Vùng nhớ cấp thừa trong khối,Đĩa bị chia nhiều phân vùng,Tệp bị lưu rải rác,A,hard
+63,Hệ thống tệp tin (file system) có chức năng gì?,"Tổ chức, lưu trữ và quản lý tệp trên thiết bị lưu trữ",Quản lý tiến trình,Lập lịch CPU,Điều khiển mạng,A,easy
+63,NTFS là hệ thống tệp của hệ điều hành nào?,Windows,Linux,macOS,Android,A,easy
+63,Ext4 là hệ thống tệp phổ biến của hệ điều hành nào?,Linux,Windows,macOS,iOS,A,easy
+63,Thư mục gốc trong Linux được ký hiệu là gì?,Dấu gạch chéo /,C:,root:,Dấu chấm .,A,easy
+63,Lệnh nào trong Linux dùng để liệt kê tệp trong thư mục?,ls,dir,list,show,A,easy
+63,Lệnh cd trong Linux dùng để làm gì?,Chuyển thư mục làm việc,Sao chép tệp,Xóa tệp,Tạo thư mục,A,easy
+63,Lệnh nào dùng để tạo thư mục mới trong Linux?,mkdir,touch,rm,cp,A,easy
+63,Lệnh chmod trong Linux dùng để làm gì?,Thay đổi quyền truy cập tệp,Đổi tên tệp,Di chuyển tệp,Nén tệp,A,medium
+63,Quyền 755 trong Linux có ý nghĩa gì?,"Chủ sở hữu đọc ghi thực thi, nhóm và người khác đọc và thực thi",Mọi người có toàn quyền,Chỉ chủ sở hữu đọc được,Không ai có quyền gì,A,hard
+63,Tiến trình nền (background process) trong Linux được chạy bằng ký hiệu nào?,Dấu và (&) ở cuối lệnh,Dấu chấm than,Dấu hai chấm,Dấu sao,A,medium
+63,Kernel là gì?,Phần lõi của hệ điều hành quản lý tài nguyên phần cứng,Giao diện người dùng,Trình biên dịch,Ứng dụng hệ thống,A,easy

@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+42,Vấn đề cơ bản của triết học là gì?,Quan hệ giữa vật chất và ý thức,Quan hệ giữa con người và tự nhiên,Quan hệ giữa cá nhân và xã hội,Quan hệ giữa lý luận và thực tiễn,A,easy
+42,Chủ nghĩa duy vật khẳng định điều gì?,"Ý thức có trước, quyết định vật chất","Vật chất có trước, quyết định ý thức",Vật chất và ý thức cùng có trước,Không thể nhận thức được thế giới,B,easy
+42,"Theo Lênin, vật chất là gì?",Toàn bộ các sự vật có thể nhìn thấy,Phạm trù triết học chỉ thực tại khách quan tồn tại độc lập với ý thức,Tổng hợp các nguyên tử,Năng lượng của vũ trụ,B,medium
+42,Thuộc tính cơ bản nhất của vật chất theo chủ nghĩa duy vật biện chứng là gì?,Có khối lượng,Tồn tại khách quan,Có thể quan sát bằng mắt,Luôn đứng yên,B,medium
+42,Ý thức có nguồn gốc xã hội trực tiếp từ đâu?,Lao động và ngôn ngữ,Bộ não người,Thế giới tự nhiên,Tôn giáo,A,medium
+42,Phép biện chứng duy vật có mấy quy luật cơ bản?,Hai quy luật,Ba quy luật,Bốn quy luật,Sáu quy luật,B,easy
+42,"Quy luật nào chỉ ra nguồn gốc, động lực của sự phát triển?",Quy luật lượng - chất,Quy luật thống nhất và đấu tranh của các mặt đối lập,Quy luật phủ định của phủ định,Quy luật giá trị,B,medium
+42,Quy luật nào chỉ ra cách thức của sự phát triển?,Quy luật lượng đổi dẫn đến chất đổi,Quy luật mâu thuẫn,Quy luật phủ định của phủ định,Quy luật cung cầu,A,medium
+42,Quy luật nào chỉ ra khuynh hướng của sự phát triển?,Quy luật mâu thuẫn,Quy luật lượng - chất,Quy luật phủ định của phủ định,Quy luật bảo toàn năng lượng,C,medium
+42,"Theo phép biện chứng, phát triển diễn ra theo hình thức nào?",Đường thẳng đi lên,Đường xoáy ốc đi lên,Vòng tròn khép kín,Đường thẳng đi xuống,B,medium
+42,Độ trong quy luật lượng - chất là gì?,Giới hạn mà sự thay đổi lượng chưa làm thay đổi chất,Mức độ phát triển cao nhất,Điểm mà chất mới ra đời,Tốc độ biến đổi của sự vật,A,hard
+42,Điểm nút là khái niệm chỉ điều gì?,Điểm giới hạn mà tại đó sự thay đổi lượng làm chất thay đổi,Điểm khởi đầu của sự vật,Điểm kết thúc của quá trình,Trung điểm của quá trình phát triển,A,hard
+42,Bước nhảy là gì?,Sự thay đổi dần dần về lượng,Sự chuyển hóa về chất do thay đổi về lượng gây ra,Sự đứng yên tương đối,Sự lặp lại của cái cũ,B,medium
+42,Mâu thuẫn biện chứng là gì?,Sự xung đột giữa các cá nhân,Sự thống nhất và đấu tranh giữa các mặt đối lập,Sai lầm trong tư duy logic,Sự khác nhau giữa hai sự vật,B,medium
+42,Phủ định biện chứng có đặc điểm cơ bản nào?,Xóa bỏ hoàn toàn cái cũ,Tính khách quan và tính kế thừa,Do ý muốn chủ quan quyết định,Chấm dứt sự phát triển,B,medium
+42,Hai nguyên lý cơ bản của phép biện chứng duy vật là gì?,Nguyên lý về mối liên hệ phổ biến và nguyên lý về sự phát triển,Nguyên lý nhân quả và nguyên lý tất yếu,Nguyên lý vận động và nguyên lý đứng yên,Nguyên lý thực tiễn và nguyên lý nhận thức,A,medium
+42,Cặp phạm trù nào phản ánh quan hệ giữa cái sinh ra và cái được sinh ra?,Nội dung - hình thức,Nguyên nhân - kết quả,Bản chất - hiện tượng,Cái chung - cái riêng,B,easy
+42,Phạm trù nào chỉ cái nhất định phải xảy ra trong điều kiện nhất định?,Ngẫu nhiên,Tất nhiên,Khả năng,Hiện tượng,B,medium
+42,Thực tiễn là gì?,Hoạt động nhận thức của con người,"Hoạt động vật chất có mục đích, mang tính lịch sử - xã hội của con người",Hoạt động tư duy trừu tượng,Hoạt động tôn giáo,B,medium
+42,Vai trò của thực tiễn đối với nhận thức là gì?,"Là cơ sở, động lực, mục đích và tiêu chuẩn của chân lý",Chỉ là kết quả của nhận thức,Không liên quan đến nhận thức,Chỉ kiểm tra nhận thức,A,medium
+42,Con đường biện chứng của nhận thức chân lý đi theo trình tự nào?,Từ tư duy trừu tượng đến trực quan sinh động,Từ trực quan sinh động đến tư duy trừu tượng và đến thực tiễn,Từ thực tiễn đến lý luận rồi dừng lại,Từ lý luận đến lý luận,B,hard
+42,Chân lý theo quan điểm mácxít có tính chất gì?,Chỉ mang tính chủ quan,"Khách quan, cụ thể, tương đối và tuyệt đối",Bất biến và vĩnh cửu,Do số đông quyết định,B,medium
+42,Hình thức nào thuộc giai đoạn nhận thức cảm tính?,Khái niệm,Phán đoán,Tri giác,Suy luận,C,easy
+42,Hình thức nào thuộc giai đoạn nhận thức lý tính?,Cảm giác,Tri giác,Biểu tượng,Khái niệm,D,easy
+42,Tồn tại xã hội quyết định yếu tố nào?,Ý thức xã hội,Điều kiện tự nhiên,Quy luật vật lý,Cấu tạo sinh học của con người,A,medium
+42,Yếu tố nào giữ vai trò quyết định trong tồn tại xã hội?,Điều kiện địa lý,Dân số,Phương thức sản xuất vật chất,Truyền thống văn hóa,C,medium
+42,Lực lượng sản xuất bao gồm những yếu tố nào?,Người lao động và tư liệu sản xuất,Quan hệ sở hữu và quan hệ phân phối,Nhà nước và pháp luật,Đạo đức và tôn giáo,A,medium
+42,"Trong lực lượng sản xuất, yếu tố nào giữ vai trò quyết định nhất?",Công cụ lao động,Người lao động,Đối tượng lao động,Vốn đầu tư,B,hard
+42,Quan hệ sản xuất bao gồm những mặt nào?,"Sở hữu tư liệu sản xuất, tổ chức quản lý và phân phối sản phẩm","Lao động, vốn và công nghệ","Kinh tế, chính trị và văn hóa","Nhà nước, pháp luật và đạo đức",A,medium
+42,Cơ sở hạ tầng trong triết học Mác - Lênin là gì?,"Hệ thống đường sá, cầu cống",Toàn bộ quan hệ sản xuất hợp thành cơ cấu kinh tế của xã hội,Hệ thống chính trị của nhà nước,Nền tảng đạo đức xã hội,B,hard

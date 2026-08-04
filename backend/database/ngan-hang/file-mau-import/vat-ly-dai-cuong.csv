@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+55,Đơn vị đo lực trong hệ SI là gì?,Newton (N),Jun (J),Watt (W),Pascal (Pa),A,easy
+55,Định luật I Newton phát biểu điều gì?,Vật giữ nguyên trạng thái đứng yên hoặc chuyển động thẳng đều nếu không có lực tác dụng,Gia tốc tỷ lệ với lực,Lực và phản lực bằng nhau,Năng lượng được bảo toàn,A,easy
+55,Định luật II Newton có biểu thức nào?,F = ma,F = mv,F = mgh,F = 1/2mv^2,A,easy
+55,Định luật III Newton phát biểu điều gì?,"Lực và phản lực có độ lớn bằng nhau, ngược chiều",Vật luôn chuyển động thẳng đều,Gia tốc tỷ lệ nghịch với khối lượng,Động lượng luôn tăng,A,easy
+55,Công thức tính động năng là gì?,1/2mv^2,mgh,mv,F·s,A,easy
+55,Công thức tính thế năng trọng trường là gì?,mgh,1/2mv^2,mv,F·s,A,easy
+55,Đơn vị đo công và năng lượng trong hệ SI là gì?,Jun (J),Newton (N),Watt (W),Pascal (Pa),A,easy
+55,Công suất được tính bằng công thức nào?,P = A/t,P = F·m,P = mgh,P = mv,A,easy
+55,Đơn vị đo công suất trong hệ SI là gì?,Watt (W),Jun (J),Newton (N),Ampe (A),A,easy
+55,Động lượng của vật được tính bằng công thức nào?,p = mv,p = ma,p = 1/2mv^2,p = mgh,A,easy
+55,Định luật bảo toàn động lượng áp dụng cho hệ nào?,Hệ kín (không có ngoại lực hoặc ngoại lực cân bằng),Mọi hệ vật,Chỉ hệ có ma sát,Chỉ vật rơi tự do,A,medium
+55,Gia tốc rơi tự do trên Trái Đất xấp xỉ bao nhiêu?,"9,8 m/s^2",10 m/s,"9,8 m/s","1,6 m/s^2",A,easy
+55,Chuyển động thẳng đều có đặc điểm gì?,Vận tốc không đổi theo thời gian,Gia tốc không đổi khác 0,Quãng đường tỷ lệ bình phương thời gian,Vận tốc tăng dần,A,easy
+55,"Trong chuyển động thẳng biến đổi đều, công thức nào đúng?",v = v0 + at,v = v0·t,v = at^2,v = v0/t,A,medium
+55,Lực ma sát trượt phụ thuộc vào yếu tố nào?,Áp lực và hệ số ma sát,Diện tích tiếp xúc,Vận tốc chuyển động,Khối lượng riêng,A,medium
+55,Định luật vạn vật hấp dẫn phát biểu lực hấp dẫn tỷ lệ thế nào?,Tỷ lệ thuận với tích hai khối lượng và nghịch với bình phương khoảng cách,Tỷ lệ thuận với khoảng cách,Tỷ lệ nghịch với khối lượng,Không phụ thuộc khoảng cách,A,medium
+55,Chuyển động tròn đều có gia tốc gì?,Gia tốc hướng tâm,Gia tốc bằng 0,Gia tốc tiếp tuyến khác 0,Gia tốc rơi tự do,A,medium
+55,Công thức tính gia tốc hướng tâm là gì?,a = v^2/r,a = v/r,a = vr,a = r/v^2,A,medium
+55,Momen lực được tính bằng công thức nào?,M = F·d,M = F/d,M = F + d,M = F·v,A,medium
+55,Điều kiện cân bằng của vật rắn có trục quay cố định là gì?,Tổng momen lực theo chiều kim đồng hồ bằng tổng momen ngược chiều,Tổng lực bằng 0,Vận tốc bằng 0,Khối lượng phân bố đều,A,medium
+55,Áp suất chất lỏng ở độ sâu h được tính bằng công thức nào?,p = ρgh,p = mgh,p = F/m,p = ρg/h,A,medium
+55,Định luật Ác-si-mét phát biểu điều gì?,Vật nhúng trong chất lỏng chịu lực đẩy bằng trọng lượng phần chất lỏng bị chiếm chỗ,Áp suất truyền đi nguyên vẹn,Chất lỏng chảy nhanh thì áp suất giảm,Nhiệt lượng được bảo toàn,A,easy
+55,Định luật Pascal phát biểu điều gì?,Áp suất tác dụng lên chất lỏng được truyền nguyên vẹn theo mọi hướng,Vật nổi khi khối lượng riêng nhỏ hơn,Lưu lượng không đổi,Nhiệt truyền từ nóng sang lạnh,A,medium
+55,Nguyên lý I nhiệt động lực học phát biểu điều gì?,Độ biến thiên nội năng bằng tổng nhiệt lượng và công nhận được,Nhiệt không tự truyền từ lạnh sang nóng,Entropy luôn tăng,Năng lượng luôn giảm,A,medium
+55,Nguyên lý II nhiệt động lực học phát biểu điều gì?,Nhiệt không thể tự truyền từ vật lạnh sang vật nóng hơn,Năng lượng được bảo toàn,Công bằng nhiệt lượng,Nội năng không đổi,A,medium
+55,Quá trình đẳng nhiệt có đặc điểm gì?,Nhiệt độ không đổi,Áp suất không đổi,Thể tích không đổi,Không trao đổi nhiệt,A,easy
+55,Quá trình đẳng tích có đặc điểm gì?,Thể tích không đổi,Nhiệt độ không đổi,Áp suất không đổi,Nội năng không đổi,A,easy
+55,Định luật Bôi-lơ Ma-ri-ốt áp dụng cho quá trình nào?,Đẳng nhiệt,Đẳng tích,Đẳng áp,Đoạn nhiệt,A,medium
+55,Phương trình trạng thái khí lý tưởng có dạng nào?,pV = nRT,pV = mgh,p = ρgh,pV = 1/2mv^2,A,medium
+55,Điện tích cùng dấu thì tương tác thế nào?,Đẩy nhau,Hút nhau,Không tương tác,Trung hòa nhau,A,easy

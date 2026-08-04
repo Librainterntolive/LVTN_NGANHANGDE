@@ -1,0 +1,31 @@
+﻿subject_id,content,A,B,C,D,correct,difficulty
+61,Cơ sở dữ liệu là gì?,"Tập hợp dữ liệu có tổ chức, lưu trữ và truy xuất theo yêu cầu",Một phần mềm soạn thảo,Một loại phần cứng,Một ngôn ngữ lập trình,A,easy
+61,Hệ quản trị cơ sở dữ liệu (DBMS) có chức năng gì?,"Quản lý việc lưu trữ, truy xuất và bảo mật dữ liệu",Thiết kế giao diện,Biên dịch chương trình,Kết nối mạng,A,easy
+61,Mô hình dữ liệu phổ biến nhất hiện nay là gì?,Mô hình quan hệ,Mô hình phân cấp,Mô hình mạng,Mô hình đối tượng,A,easy
+61,"Trong mô hình quan hệ, bảng còn được gọi là gì?",Quan hệ,Thực thể,Thuộc tính,Miền giá trị,A,medium
+61,Khóa chính (Primary Key) có đặc điểm gì?,Xác định duy nhất mỗi bản ghi và không được rỗng,Có thể trùng lặp,Luôn là kiểu số,Có thể để trống,A,easy
+61,Khóa ngoại (Foreign Key) dùng để làm gì?,Liên kết dữ liệu giữa hai bảng,Xác định duy nhất bản ghi,Tăng tốc truy vấn,Mã hóa dữ liệu,A,easy
+61,Câu lệnh SQL nào dùng để truy vấn dữ liệu?,SELECT,INSERT,UPDATE,DELETE,A,easy
+61,Câu lệnh nào dùng để thêm bản ghi mới?,INSERT INTO,SELECT,UPDATE,ALTER,A,easy
+61,Câu lệnh nào dùng để sửa dữ liệu đã có?,UPDATE,INSERT,SELECT,CREATE,A,easy
+61,Mệnh đề WHERE trong SQL dùng để làm gì?,Lọc bản ghi theo điều kiện,Sắp xếp kết quả,Nhóm dữ liệu,Nối bảng,A,easy
+61,Mệnh đề ORDER BY dùng để làm gì?,Sắp xếp kết quả truy vấn,Lọc dữ liệu,Nhóm dữ liệu,Đếm bản ghi,A,easy
+61,Mệnh đề GROUP BY dùng để làm gì?,Nhóm các bản ghi có cùng giá trị để tính toán tổng hợp,Sắp xếp dữ liệu,Lọc bản ghi,Xóa dữ liệu trùng,A,medium
+61,Mệnh đề HAVING khác WHERE ở điểm nào?,"HAVING lọc sau khi nhóm, WHERE lọc trước khi nhóm",Không có khác biệt,HAVING nhanh hơn,WHERE chỉ dùng với GROUP BY,A,hard
+61,Hàm COUNT() trong SQL trả về gì?,Số lượng bản ghi,Tổng giá trị,Giá trị lớn nhất,Giá trị trung bình,A,easy
+61,Hàm SUM() dùng để làm gì?,Tính tổng các giá trị số,Đếm bản ghi,Tìm giá trị lớn nhất,Nối chuỗi,A,easy
+61,INNER JOIN trả về kết quả gì?,Các bản ghi khớp ở cả hai bảng,Tất cả bản ghi của bảng trái,Tất cả bản ghi của bảng phải,Toàn bộ bản ghi hai bảng,A,medium
+61,LEFT JOIN trả về kết quả gì?,Toàn bộ bản ghi bảng trái và bản ghi khớp ở bảng phải,Chỉ bản ghi khớp,Toàn bộ bảng phải,Bản ghi không khớp,A,medium
+61,Từ khóa DISTINCT dùng để làm gì?,Loại bỏ giá trị trùng lặp trong kết quả,Sắp xếp dữ liệu,Đếm bản ghi,Nhóm dữ liệu,A,easy
+61,Chuẩn hóa cơ sở dữ liệu nhằm mục đích gì?,Giảm dư thừa dữ liệu và tránh bất thường khi cập nhật,Tăng tốc độ truy vấn tuyệt đối,Giảm số bảng,Tăng dung lượng lưu trữ,A,medium
+61,Dạng chuẩn 1NF yêu cầu điều gì?,"Mỗi thuộc tính chỉ chứa giá trị nguyên tố, không lặp nhóm",Không có phụ thuộc bắc cầu,Không có phụ thuộc hàm bộ phận,Mọi thuộc tính đều là khóa,A,medium
+61,Dạng chuẩn 2NF yêu cầu điều gì?,Đạt 1NF và loại bỏ phụ thuộc hàm bộ phận vào khóa chính,Loại bỏ phụ thuộc bắc cầu,Chỉ có một bảng,Không có khóa ngoại,A,hard
+61,Dạng chuẩn 3NF yêu cầu điều gì?,Đạt 2NF và loại bỏ phụ thuộc bắc cầu,Loại bỏ phụ thuộc bộ phận,Mọi thuộc tính là nguyên tố,Không có khóa chính,A,hard
+61,Giao dịch (Transaction) trong CSDL là gì?,Chuỗi thao tác được thực hiện như một đơn vị không thể chia cắt,Một câu truy vấn đơn lẻ,Việc sao lưu dữ liệu,Kết nối tới máy chủ,A,medium
+61,Tính chất ACID gồm những gì?,"Nguyên tử, nhất quán, cô lập và bền vững","Nhanh, chính xác, an toàn, đơn giản","Thêm, sửa, xóa, đọc","Khóa chính, ngoại, duy nhất, tổng hợp",A,medium
+61,Tính nguyên tử (Atomicity) của giao dịch nghĩa là gì?,"Hoặc thực hiện toàn bộ, hoặc không thực hiện gì cả",Dữ liệu luôn đúng ràng buộc,Các giao dịch không ảnh hưởng nhau,Kết quả được lưu vĩnh viễn,A,medium
+61,Lệnh COMMIT có tác dụng gì?,Xác nhận và lưu vĩnh viễn các thay đổi của giao dịch,Hủy bỏ thay đổi,Tạo bảng mới,Sao lưu dữ liệu,A,medium
+61,Lệnh ROLLBACK có tác dụng gì?,"Hủy bỏ các thay đổi, đưa dữ liệu về trạng thái trước giao dịch",Lưu thay đổi,Xóa bảng,Tạo chỉ mục,A,medium
+61,Chỉ mục (Index) trong CSDL có tác dụng gì?,Tăng tốc độ truy vấn tìm kiếm,Giảm dung lượng lưu trữ,Mã hóa dữ liệu,Tạo quan hệ giữa bảng,A,medium
+61,Nhược điểm của việc tạo quá nhiều chỉ mục là gì?,Làm chậm thao tác thêm sửa xóa và tốn dung lượng,Truy vấn chậm hơn,Không lưu được dữ liệu,Mất khóa chính,A,hard
+61,View trong CSDL là gì?,Bảng ảo được tạo từ kết quả truy vấn,Bảng vật lý lưu trên đĩa,Một loại chỉ mục,Một thủ tục lưu trữ,A,medium

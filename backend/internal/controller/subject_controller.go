@@ -17,8 +17,9 @@ func NewSubjectController(svc *service.SubjectService) *SubjectController {
 	return &SubjectController{svc: svc}
 }
 
+// GetAll: ?include_hidden=true để lấy cả môn đã tạm ẩn (màn hình quản lý môn).
 func (ctl *SubjectController) GetAll(c *gin.Context) {
-	data, _ := ctl.svc.GetAll()
+	data, _ := ctl.svc.GetAll(c.Query("include_hidden") == "true")
 	c.JSON(http.StatusOK, data)
 }
 
