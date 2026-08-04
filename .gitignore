@@ -19,3 +19,6 @@ desktop.ini
 
 # File tạm Word (mở file .docx sẽ sinh ra ~$...)
 ~$*.docx
+
+# File sao lưu tự động của draw.io (.$Ten_so_do.drawio.bkp)
+.$*.bkp
