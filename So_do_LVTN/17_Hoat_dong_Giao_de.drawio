@@ -1,25 +1,67 @@
-<mxfile host="app.diagrams.net">
-<diagram id="d1" name="Trang-1">
-<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0"><root>
-<mxCell id="0"/>
-<mxCell id="1" parent="0"/>
-<mxCell id="T" value="Sơ đồ hoạt động — Giao đề cho lớp" style="text;html=1;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="40" y="8" width="760" height="26" as="geometry"/></mxCell>
-<mxCell id="I" value="" style="ellipse;fillColor=#000000;html=1;" vertex="1" parent="1"><mxGeometry x="106.0" y="46.0" width="28" height="28" as="geometry"/></mxCell>
-<mxCell id="A" value="Chọn đề đã phát hành" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" vertex="1" parent="1"><mxGeometry x="20.0" y="145.0" width="200" height="50" as="geometry"/></mxCell>
-<mxCell id="B" value="Chọn lớp cần giao" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" vertex="1" parent="1"><mxGeometry x="25.0" y="265.0" width="190" height="50" as="geometry"/></mxCell>
-<mxCell id="C" value="Đề đã giao cho lớp?" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="40.0" y="373.0" width="160" height="74" as="geometry"/></mxCell>
-<mxCell id="D" value="Tạo bản ghi EXAM_CLASSES" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" vertex="1" parent="1"><mxGeometry x="10.0" y="523.0" width="220" height="54" as="geometry"/></mxCell>
-<mxCell id="F" value="Thông báo đã giao trước đó" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" vertex="1" parent="1"><mxGeometry x="265.0" y="383.0" width="190" height="54" as="geometry"/></mxCell>
-<mxCell id="G" value="SV trong lớp thấy đề được giao" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" vertex="1" parent="1"><mxGeometry x="0.0" y="643.0" width="240" height="54" as="geometry"/></mxCell>
-<mxCell id="Z" value="" style="ellipse;fillColor=none;html=1;shape=endState;" vertex="1" parent="1"><mxGeometry x="104.0" y="764.0" width="32" height="32" as="geometry"/></mxCell>
-<mxCell id="e0" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="I" target="A"><mxGeometry relative="1" as="geometry"/></mxCell>
-<mxCell id="e1" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="A" target="B"><mxGeometry relative="1" as="geometry"/></mxCell>
-<mxCell id="e2" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="B" target="C"><mxGeometry relative="1" as="geometry"/></mxCell>
-<mxCell id="e3" value="Chưa" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="C" target="D"><mxGeometry relative="1" as="geometry"/></mxCell>
-<mxCell id="e4" value="Rồi" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="C" target="F"><mxGeometry relative="1" as="geometry"/></mxCell>
-<mxCell id="e5" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="D" target="G"><mxGeometry relative="1" as="geometry"/></mxCell>
-<mxCell id="e6" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="F" target="G"><mxGeometry relative="1" as="geometry"/></mxCell>
-<mxCell id="e7" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="G" target="Z"><mxGeometry relative="1" as="geometry"/></mxCell>
-</root></mxGraphModel>
-</diagram>
+<mxfile host="Electron">
+  <diagram id="d1" name="Trang-1">
+    <mxGraphModel dx="1398" dy="825" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="T" parent="1" style="text;html=1;fontStyle=1;fontSize=14;" value="Sơ đồ hoạt động — Giao đề cho lớp" vertex="1">
+          <mxGeometry height="26" width="300" x="480" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="I" parent="1" style="ellipse;fillColor=#000000;html=1;" value="" vertex="1">
+          <mxGeometry height="28" width="28" x="606" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="A" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" value="Chọn đề đã phát hành" vertex="1">
+          <mxGeometry height="50" width="200" x="520" y="159" as="geometry" />
+        </mxCell>
+        <mxCell id="B" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" value="Chọn lớp cần giao" vertex="1">
+          <mxGeometry height="50" width="190" x="525" y="279" as="geometry" />
+        </mxCell>
+        <mxCell id="C" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;" value="Đề đã giao cho lớp?" vertex="1">
+          <mxGeometry height="74" width="160" x="540" y="387" as="geometry" />
+        </mxCell>
+        <mxCell id="D" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" value="Tạo bản ghi EXAM_CLASSES" vertex="1">
+          <mxGeometry height="54" width="220" x="510" y="537" as="geometry" />
+        </mxCell>
+        <mxCell id="F" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" value="Thông báo đã giao trước đó" vertex="1">
+          <mxGeometry height="54" width="190" x="765" y="397" as="geometry" />
+        </mxCell>
+        <mxCell id="G" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" value="SV trong lớp thấy đề được giao" vertex="1">
+          <mxGeometry height="54" width="240" x="500" y="657" as="geometry" />
+        </mxCell>
+        <mxCell id="Z" parent="1" style="ellipse;fillColor=none;html=1;shape=endState;" value="" vertex="1">
+          <mxGeometry height="32" width="32" x="604" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" edge="1" parent="1" source="I" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" target="A" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="A" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" target="B" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="B" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" target="C" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="C" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" target="D" value="Chưa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="C" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" target="F" value="Rồi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="D" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" target="G" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="F" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" target="G" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="684" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="G" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="620" y="778" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
 </mxfile>
