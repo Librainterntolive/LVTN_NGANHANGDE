@@ -1,0 +1,20 @@
+<mxfile host="app.diagrams.net">
+<diagram id="d1" name="Trang-1">
+<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0"><root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="T" value="Sơ đồ Use Case — Sổ tay câu sai và luyện tập" style="text;html=1;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="120" y="8" width="760" height="26" as="geometry"/></mxCell>
+<mxCell id="AC" value="Sinh viên" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="60" y="355.0" width="36" height="60" as="geometry"/></mxCell>
+<mxCell id="C" value="SỔ TAY CÂU SAI VÀ LUYỆN TẬP" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="360" y="345.0" width="220" height="80" as="geometry"/></mxCell>
+<mxCell id="ea" value="" style="endArrow=none;html=1;" edge="1" parent="1" source="AC" target="C"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="S0" value="Xem danh sách câu đã làm sai" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="174.5" width="200" height="76" as="geometry"/></mxCell>
+<mxCell id="es0" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1" source="C" target="S0"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="S1" value="Luyện lại các câu sai" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="289.5" width="200" height="76" as="geometry"/></mxCell>
+<mxCell id="es1" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1" source="C" target="S1"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="S2" value="Nộp bài luyện tập" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="404.5" width="200" height="76" as="geometry"/></mxCell>
+<mxCell id="es2" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1" source="C" target="S2"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="S3" value="Xem thống kê học tập cá nhân" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="519.5" width="200" height="76" as="geometry"/></mxCell>
+<mxCell id="es3" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1" source="C" target="S3"><mxGeometry relative="1" as="geometry"/></mxCell>
+</root></mxGraphModel>
+</diagram>
+</mxfile>
