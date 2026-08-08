@@ -2,12 +2,18 @@ package service
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
+	"log"
 	"mime"
 	"net/smtp"
 	"os"
 	"strings"
 )
+
+// ErrEmailNotSent la thong bao duy nhat ma nguoi dung cuoi nhin thay khi he
+// thong khong gui duoc thu. Moi chi tiet ky thuat deu nam trong log.
+var ErrEmailNotSent = errors.New("Hệ thống chưa gửi được email. Hãy thử lại sau ít phút hoặc liên hệ quản trị viên.")
 
 func NewOTP() (string, error) {
 	bytes := make([]byte, 3)
@@ -77,7 +83,8 @@ func sendEmail(to, subject, body string) error {
 	port := os.Getenv("SMTP_PORT")
 	from := os.Getenv("SMTP_FROM")
 	if host == "" || username == "" || password == "" {
-		return fmt.Errorf("SMTP chưa được cấu hình")
+		log.Printf("gửi thư thất bại: chưa cấu hình SMTP_HOST/SMTP_USERNAME/SMTP_PASSWORD")
+		return ErrEmailNotSent
 	}
 	if port == "" {
 		port = "587"
@@ -89,7 +96,14 @@ func sendEmail(to, subject, body string) error {
 	from = sanitizeMailHeader(from)
 	subject = encodeMailSubject(subject)
 	message := []byte("To: " + to + "\r\nFrom: " + from + "\r\nSubject: " + subject + "\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" + body + "\r\n")
-	return smtp.SendMail(host+":"+port, smtp.PlainAuth("", username, password, host), username, []string{to}, message)
+	if err := smtp.SendMail(host+":"+port, smtp.PlainAuth("", username, password, host), username, []string{to}, message); err != nil {
+		// Chi tiet loi cua may chu thu (ma 535, duong dan ho tro cua Google...)
+		// chi ghi vao log cho quan tri vien. Nguoi dung cuoi khong can biet, va
+		// day cung la thong tin ve he thong thu ben trong, khong nen lo ra ngoai.
+		log.Printf("gửi thư tới %s thất bại: %v", to, err)
+		return ErrEmailNotSent
+	}
+	return nil
 }
 
 // encodeMailSubject chuan bi tieu de thu de dat vao header Subject.
