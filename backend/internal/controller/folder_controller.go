@@ -60,12 +60,24 @@ func (ctl *FolderController) Delete(c *gin.Context) {
 }
 
 func (ctl *FolderController) GetExams(c *gin.Context) {
-	data, err := ctl.svc.GetExams(c.Param("id"), getUserID(c))
+	ctl.GetExamsPaged(c)
+}
+
+func (ctl *FolderController) GetExamsPaged(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 15 {
+		limit = 12
+	}
+	items, total, err := ctl.svc.GetExamsPaged(c.Param("id"), getUserID(c), limit, (page-1)*limit)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, gin.H{"items": items, "total": total, "page": page, "limit": limit})
 }
 
 func (ctl *FolderController) AddExam(c *gin.Context) {

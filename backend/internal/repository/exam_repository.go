@@ -26,6 +26,42 @@ func (r *ExamRepository) FindAll(keyword, subjectID string) ([]entity.Exam, erro
 	err := q.Order("id desc").Find(&exams).Error
 	return exams, err
 }
+func (r *ExamRepository) FindPaged(keyword, subjectID string, limit, offset int) ([]entity.Exam, int64, error) {
+	var rows []entity.Exam
+	var total int64
+	q := r.db.Model(&entity.Exam{})
+	if keyword != "" {
+		q = q.Where("title LIKE ?", "%"+keyword+"%")
+	}
+	if subjectID != "" {
+		q = q.Where("subject_id = ?", subjectID)
+	}
+	if err := q.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := q.Order("id desc").Limit(limit).Offset(offset).Find(&rows).Error
+	return rows, total, err
+}
+
+func (r *ExamRepository) FindPagedForOwner(keyword, subjectID string, ownerID uint, isAdmin bool, limit, offset int) ([]entity.Exam, int64, error) {
+	var rows []entity.Exam
+	var total int64
+	query := r.db.Model(&entity.Exam{})
+	if !isAdmin {
+		query = query.Where("created_by = ?", ownerID)
+	}
+	if keyword != "" {
+		query = query.Where("title LIKE ?", "%"+keyword+"%")
+	}
+	if subjectID != "" {
+		query = query.Where("subject_id = ?", subjectID)
+	}
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := query.Order("id desc").Limit(limit).Offset(offset).Find(&rows).Error
+	return rows, total, err
+}
 
 func (r *ExamRepository) FindByID(id string) (*entity.Exam, error) {
 	var exam entity.Exam
@@ -106,16 +142,46 @@ func (r *ExamRepository) CountQuestions(examID uint) int64 {
 // đề đã phát hành (cho mọi người duyệt trong "ngân hàng đề")
 func (r *ExamRepository) FindPublished() ([]entity.Exam, error) {
 	var exams []entity.Exam
-	err := r.db.Where("status = ?", "published").Order("id desc").Find(&exams).Error
+	err := r.publishedPublicQuery().Order("id desc").Find(&exams).Error
 	return exams, err
+}
+
+func (r *ExamRepository) FindPublishedPaged(subjectID, keyword string, limit, offset int) ([]entity.Exam, int64, error) {
+	var exams []entity.Exam
+	query := r.publishedPublicQuery()
+	if subjectID != "" {
+		query = query.Where("subject_id = ?", subjectID)
+	}
+	if keyword != "" {
+		query = query.Where("title LIKE ?", "%"+keyword+"%")
+	}
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := query.Order("id desc").Limit(limit).Offset(offset).Find(&exams).Error
+	return exams, total, err
 }
 
 // đề công khai cho khách dùng thử (published + public)
 func (r *ExamRepository) FindPublic() ([]entity.Exam, error) {
 	var exams []entity.Exam
-	err := r.db.Where("status = ? AND access_type = ?", "published", "public").
+	err := r.publishedPublicQuery().
 		Order("id desc").Find(&exams).Error
 	return exams, err
+}
+func (r *ExamRepository) FindPublicPaged(subjectID string, limit, offset int) ([]entity.Exam, int64, error) {
+	var exams []entity.Exam
+	var total int64
+	query := r.publishedPublicQuery()
+	if subjectID != "" {
+		query = query.Where("subject_id = ?", subjectID)
+	}
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := query.Order("id desc").Limit(limit).Offset(offset).Find(&exams).Error
+	return exams, total, err
 }
 
 // IsAssignedToStudent: sinh viên có thuộc lớp nào được giao đề này không?
@@ -133,7 +199,23 @@ func (r *ExamRepository) IsAssignedToStudent(examID, studentID uint) bool {
 // đề thi sinh viên được phép làm
 func (r *ExamRepository) FindAvailableForStudent(studentID interface{}) ([]entity.Exam, error) {
 	var exams []entity.Exam
-	err := r.db.Where(
+	err := r.availableForStudent(studentID).Order("id desc").Find(&exams).Error
+	return exams, err
+}
+
+func (r *ExamRepository) FindAvailableForStudentPaged(studentID interface{}, limit, offset int) ([]entity.Exam, int64, error) {
+	var exams []entity.Exam
+	query := r.availableForStudent(studentID)
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := query.Order("id desc").Limit(limit).Offset(offset).Find(&exams).Error
+	return exams, total, err
+}
+
+func (r *ExamRepository) availableForStudent(studentID interface{}) *gorm.DB {
+	return r.withVerifiedQuestions(r.db.Model(&entity.Exam{})).Where(
 		"status = ? AND (access_type = ? OR id IN (?))",
 		"published", "public",
 		r.db.Model(&entity.ExamClass{}).Select("exam_id").
@@ -141,6 +223,34 @@ func (r *ExamRepository) FindAvailableForStudent(studentID interface{}) ([]entit
 				r.db.Model(&entity.ClassStudent{}).Select("class_id").
 					Where("student_id = ?", studentID),
 			),
-	).Order("id desc").Find(&exams).Error
-	return exams, err
+	)
+}
+
+func (r *ExamRepository) publishedPublicQuery() *gorm.DB {
+	return r.withVerifiedQuestions(r.db.Model(&entity.Exam{})).Where("status = ? AND access_type = ?", "published", "public")
+}
+
+func (r *ExamRepository) withVerifiedQuestions(query *gorm.DB) *gorm.DB {
+	return query.Where(`EXISTS (SELECT 1 FROM exam_questions eq WHERE eq.exam_id = exams.id)
+AND NOT EXISTS (
+  SELECT 1 FROM exam_questions eq
+  LEFT JOIN questions q ON q.id = eq.question_id
+  LEFT JOIN sources s ON s.id = q.source_id
+  WHERE eq.exam_id = exams.id
+    AND (q.id IS NULL OR q.status <> 'active' OR q.review_status <> 'approved' OR s.id IS NULL OR s.verification_status <> 'verified')
+)`)
+}
+
+func (r *ExamRepository) HasVerifiedQuestionSet(examID uint) bool {
+	var total, invalid int64
+	r.db.Model(&entity.ExamQuestion{}).Where("exam_id = ?", examID).Count(&total)
+	if total == 0 {
+		return false
+	}
+	r.db.Table("exam_questions eq").
+		Joins("LEFT JOIN questions q ON q.id = eq.question_id").
+		Joins("LEFT JOIN sources s ON s.id = q.source_id").
+		Where("eq.exam_id = ? AND (q.id IS NULL OR q.status <> ? OR q.review_status <> ? OR s.id IS NULL OR s.verification_status <> ?)", examID, "active", "approved", "verified").
+		Count(&invalid)
+	return invalid == 0
 }

@@ -1,10 +1,12 @@
 package service
 
 import (
+	cryptorand "crypto/rand"
 	"errors"
-	"math/rand"
+	"fmt"
+	"math/big"
 	"strconv"
-	"time"
+	"strings"
 
 	"quiz-backend/internal/dto"
 	"quiz-backend/internal/entity"
@@ -21,32 +23,35 @@ func NewClassService(repo *repository.ClassRepository, userRepo *repository.User
 }
 
 // sinh mã lớp ngẫu nhiên 6 ký tự (không trùng)
-func (s *ClassService) genCode() string {
+func (s *ClassService) genCode() (string, error) {
 	const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	charsetLength := big.NewInt(int64(len(charset)))
 	for {
 		b := make([]byte, 6)
 		for i := range b {
-			b[i] = charset[r.Intn(len(charset))]
+			index, err := cryptorand.Int(cryptorand.Reader, charsetLength)
+			if err != nil {
+				return "", err
+			}
+			b[i] = charset[index.Int64()]
 		}
 		code := string(b)
 		if !s.repo.CodeExists(code) {
-			return code
+			return code, nil
 		}
 	}
 }
 
-func (s *ClassService) userNameMap() map[uint]string {
-	m := map[uint]string{}
-	users, _ := s.userRepo.FindAll()
-	for _, u := range users {
-		name := u.FullName
-		if name == "" {
-			name = u.Username
-		}
-		m[u.ID] = name
+func (s *ClassService) userNameMap(classes []entity.Class) map[uint]string {
+	creatorIDs := make([]uint, 0, len(classes))
+	for _, classroom := range classes {
+		creatorIDs = append(creatorIDs, classroom.CreatedBy)
 	}
-	return m
+	names, err := s.userRepo.FindNameMap(creatorIDs)
+	if err != nil {
+		return map[uint]string{}
+	}
+	return names
 }
 
 // GetAll: Teacher chỉ thấy lớp của mình, Admin thấy tất cả
@@ -64,12 +69,42 @@ func (s *ClassService) GetAll(role string, userID uint) ([]entity.Class, error) 
 	s.fillInfo(classes)
 	return classes, nil
 }
+func (s *ClassService) GetPaged(role string, userID uint, limit, offset int) ([]entity.Class, int64, error) {
+	rows, total, err := s.repo.FindPaged(userID, role == "Admin", limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	s.fillInfo(rows)
+	return rows, total, nil
+}
+
+func (s *ClassService) GetOne(id string, userID uint, role string) (*entity.Class, error) {
+	class, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, errors.New("khong tim thay lop")
+	}
+	if role == "Student" {
+		if !s.repo.IsStudentIn(class.ID, userID) {
+			return nil, ErrNotOwner
+		}
+	} else if _, err := s.canManageStudents(id, userID, role); err != nil {
+		return nil, err
+	}
+	items := []entity.Class{*class}
+	s.fillInfo(items)
+	*class = items[0]
+	return class, nil
+}
 
 // fillInfo: điền tên GV + số sinh viên + số đề đã giao cho danh sách lớp
 func (s *ClassService) fillInfo(classes []entity.Class) {
-	names := s.userNameMap()
-	studentCounts, _ := s.repo.StudentCounts()
-	examCounts, _ := s.repo.ExamCounts()
+	names := s.userNameMap(classes)
+	classIDs := make([]uint, 0, len(classes))
+	for _, classroom := range classes {
+		classIDs = append(classIDs, classroom.ID)
+	}
+	studentCounts, _ := s.repo.StudentCounts(classIDs)
+	examCounts, _ := s.repo.ExamCounts(classIDs)
 	for i := range classes {
 		classes[i].CreatorName = names[classes[i].CreatedBy]
 		classes[i].StudentCount = studentCounts[classes[i].ID]
@@ -78,16 +113,30 @@ func (s *ClassService) fillInfo(classes []entity.Class) {
 }
 
 // GetExams: đề thi đã giao cho lớp
-func (s *ClassService) GetExams(classID string) ([]entity.Exam, error) {
+func (s *ClassService) GetExams(classID string, userID uint, role string) ([]entity.Exam, error) {
+	if _, err := s.canManageStudents(classID, userID, role); err != nil {
+		return nil, err
+	}
 	return s.repo.FindExams(classID)
 }
 
+func (s *ClassService) GetExamsPaged(classID string, userID uint, role string, limit, offset int) ([]entity.Exam, int64, error) {
+	if _, err := s.canManageStudents(classID, userID, role); err != nil {
+		return nil, 0, err
+	}
+	return s.repo.FindExamsPaged(classID, limit, offset)
+}
+
 func (s *ClassService) Create(in dto.ClassInput, createdBy uint) (*entity.Class, error) {
+	code, err := s.genCode()
+	if err != nil {
+		return nil, err
+	}
 	class := &entity.Class{
 		Name: in.Name, Description: in.Description, IsPublic: in.IsPublic,
-		CreatedBy: createdBy, Code: s.genCode(),
+		CreatedBy: createdBy, Code: code,
 	}
-	err := s.repo.Create(class)
+	err = s.repo.Create(class)
 	return class, err
 }
 
@@ -105,6 +154,23 @@ func (s *ClassService) GetAssignable(role string, userID uint) ([]entity.Class, 
 	}
 	s.fillInfo(classes)
 	return classes, nil
+}
+
+func (s *ClassService) GetAssignablePaged(role string, userID uint, limit, offset int) ([]entity.Class, int64, error) {
+	if role == "Admin" {
+		rows, total, err := s.repo.FindPaged(userID, true, limit, offset)
+		if err != nil {
+			return nil, 0, err
+		}
+		s.fillInfo(rows)
+		return rows, total, nil
+	}
+	rows, total, err := s.repo.FindAssignablePaged(userID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	s.fillInfo(rows)
+	return rows, total, nil
 }
 
 func (s *ClassService) Update(id string, in dto.ClassInput, userID uint, role string) (*entity.Class, error) {
@@ -133,22 +199,29 @@ func (s *ClassService) Delete(id string, userID uint, role string) error {
 	return s.repo.Delete(id)
 }
 
-// canManageStudents: đổi danh sách sinh viên của lớp.
-// Ngoài chủ lớp và Admin, lớp "dùng chung" (IsPublic) cho phép mọi giảng viên
-// thao tác - đúng với ý nghĩa lớp dùng chung đã thiết kế.
 func (s *ClassService) canManageStudents(classID string, userID uint, role string) (*entity.Class, error) {
 	class, err := s.repo.FindByID(classID)
 	if err != nil {
 		return nil, errors.New("khong tim thay lop")
 	}
-	if !canModify(class.CreatedBy, userID, role) && !class.IsPublic {
+	if !canModify(class.CreatedBy, userID, role) {
 		return nil, ErrNotOwner
 	}
 	return class, nil
 }
 
-func (s *ClassService) GetStudents(classID string) ([]entity.User, error) {
+func (s *ClassService) GetStudents(classID string, userID uint, role string) ([]entity.User, error) {
+	if _, err := s.canManageStudents(classID, userID, role); err != nil {
+		return nil, err
+	}
 	return s.repo.FindStudents(classID)
+}
+
+func (s *ClassService) GetStudentsPaged(classID string, userID uint, role string, limit, offset int) ([]entity.User, int64, error) {
+	if _, err := s.canManageStudents(classID, userID, role); err != nil {
+		return nil, 0, err
+	}
+	return s.repo.FindStudentsPaged(classID, limit, offset)
 }
 
 func (s *ClassService) AddStudent(classID string, studentID uint, userID uint, role string) error {
@@ -164,14 +237,39 @@ func (s *ClassService) AddStudent(classID string, studentID uint, userID uint, r
 	if stu.Role != "Student" {
 		return errors.New("chi them duoc tai khoan sinh vien vao lop")
 	}
-	return s.repo.AddStudent(class.ID, studentID)
+	if err := s.repo.AddStudent(class.ID, studentID); err != nil {
+		return err
+	}
+	if stu.Email != nil && *stu.Email != "" {
+		go func(email, className, classCode string) {
+			if err := SendClassJoined(email, className, classCode); err != nil {
+				fmt.Printf("gui email them sinh vien that bai: %v\n", err)
+			}
+		}(*stu.Email, class.Name, class.Code)
+	}
+	return nil
 }
 
 func (s *ClassService) RemoveStudent(classID, studentID string, userID uint, role string) error {
-	if _, err := s.canManageStudents(classID, userID, role); err != nil {
+	class, err := s.canManageStudents(classID, userID, role)
+	if err != nil {
 		return err
 	}
-	return s.repo.RemoveStudent(classID, studentID)
+	student, err := s.userRepo.FindByID(studentID)
+	if err != nil {
+		return errors.New("khong tim thay tai khoan")
+	}
+	if err := s.repo.RemoveStudent(classID, studentID); err != nil {
+		return err
+	}
+	if student.Email != nil && *student.Email != "" {
+		go func(email, className string) {
+			if err := SendClassRemoved(email, className); err != nil {
+				fmt.Printf("gui email xoa sinh vien that bai: %v\n", err)
+			}
+		}(*student.Email, class.Name)
+	}
+	return nil
 }
 
 // SV tự tham gia lớp bằng mã
@@ -186,6 +284,14 @@ func (s *ClassService) JoinByCode(code string, studentID uint) (*entity.Class, e
 	if err := s.repo.AddStudent(class.ID, studentID); err != nil {
 		return nil, err
 	}
+	student, studentErr := s.userRepo.FindByID(strconv.FormatUint(uint64(studentID), 10))
+	if studentErr == nil && student.Email != nil && *student.Email != "" {
+		go func(email, className, classCode string) {
+			if err := SendClassJoined(email, className, classCode); err != nil {
+				fmt.Printf("gui email tham gia lop that bai: %v\n", err)
+			}
+		}(*student.Email, class.Name, class.Code)
+	}
 	return class, nil
 }
 
@@ -195,9 +301,29 @@ func (s *ClassService) GetMyClasses(studentID uint) ([]entity.Class, error) {
 	if err != nil {
 		return nil, err
 	}
-	names := s.userNameMap()
+	names := s.userNameMap(classes)
 	for i := range classes {
 		classes[i].CreatorName = names[classes[i].CreatedBy]
 	}
 	return classes, nil
+}
+
+func (s *ClassService) GetMyClassesPaged(studentID uint, limit, offset int) ([]entity.Class, int64, error) {
+	classes, total, err := s.repo.FindByStudentPaged(studentID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	names := s.userNameMap(classes)
+	for i := range classes {
+		classes[i].CreatorName = names[classes[i].CreatedBy]
+	}
+	return classes, total, nil
+}
+
+func (s *ClassService) SearchStudents(keyword string) ([]entity.User, error) {
+	keyword = strings.TrimSpace(keyword)
+	if len(keyword) < 2 {
+		return []entity.User{}, nil
+	}
+	return s.userRepo.FindStudentsByKeyword(keyword, 8)
 }

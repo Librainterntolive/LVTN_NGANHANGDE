@@ -13,6 +13,21 @@ type LoginInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+type VerifyOTPInput struct {
+	Email string `json:"email" binding:"required,email"`
+	Code  string `json:"code" binding:"required,len=6"`
+}
+type ResendOTPInput struct {
+	Email string `json:"email" binding:"required,email"`
+}
+type ForgotPasswordInput struct {
+	Email string `json:"email" binding:"required,email"`
+	Code  string `json:"code" binding:"required,len=6"`
+}
+type ChangePasswordInput struct {
+	CurrentPassword string `json:"current_password" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=6,max=72"`
+}
 
 // ===== User (Admin quản lý) =====
 type UserInput struct {
@@ -42,13 +57,33 @@ type AnswerInput struct {
 }
 
 type QuestionInput struct {
-	SubjectID    uint          `json:"subject_id" binding:"required"`
-	ChapterID    *uint         `json:"chapter_id"` // null = chưa phân chương
-	Content      string        `json:"content" binding:"required"`
-	QuestionType string        `json:"question_type"`
-	Difficulty   string        `json:"difficulty"`
-	Status       string        `json:"status"` // draft / active
-	Answers      []AnswerInput `json:"answers" binding:"required"`
+	SubjectID       uint          `json:"subject_id" binding:"required"`
+	ChapterID       *uint         `json:"chapter_id"` // null = chưa phân chương
+	Content         string        `json:"content" binding:"required"`
+	QuestionType    string        `json:"question_type"`
+	Difficulty      string        `json:"difficulty"`
+	Status          string        `json:"status"` // draft / active
+	SourceID        *uint         `json:"source_id"`
+	SourceReference string        `json:"source_reference"`
+	SubmitForReview bool          `json:"submit_for_review"`
+	Answers         []AnswerInput `json:"answers" binding:"required"`
+}
+
+// ===== Source (nguồn tài liệu) =====
+type SourceInput struct {
+	Title         string `json:"title" binding:"required"`
+	Publisher     string `json:"publisher"`
+	URL           string `json:"url" binding:"required,url"`
+	PublishedYear string `json:"published_year"`
+	LicenseNote   string `json:"license_note"`
+}
+type SourceReviewInput struct {
+	Status string `json:"status" binding:"required,oneof=verified rejected"`
+}
+
+type ReviewInput struct {
+	Status string `json:"status" binding:"required,oneof=approved rejected"`
+	Note   string `json:"note"`
 }
 
 // ===== Chapter (chương/chủ đề của môn) =====
@@ -73,6 +108,32 @@ type JoinClassInput struct {
 	Code string `json:"code" binding:"required"`
 }
 
+type ClassPostInput struct {
+	Content string `json:"content" binding:"required,max=2000"`
+}
+
+// ===== Assignment =====
+type AssignmentInput struct {
+	ClassID     uint    `json:"class_id" binding:"required"`
+	Title       string  `json:"title" binding:"required,max=200"`
+	Description string  `json:"description"`
+	DueAt       string  `json:"due_at" binding:"required"`
+	LateUntil   string  `json:"late_until"`
+	MaxScore    float64 `json:"max_score"`
+	Status      string  `json:"status"`
+}
+
+type GradeAssignmentInput struct {
+	Score    float64 `json:"score" binding:"required,min=0"`
+	Feedback string  `json:"feedback"`
+}
+
+type StartUploadInput struct {
+	Filename string `json:"filename" binding:"required,max=255"`
+	MimeType string `json:"mime_type" binding:"required,max=120"`
+	Size     int64  `json:"size" binding:"required,min=1"`
+}
+
 // ===== Kho cá nhân (thư mục) =====
 type FolderInput struct {
 	Name     string `json:"name" binding:"required"`
@@ -93,11 +154,11 @@ type NoteInput struct {
 
 // ===== Exam =====
 type ExamInput struct {
-	SubjectID   uint    `json:"subject_id" binding:"required"`
-	Title       string  `json:"title" binding:"required"`
-	Description string  `json:"description"`
-	StartTime   string  `json:"start_time"`
-	EndTime     string  `json:"end_time"`
+	SubjectID      uint    `json:"subject_id" binding:"required"`
+	Title          string  `json:"title" binding:"required"`
+	Description    string  `json:"description"`
+	StartTime      string  `json:"start_time"`
+	EndTime        string  `json:"end_time"`
 	Duration       int     `json:"duration"`
 	PassScore      float64 `json:"pass_score"`
 	Shuffle        bool    `json:"shuffle"`

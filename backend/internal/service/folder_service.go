@@ -76,6 +76,25 @@ func (s *FolderService) GetExams(folderID string, userID uint) ([]repository.Sav
 	return exams, nil
 }
 
+func (s *FolderService) GetExamsPaged(folderID string, userID uint, limit, offset int) ([]repository.SavedExam, int64, error) {
+	f, err := s.repo.FindByID(folderID)
+	if err != nil || f.UserID != userID {
+		return nil, 0, errors.New("khong tim thay thu muc")
+	}
+	exams, total, err := s.repo.FindExamsPaged(f.ID, userID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	stats, _ := s.repo.AttemptStats(userID)
+	for i := range exams {
+		st := stats[exams[i].ExamID]
+		exams[i].AttemptCount = st.Count
+		exams[i].BestScore = st.Best
+		exams[i].LastScore = st.Last
+	}
+	return exams, total, nil
+}
+
 // SavedExamIDs: id đề đã lưu (badge "Đã lưu" ở ngân hàng đề)
 func (s *FolderService) SavedExamIDs(userID uint) ([]uint, error) {
 	return s.repo.SavedExamIDs(userID)

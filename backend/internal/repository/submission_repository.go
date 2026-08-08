@@ -2,6 +2,7 @@ package repository
 
 import (
 	"quiz-backend/internal/entity"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -38,6 +39,21 @@ func (r *SubmissionRepository) FindInProgress(examID, userID uint) *entity.Submi
 	return &s
 }
 
+func (r *SubmissionRepository) FindByIDForUser(id, userID uint) (*entity.Submission, error) {
+	var submission entity.Submission
+	if err := r.db.Where("id = ? AND user_id = ?", id, userID).First(&submission).Error; err != nil {
+		return nil, err
+	}
+	return &submission, nil
+}
+
+// Expire closes an unfinished attempt so it cannot block a later permitted attempt.
+func (r *SubmissionRepository) Expire(id uint, at time.Time) error {
+	return r.db.Model(&entity.Submission{}).
+		Where("id = ? AND status = ?", id, "in_progress").
+		Updates(map[string]interface{}{"status": "expired", "submit_time": at, "total_score": 0, "is_passed": false}).Error
+}
+
 // SubmitTx: lưu bài + toàn bộ chi tiết trong 1 giao dịch.
 // Nếu lỗi giữa chừng thì rollback, không để lại bài chấm dở trong CSDL.
 func (r *SubmissionRepository) SubmitTx(s *entity.Submission, details []entity.SubmissionDetail) error {
@@ -70,15 +86,30 @@ type SubmissionRow struct {
 	TotalScore float64 `json:"total_score"`
 	IsPassed   bool    `json:"is_passed"`
 	SubmitTime string  `json:"submit_time"`
+	Status     string  `json:"status"`
 }
 
 func (r *SubmissionRepository) FindByUser(userID interface{}) ([]SubmissionRow, error) {
 	var rows []SubmissionRow
-	err := r.db.Table("submissions s").
-		Select("s.id, s.exam_id, e.title as exam_title, s.total_score, s.is_passed, s.submit_time").
-		Joins("JOIN exams e ON e.id = s.exam_id").
-		Where("s.user_id = ?", userID).
+	err := r.byUserQuery(userID).
+		Select("s.id, s.exam_id, e.title as exam_title, s.total_score, s.is_passed, s.submit_time, s.status").
 		Order("s.id desc").
 		Scan(&rows).Error
 	return rows, err
+}
+
+func (r *SubmissionRepository) FindByUserPaged(userID interface{}, limit, offset int) ([]SubmissionRow, int64, error) {
+	var rows []SubmissionRow
+	query := r.byUserQuery(userID)
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := query.Select("s.id, s.exam_id, e.title as exam_title, s.total_score, s.is_passed, s.submit_time, s.status").
+		Order("s.id desc").Limit(limit).Offset(offset).Scan(&rows).Error
+	return rows, total, err
+}
+
+func (r *SubmissionRepository) byUserQuery(userID interface{}) *gorm.DB {
+	return r.db.Table("submissions s").Joins("JOIN exams e ON e.id = s.exam_id").Where("s.user_id = ?", userID)
 }

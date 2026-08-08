@@ -13,11 +13,12 @@ import (
 )
 
 type ImportService struct {
-	repo *repository.QuestionRepository
+	repo       *repository.QuestionRepository
+	sourceRepo *repository.SourceRepository
 }
 
-func NewImportService(repo *repository.QuestionRepository) *ImportService {
-	return &ImportService{repo: repo}
+func NewImportService(repo *repository.QuestionRepository, sourceRepo *repository.SourceRepository) *ImportService {
+	return &ImportService{repo: repo, sourceRepo: sourceRepo}
 }
 
 // readRows: đọc toàn bộ dòng từ file CSV hoặc XLSX thành [][]string
@@ -82,6 +83,18 @@ func mapColumns(header []string) map[string]int {
 		}
 	}
 	// cần tối thiểu 3 cột này thì mới coi là map hợp lệ
+	for i, h := range header {
+		switch normHeader(h) {
+		case "source_title", "source":
+			m["source_title"] = i
+		case "source_publisher", "publisher":
+			m["source_publisher"] = i
+		case "source_url", "url", "link":
+			m["source_url"] = i
+		case "source_reference", "reference", "source_ref":
+			m["source_reference"] = i
+		}
+	}
 	if _, ok := m["content"]; !ok {
 		return nil
 	}
@@ -102,8 +115,9 @@ func (s *ImportService) Import(r io.Reader, ext string, createdBy uint, defaultS
 	var ids []uint
 	var subjectIDs []uint
 	seenSubject := map[uint]bool{}
+	seenContent := map[string]bool{}
 
-	rows, err := readRows(r, ext)
+	rows, err := readSafeImportRows(r, ext)
 	if err != nil {
 		return ids, subjectIDs, []string{"Khong doc duoc file: " + err.Error()}
 	}
@@ -169,6 +183,38 @@ func (s *ImportService) Import(r io.Reader, ext string, createdBy uint, defaultS
 			errs = append(errs, "Dong "+strconv.Itoa(lineNo)+": thieu noi dung/dap an/dap an dung")
 			continue
 		}
+		sourceTitle := strings.TrimSpace(get(rec, "source_title", -1))
+		sourceURL := strings.TrimSpace(get(rec, "source_url", -1))
+		sourceRef := strings.TrimSpace(get(rec, "source_reference", -1))
+		if sourceTitle == "" || sourceURL == "" || sourceRef == "" {
+			errs = append(errs, "Dong "+strconv.Itoa(lineNo)+": thieu ten nguon, URL nguon hoac vi tri tham chieu")
+			continue
+		}
+		if !validSourceURL(sourceURL) {
+			errs = append(errs, "Dong "+strconv.Itoa(lineNo)+": URL nguon phai bat dau bang http:// hoac https://")
+			continue
+		}
+		duplicateKey := strconv.Itoa(subjectID) + "\x00" + normalizedQuestionContent(content)
+		if seenContent[duplicateKey] {
+			errs = append(errs, "Dong "+strconv.Itoa(lineNo)+": cau hoi bi trung trong file import")
+			continue
+		}
+		if exists, duplicateErr := s.repo.ContentExists(uint(subjectID), questionContentHash(content), 0); duplicateErr != nil {
+			errs = append(errs, "Dong "+strconv.Itoa(lineNo)+": khong kiem tra duoc cau hoi trung")
+			continue
+		} else if exists {
+			errs = append(errs, "Dong "+strconv.Itoa(lineNo)+": cau hoi trung voi kho cau hoi hien co")
+			continue
+		}
+		seenContent[duplicateKey] = true
+		source, sourceErr := s.sourceRepo.FindOrCreate(&entity.Source{
+			Title: sourceTitle, Publisher: strings.TrimSpace(get(rec, "source_publisher", -1)),
+			URL: sourceURL, VerificationStatus: "pending", CreatedBy: createdBy,
+		})
+		if sourceErr != nil {
+			errs = append(errs, "Dong "+strconv.Itoa(lineNo)+": khong luu duoc nguon")
+			continue
+		}
 
 		// cột tùy chọn: độ khó + chương (chỉ nhận diện qua tên cột)
 		difficulty := parseDifficulty(get(rec, "difficulty", -1))
@@ -180,8 +226,8 @@ func (s *ImportService) Import(r io.Reader, ext string, createdBy uint, defaultS
 
 		q := &entity.Question{
 			SubjectID: uint(subjectID), ChapterID: chapterID, CreatedBy: createdBy,
-			Content: content, QuestionType: "single", Difficulty: difficulty,
-			Status: "active", Answers: answers,
+			Content: content, ContentHash: questionContentHash(content), QuestionType: "single", Difficulty: difficulty,
+			Status: "draft", ReviewStatus: "pending", SourceID: &source.ID, SourceRef: sourceRef, Answers: answers,
 		}
 		if err := s.repo.Create(q); err != nil {
 			errs = append(errs, "Dong "+strconv.Itoa(lineNo)+": loi luu DB")
@@ -202,16 +248,16 @@ func (s *ImportService) GenerateTemplate() ([]byte, error) {
 	defer f.Close()
 	sheet := f.GetSheetName(0)
 
-	headers := []string{"subject_id", "content", "A", "B", "C", "D", "correct", "difficulty", "chapter_id"}
+	headers := []string{"subject_id", "content", "A", "B", "C", "D", "correct", "difficulty", "chapter_id", "source_title", "source_publisher", "source_url", "source_reference"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		f.SetCellValue(sheet, cell, h)
 	}
-	example := []interface{}{1, "Thủ đô Việt Nam là?", "Hà Nội", "Huế", "Đà Nẵng", "Cần Thơ", "A", "easy", ""}
-	for i, v := range example {
-		cell, _ := excelize.CoordinatesToCellName(i+1, 2)
-		f.SetCellValue(sheet, cell, v)
-	}
+	guide, _ := f.NewSheet("Huong_dan")
+	f.SetCellValue("Huong_dan", "A1", "Khong co du lieu mau. Chi import cau hoi co nguon kiem chung.")
+	f.SetCellValue("Huong_dan", "A2", "Bat buoc: source_title, source_url, source_reference (chuong/trang/dieu/muc).")
+	f.SetCellValue("Huong_dan", "A3", "Cau hoi import se o trang thai Cho duyet; Admin duyet truoc khi dua vao de thi.")
+	f.SetActiveSheet(guide)
 
 	buf, err := f.WriteToBuffer()
 	if err != nil {

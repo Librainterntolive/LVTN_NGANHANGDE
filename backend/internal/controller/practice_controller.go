@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"quiz-backend/internal/dto"
 	"quiz-backend/internal/service"
@@ -19,12 +20,24 @@ func NewPracticeController(svc *service.PracticeService) *PracticeController {
 
 // Notebook: GET /practice/wrong-questions - sổ tay câu sai
 func (ctl *PracticeController) Notebook(c *gin.Context) {
-	data, err := ctl.svc.GetNotebook(getUserID(c))
+	ctl.NotebookPaged(c)
+}
+
+func (ctl *PracticeController) NotebookPaged(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 15 {
+		limit = 12
+	}
+	items, total, err := ctl.svc.GetNotebookPaged(getUserID(c), limit, (page-1)*limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, gin.H{"items": items, "total": total, "page": page, "limit": limit})
 }
 
 // Take: GET /practice/wrong-questions/take - bộ câu để luyện lại (ẩn đáp án đúng)

@@ -26,6 +26,25 @@ func (s *SubjectService) GetAll(includeHidden bool) ([]entity.Subject, error) {
 	return s.repo.FindAll()
 }
 
+func normalizeSubjectPaging(page, limit int) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 12
+	}
+	if limit > 15 {
+		limit = 15
+	}
+	return page, limit
+}
+
+func (s *SubjectService) GetPaged(includeHidden bool, level, keyword string, page, limit int) ([]entity.Subject, int64, int, int, error) {
+	page, limit = normalizeSubjectPaging(page, limit)
+	items, total, err := s.repo.FindPaged(includeHidden, level, keyword, limit, (page-1)*limit)
+	return items, total, page, limit, err
+}
+
 func (s *SubjectService) GetByID(id string) (*entity.Subject, error) {
 	return s.repo.FindByID(id)
 }

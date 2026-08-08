@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"quiz-backend/internal/dto"
 	"quiz-backend/internal/service"
@@ -18,8 +19,17 @@ func NewSubmissionController(svc *service.SubmissionService) *SubmissionControll
 }
 
 func (ctl *SubmissionController) GetMyExams(c *gin.Context) {
-	data, _ := ctl.svc.GetMyExams(getUserID(c))
-	c.JSON(http.StatusOK, data)
+	ctl.GetMyExamsPaged(c)
+}
+
+func (ctl *SubmissionController) GetMyExamsPaged(c *gin.Context) {
+	page, limit := pagination(c)
+	items, total, err := ctl.svc.GetMyExamsPaged(getUserID(c), limit, (page-1)*limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items, "total": total, "page": page, "limit": limit})
 }
 
 func (ctl *SubmissionController) Take(c *gin.Context) {
@@ -36,6 +46,9 @@ func (ctl *SubmissionController) Take(c *gin.Context) {
 	if session != nil {
 		res["submission_id"] = session.SubmissionID
 		res["remaining_seconds"] = session.RemainingSeconds
+	} else {
+		res["is_guest_trial"] = true
+		res["question_limit"] = 20
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -55,6 +68,41 @@ func (ctl *SubmissionController) Submit(c *gin.Context) {
 }
 
 func (ctl *SubmissionController) GetMySubmissions(c *gin.Context) {
-	data, _ := ctl.svc.GetMySubmissions(getUserID(c))
-	c.JSON(http.StatusOK, data)
+	ctl.GetMySubmissionsPaged(c)
+}
+
+func (ctl *SubmissionController) GetMySubmissionsPaged(c *gin.Context) {
+	page, limit := pagination(c)
+	items, total, err := ctl.svc.GetMySubmissionsPaged(getUserID(c), limit, (page-1)*limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items, "total": total, "page": page, "limit": limit})
+}
+
+func (ctl *SubmissionController) GetResult(c *gin.Context) {
+	submissionID, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil || submissionID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ma bai lam khong hop le"})
+		return
+	}
+	result, err := ctl.svc.GetSubmissionResult(uint(submissionID), getUserID(c))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+func pagination(c *gin.Context) (int, int) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 15 {
+		limit = 12
+	}
+	return page, limit
 }

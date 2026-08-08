@@ -18,7 +18,7 @@ func NewImportController(svc *service.ImportService) *ImportController {
 	return &ImportController{svc: svc}
 }
 
-const maxImportSize = 50 << 20 // 50 MB
+const maxImportSize = 20 << 20 // 20 MB
 
 func (ctl *ImportController) Import(c *gin.Context) {
 	fileHeader, err := c.FormFile("file")
@@ -27,9 +27,9 @@ func (ctl *ImportController) Import(c *gin.Context) {
 		return
 	}
 
-	// chốt chặn 1: dung lượng tối đa 50MB
+	// chốt chặn 1: dung lượng tối đa 20MB
 	if fileHeader.Size > maxImportSize {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File qua lon (toi da 50MB)"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File qua lon (toi da 20MB)"})
 		return
 	}
 

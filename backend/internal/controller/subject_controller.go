@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"quiz-backend/internal/dto"
 	"quiz-backend/internal/service"
@@ -19,8 +20,24 @@ func NewSubjectController(svc *service.SubjectService) *SubjectController {
 
 // GetAll: ?include_hidden=true để lấy cả môn đã tạm ẩn (màn hình quản lý môn).
 func (ctl *SubjectController) GetAll(c *gin.Context) {
-	data, _ := ctl.svc.GetAll(c.Query("include_hidden") == "true")
-	c.JSON(http.StatusOK, data)
+	ctl.GetPaged(c)
+}
+
+func (ctl *SubjectController) GetPaged(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "12"))
+	items, total, normalizedPage, normalizedLimit, err := ctl.svc.GetPaged(
+		false,
+		c.DefaultQuery("level", "Đại học"),
+		c.Query("keyword"),
+		page,
+		limit,
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items, "total": total, "page": normalizedPage, "limit": normalizedLimit})
 }
 
 func (ctl *SubjectController) GetByID(c *gin.Context) {

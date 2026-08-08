@@ -11,19 +11,23 @@ import (
 )
 
 type ExamService struct {
-	repo  *repository.ExamRepository
-	qRepo *repository.QuestionRepository
+	repo      *repository.ExamRepository
+	qRepo     *repository.QuestionRepository
+	classRepo *repository.ClassRepository
 }
 
-func NewExamService(repo *repository.ExamRepository, qRepo *repository.QuestionRepository) *ExamService {
-	return &ExamService{repo: repo, qRepo: qRepo}
+func NewExamService(repo *repository.ExamRepository, qRepo *repository.QuestionRepository, classRepo *repository.ClassRepository) *ExamService {
+	return &ExamService{repo: repo, qRepo: qRepo, classRepo: classRepo}
 }
 
 // Preview: trả đề + đầy đủ câu hỏi kèm đáp án (cho GV xem lại, có hiện đáp án đúng)
-func (s *ExamService) Preview(idStr string) (*entity.Exam, []entity.Question, error) {
+func (s *ExamService) Preview(idStr string, userID uint, role string) (*entity.Exam, []entity.Question, error) {
 	exam, err := s.repo.FindByID(idStr)
 	if err != nil {
 		return nil, nil, err
+	}
+	if !canModify(exam.CreatedBy, userID, role) {
+		return nil, nil, ErrNotOwner
 	}
 	qids := s.repo.GetQuestionIDs(exam.ID)
 	questions, _ := s.qRepo.FindByIDs(qids)
@@ -55,13 +59,20 @@ func parseTime(s string) time.Time {
 	return time.Time{}
 }
 
-func (s *ExamService) GetAll(keyword, subjectID string) ([]entity.Exam, error) {
-	return s.repo.FindAll(keyword, subjectID)
+func (s *ExamService) GetAll(keyword, subjectID string, userID uint, role string) ([]entity.Exam, error) {
+	items, _, err := s.repo.FindPagedForOwner(keyword, subjectID, userID, role == "Admin", 1000, 0)
+	return items, err
+}
+func (s *ExamService) GetPaged(keyword, subjectID string, userID uint, role string, limit, offset int) ([]entity.Exam, int64, error) {
+	return s.repo.FindPagedForOwner(keyword, subjectID, userID, role == "Admin", limit, offset)
 }
 
 // đề công khai cho khách dùng thử
 func (s *ExamService) GetPublic() ([]entity.Exam, error) {
 	return s.repo.FindPublic()
+}
+func (s *ExamService) GetPublicPaged(subjectID string, limit, offset int) ([]entity.Exam, int64, error) {
+	return s.repo.FindPublicPaged(subjectID, limit, offset)
 }
 
 // đề đã phát hành cho "ngân hàng đề" (mọi người đăng nhập đều xem được)
@@ -69,26 +80,36 @@ func (s *ExamService) GetBank() ([]entity.Exam, error) {
 	return s.repo.FindPublished()
 }
 
+func (s *ExamService) GetBankPaged(subjectID, keyword string, limit, offset int) ([]entity.Exam, int64, error) {
+	return s.repo.FindPublishedPaged(subjectID, keyword, limit, offset)
+}
+
 // GetDetail: trả đề + danh sách câu hỏi + lớp (cho màn hình sửa)
-func (s *ExamService) GetDetail(id string) (*entity.Exam, []uint, []uint, error) {
+func (s *ExamService) GetDetail(id string, userID uint, role string) (*entity.Exam, []uint, []uint, error) {
 	exam, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, nil, nil, err
 	}
+	if !canModify(exam.CreatedBy, userID, role) {
+		return nil, nil, nil, ErrNotOwner
+	}
 	return exam, s.repo.GetQuestionIDs(exam.ID), s.repo.GetClassIDs(exam.ID), nil
 }
 
-func (s *ExamService) Create(in dto.ExamInput, createdBy uint) (*entity.Exam, error) {
-	if n := s.qRepo.CountDraft(in.QuestionIDs); n > 0 {
-		return nil, errors.New("de thi chua cau hoi o trang thai Nhap - hay chuyen sang Chinh thuc truoc")
+func (s *ExamService) Create(in dto.ExamInput, createdBy uint, role string) (*entity.Exam, error) {
+	if n := s.qRepo.CountNotApproved(in.QuestionIDs); n > 0 {
+		return nil, errors.New("de thi chua cau hoi chua duoc duyet hoac thieu nguon")
+	}
+	if err := s.validateClassAssignments(in.ClassIDs, createdBy, role); err != nil {
+		return nil, err
 	}
 	exam := &entity.Exam{
-		SubjectID:   in.SubjectID,
-		CreatedBy:   createdBy,
-		Title:       in.Title,
-		Description: in.Description,
-		StartTime:   parseTime(in.StartTime),
-		EndTime:     parseTime(in.EndTime),
+		SubjectID:      in.SubjectID,
+		CreatedBy:      createdBy,
+		Title:          in.Title,
+		Description:    in.Description,
+		StartTime:      parseTime(in.StartTime),
+		EndTime:        parseTime(in.EndTime),
 		Duration:       in.Duration,
 		PassScore:      in.PassScore,
 		Shuffle:        in.Shuffle,
@@ -107,8 +128,8 @@ func (s *ExamService) Create(in dto.ExamInput, createdBy uint) (*entity.Exam, er
 }
 
 func (s *ExamService) Update(id string, in dto.ExamInput, userID uint, role string) (*entity.Exam, error) {
-	if n := s.qRepo.CountDraft(in.QuestionIDs); n > 0 {
-		return nil, errors.New("de thi chua cau hoi o trang thai Nhap - hay chuyen sang Chinh thuc truoc")
+	if n := s.qRepo.CountNotApproved(in.QuestionIDs); n > 0 {
+		return nil, errors.New("de thi chua cau hoi chua duoc duyet hoac thieu nguon")
 	}
 	exam, err := s.repo.FindByID(id)
 	if err != nil {
@@ -116,6 +137,11 @@ func (s *ExamService) Update(id string, in dto.ExamInput, userID uint, role stri
 	}
 	if !canModify(exam.CreatedBy, userID, role) {
 		return nil, ErrNotOwner
+	}
+	if in.ClassIDs != nil {
+		if err := s.validateClassAssignments(in.ClassIDs, userID, role); err != nil {
+			return nil, err
+		}
 	}
 	exam.SubjectID = in.SubjectID
 	exam.Title = in.Title
@@ -147,7 +173,7 @@ func (s *ExamService) Update(id string, in dto.ExamInput, userID uint, role stri
 
 // Generate: sinh đề tự động theo ma trận (chương × độ khó × số câu).
 // Bốc ngẫu nhiên câu CHÍNH THỨC trong ngân hàng; thiếu câu ở dòng nào thì báo rõ dòng đó.
-func (s *ExamService) Generate(in dto.GenerateExamInput, createdBy uint) (*entity.Exam, int, error) {
+func (s *ExamService) Generate(in dto.GenerateExamInput, createdBy uint, role string) (*entity.Exam, int, error) {
 	var qids []uint
 	for i, rule := range in.Rules {
 		if rule.Count <= 0 {
@@ -167,7 +193,7 @@ func (s *ExamService) Generate(in dto.GenerateExamInput, createdBy uint) (*entit
 		return nil, 0, errors.New("ma tran chua co dong nao hop le (so cau > 0)")
 	}
 	in.ExamInput.QuestionIDs = qids
-	exam, err := s.Create(in.ExamInput, createdBy)
+	exam, err := s.Create(in.ExamInput, createdBy, role)
 	return exam, len(qids), err
 }
 
@@ -177,6 +203,9 @@ func (s *ExamService) Clone(id string, userID uint) (*entity.Exam, error) {
 	src, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, errors.New("khong tim thay de goc")
+	}
+	if src.CreatedBy != userID && (src.Status != "published" || src.AccessType != "public" || !s.repo.HasVerifiedQuestionSet(src.ID)) {
+		return nil, ErrNotOwner
 	}
 	clone := &entity.Exam{
 		SubjectID:      src.SubjectID,
@@ -210,11 +239,27 @@ func (s *ExamService) Delete(id string, userID uint, role string) error {
 	return s.repo.Delete(id)
 }
 
-// lấy danh sách id câu hỏi của 1 đề (để gộp khi tạo đề mới)
-func (s *ExamService) GetQuestionIDs(examID string) []uint {
-	exam, err := s.repo.FindByID(examID)
-	if err != nil {
+func (s *ExamService) validateClassAssignments(classIDs []uint, userID uint, role string) error {
+	if role == "Admin" {
 		return nil
 	}
-	return s.repo.GetQuestionIDs(exam.ID)
+	for _, classID := range classIDs {
+		classroom, err := s.classRepo.FindByID(strconv.FormatUint(uint64(classID), 10))
+		if err != nil || (classroom.CreatedBy != userID && !classroom.IsPublic) {
+			return ErrNotOwner
+		}
+	}
+	return nil
+}
+
+// lấy danh sách id câu hỏi của 1 đề (để gộp khi tạo đề mới)
+func (s *ExamService) GetReusableQuestionIDs(examID string, userID uint, role string) ([]uint, error) {
+	exam, err := s.repo.FindByID(examID)
+	if err != nil {
+		return nil, errors.New("khong tim thay de thi")
+	}
+	if !canModify(exam.CreatedBy, userID, role) && (exam.Status != "published" || exam.AccessType != "public" || !s.repo.HasVerifiedQuestionSet(exam.ID)) {
+		return nil, ErrNotOwner
+	}
+	return s.repo.GetQuestionIDs(exam.ID), nil
 }

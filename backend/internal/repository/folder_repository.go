@@ -45,7 +45,7 @@ func (r *FolderRepository) Delete(id uint) error {
 
 // ----- Đề trong thư mục -----
 type SavedExam struct {
-	ID         uint   `json:"id"`          // id bản ghi folder_exam
+	ID         uint   `json:"id"` // id bản ghi folder_exam
 	ExamID     uint   `json:"exam_id"`
 	Title      string `json:"title"`
 	SubjectID  uint   `json:"subject_id"`
@@ -67,6 +67,18 @@ func (r *FolderRepository) FindExams(folderID, userID uint) ([]SavedExam, error)
 		Where("fe.folder_id = ? AND fe.user_id = ?", folderID, userID).
 		Order("fe.id desc").Scan(&rows).Error
 	return rows, err
+}
+
+func (r *FolderRepository) FindExamsPaged(folderID, userID uint, limit, offset int) ([]SavedExam, int64, error) {
+	var rows []SavedExam
+	query := r.db.Table("folder_exams fe").Where("fe.folder_id = ? AND fe.user_id = ?", folderID, userID)
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := query.Select("fe.id, fe.exam_id, fe.note, e.title, e.subject_id, e.status, e.access_type, e.duration").
+		Joins("JOIN exams e ON e.id = fe.exam_id").Order("fe.id desc").Limit(limit).Offset(offset).Scan(&rows).Error
+	return rows, total, err
 }
 
 // ExamAttemptStat: tiến độ làm 1 đề của 1 người dùng

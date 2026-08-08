@@ -29,6 +29,27 @@ func (r *SubjectRepository) FindAllIncludingHidden() ([]entity.Subject, error) {
 	return subjects, err
 }
 
+func (r *SubjectRepository) FindPaged(includeHidden bool, level, keyword string, limit, offset int) ([]entity.Subject, int64, error) {
+	query := r.db.Model(&entity.Subject{})
+	if !includeHidden {
+		query = query.Where("hidden = ?", false)
+	}
+	if level != "" {
+		query = query.Where("level = ?", level)
+	}
+	if keyword != "" {
+		query = query.Where("name LIKE ? OR description LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	var subjects []entity.Subject
+	err := query.Order("name asc, id asc").Limit(limit).Offset(offset).Find(&subjects).Error
+	return subjects, total, err
+}
+
 func (r *SubjectRepository) FindByID(id string) (*entity.Subject, error) {
 	var subject entity.Subject
 	err := r.db.First(&subject, id).Error

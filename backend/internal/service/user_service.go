@@ -21,6 +21,9 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 func (s *UserService) GetAll() ([]entity.User, error) {
 	return s.repo.FindAll()
 }
+func (s *UserService) GetPaged(keyword string, limit, offset int) ([]entity.User, int64, error) {
+	return s.repo.FindPaged(keyword, limit, offset)
+}
 
 func (s *UserService) Create(in dto.UserInput) (*entity.User, error) {
 	if in.Password == "" {
