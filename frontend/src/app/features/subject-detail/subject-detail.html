@@ -1,73 +1,123 @@
-<a routerLink="/subjects" style="font-size:14px;">← Quay lại danh sách môn</a>
+<a routerLink="/subjects" class="back-link">← Danh sách học phần</a>
 
 @if (subject(); as s) {
-  <div style="background:linear-gradient(110deg,var(--accent),var(--accent-2)); color:#fff; border-radius:12px; padding:22px 26px; margin:12px 0 18px;">
-    <h2 style="color:#fff; margin:0;">📘 {{ s.name }}</h2>
-    <p style="margin:6px 0 0; color:var(--accent-soft);">{{ s.level }} @if (s.description) { · {{ s.description }} }</p>
-  </div>
+  <section class="subject-hero">
+    <div>
+      <span class="hero-kicker">HỌC PHẦN ĐẠI HỌC</span>
+      <h2>{{ s.name }}</h2>
+      <p>{{ s.description || 'Khám phá đề thi và tài nguyên đã được phân quyền cho học phần này.' }}</p>
+    </div>
+    <span class="level-badge">{{ s.level }}</span>
+  </section>
 }
 
-<!-- Tab -->
-<div style="margin-bottom:14px;">
-  <span class="chip" [class.active]="tab() === 'exams'" (click)="tab.set('exams')">📝 Đề thi ({{ exams().length }})</span>
+<section class="subject-tabs" aria-label="Nội dung học phần">
+  <button type="button" [class.active]="tab() === 'exams'" (click)="selectTab('exams')">
+    Đề thi <span>{{ examTotal() }}</span>
+  </button>
   @if (isStaff()) {
-    <span class="chip" [class.active]="tab() === 'questions'" (click)="tab.set('questions')">❓ Câu hỏi ({{ qTotal() }})</span>
+    <button type="button" [class.active]="tab() === 'questions'" (click)="selectTab('questions')">
+      Ngân hàng câu hỏi <span>{{ qTotal() }}</span>
+    </button>
   }
-</div>
+</section>
 
-<!-- ===== Tab Đề thi ===== -->
 @if (tab() === 'exams') {
-  <div style="display:flex; flex-wrap:wrap; gap:16px;">
-    @for (e of exams(); track e.id) {
-      <div class="dcard fade-in">
-        <h3 style="margin:0 0 4px; color:var(--accent);">📝 {{ e.title }}</h3>
-        <p style="color:var(--text-3); font-size:13px; margin:0 0 8px;">
-          ⏱ {{ e.duration }} phút · {{ e.status }} · {{ e.access_type }}
-        </p>
-        @if (e.status === 'published') {
-          <a [routerLink]="['/take', e.id]" class="btn-soft-primary" style="display:inline-block;">Vào làm</a>
+  <section class="section-heading">
+    <div><h3>Đề thi hiện có</h3><p>Chỉ hiển thị đề đã phát hành và bạn có quyền truy cập.</p></div>
+    <span>{{ exams().length }} / {{ examTotal() }} đề</span>
+  </section>
+
+  <div class="exam-grid">
+    @for (exam of exams(); track exam.id) {
+      <article class="exam-card fade-in">
+        <div class="exam-card-top">
+          <span class="exam-icon">📝</span>
+          <span class="access-chip">{{ exam.access_type === 'public' ? 'Công khai' : 'Theo lớp' }}</span>
+        </div>
+        <h3>{{ exam.title }}</h3>
+        <p class="exam-description">{{ exam.description || 'Đề thi trắc nghiệm thuộc học phần này.' }}</p>
+        <div class="exam-meta"><span>⏱ {{ exam.duration || 0 }} phút</span><span>•</span><span>{{ exam.status === 'published' ? 'Đang mở' : 'Chưa phát hành' }}</span></div>
+        @if (exam.status === 'published') {
+          <a [routerLink]="['/take', exam.id]" class="exam-action">Vào làm bài <span>→</span></a>
         } @else {
-          <span style="font-size:12px; color:var(--text-3);">(chưa phát hành)</span>
+          <span class="exam-closed">Đề chưa được phát hành</span>
         }
-      </div>
+      </article>
     } @empty {
-      <p style="color:var(--text-3);">Chưa có đề thi nào cho môn này.</p>
+      @if (!examLoading()) { <div class="empty-state"><b>Chưa có đề thi phù hợp.</b><span>Đề sẽ xuất hiện ở đây khi giảng viên phát hành.</span></div> }
     }
   </div>
+  @if (examLoading()) { <div class="loader"></div> }
+  @if (hasMoreExams() && !examLoading()) {
+    <div appInfiniteScroll (scrolled)="loadMoreExams()" class="load-trigger"></div>
+    <div class="load-more"><button type="button" class="btn-outline" (click)="loadMoreExams()">Tải thêm đề thi</button></div>
+  }
 }
 
-<!-- ===== Tab Câu hỏi (staff, lazy-load) ===== -->
 @if (tab() === 'questions' && isStaff()) {
-  <div class="q-grid">
-    @for (q of questions(); track q.id) {
-      <div class="dcard fade-in">
-        <p style="font-weight:600; margin:0 0 6px;">{{ q.content }}
-          <span style="color:var(--text-3); font-size:12px; font-weight:normal;">({{ q.difficulty }})</span>
-        </p>
-        <ul style="margin:0; padding-left:18px;">
-          @for (a of q.answers; track a.id) {
-            <li [style.color]="a.is_correct ? '#2e7d32' : 'var(--text-2)'" [style.fontWeight]="a.is_correct ? '600' : 'normal'">
-              {{ a.label }}. {{ a.content }} @if (a.is_correct) { ✔ }
-            </li>
+  <section class="section-heading">
+    <div><h3>Ngân hàng câu hỏi</h3><p>Câu hỏi hiển thị theo từng đợt để giữ màn hình thao tác nhanh.</p></div>
+    <span>{{ questions().length }} / {{ qTotal() }} câu</span>
+  </section>
+  <div class="question-grid">
+    @for (question of questions(); track question.id) {
+      <article class="question-card fade-in">
+        <div class="question-heading"><span>Câu hỏi</span><small>{{ question.difficulty }}</small></div>
+        <p class="question-content">{{ question.content }}</p>
+        <ol type="A">
+          @for (answer of question.answers; track answer.id) {
+            <li [class.correct]="answer.is_correct">{{ answer.content }}</li>
           }
-        </ul>
-        <p style="font-size:12px; color:var(--text-3); margin:8px 0 0;">👤 {{ q.creator_name || 'N/A' }}</p>
-      </div>
+        </ol>
+        <footer>Người tạo: {{ question.creator_name || 'Không xác định' }}</footer>
+      </article>
     } @empty {
-      @if (!qLoading()) { <p style="color:var(--text-3);">Chưa có câu hỏi nào cho môn này.</p> }
+      @if (!qLoading()) { <div class="empty-state"><b>Chưa có câu hỏi cho học phần này.</b></div> }
     }
   </div>
   @if (qLoading()) { <div class="loader"></div> }
-  @if (qHasMore() && !qLoading()) {
-    <div appInfiniteScroll (scrolled)="loadMoreQuestions()" style="height:1px;"></div>
-  }
+  @if (qHasMore() && !qLoading()) { <div appInfiniteScroll (scrolled)="loadMoreQuestions()" class="load-trigger"></div> }
 }
 
 <style>
-  .q-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
-  .dcard {
-    background:var(--surface); border-radius:10px; padding:16px; min-width:240px;
-    box-shadow:0 2px 8px rgba(0,0,0,.07); transition:transform .15s, box-shadow .15s;
-  }
-  .dcard:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
+  .back-link { display:inline-flex; gap:6px; align-items:center; margin-bottom:14px; font-size:14px; font-weight:600; }
+  .subject-hero { display:flex; justify-content:space-between; gap:24px; align-items:flex-start; padding:28px 30px; border-radius:20px; color:#fff; background:linear-gradient(115deg, var(--accent), var(--accent-2)); box-shadow:0 14px 28px rgba(54, 80, 184, .22); }
+  .hero-kicker { display:block; margin-bottom:8px; font-size:11px; font-weight:800; letter-spacing:1.4px; opacity:.84; }
+  .subject-hero h2 { margin:0; color:#fff; font-size:28px; }
+  .subject-hero p { max-width:650px; margin:8px 0 0; opacity:.9; }
+  .level-badge { padding:7px 12px; border:1px solid rgba(255,255,255,.38); border-radius:999px; font-size:13px; font-weight:700; white-space:nowrap; }
+  .subject-tabs { display:flex; gap:8px; margin:20px 0; padding-bottom:10px; border-bottom:1px solid var(--border); }
+  .subject-tabs button { background:transparent; color:var(--text-2); border-radius:9px; font-weight:700; }
+  .subject-tabs button:hover { background:var(--accent-soft); color:var(--accent); }
+  .subject-tabs button.active { background:var(--accent-soft); color:var(--accent); }
+  .subject-tabs span { margin-left:6px; padding:1px 7px; border-radius:999px; background:var(--surface); font-size:12px; }
+  .section-heading { display:flex; justify-content:space-between; gap:16px; align-items:flex-end; margin:0 0 14px; }
+  .section-heading h3 { margin:0; font-size:18px; }
+  .section-heading p { margin:4px 0 0; color:var(--text-3); font-size:13px; }
+  .section-heading > span { color:var(--text-3); font-size:13px; white-space:nowrap; }
+  .exam-grid, .question-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr)); gap:16px; }
+  .exam-card, .question-card { display:flex; flex-direction:column; min-width:0; padding:18px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+  .exam-card:hover, .question-card:hover { transform:translateY(-3px); border-color:color-mix(in srgb, var(--accent) 32%, var(--border)); box-shadow:var(--shadow-lg); }
+  .exam-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .exam-icon { display:grid; place-items:center; width:38px; height:38px; border-radius:12px; background:var(--accent-soft); font-size:19px; }
+  .access-chip { padding:4px 8px; border-radius:999px; background:var(--surface-2); color:var(--text-3); font-size:11px; font-weight:700; }
+  .exam-card h3 { margin:0; color:var(--text); font-size:16px; line-height:1.45; }
+  .exam-description { min-height:40px; margin:8px 0 16px; color:var(--text-3); font-size:13px; }
+  .exam-meta { display:flex; gap:7px; align-items:center; margin-top:auto; color:var(--text-2); font-size:12px; }
+  .exam-action { display:flex; justify-content:space-between; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); font-weight:800; text-decoration:none; }
+  .exam-action span { font-size:18px; line-height:14px; }
+  .exam-closed { display:block; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); color:var(--text-3); font-size:13px; }
+  .question-heading { display:flex; justify-content:space-between; align-items:center; color:var(--accent); font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:.4px; }
+  .question-heading small { padding:3px 7px; border-radius:999px; background:var(--surface-2); color:var(--text-3); text-transform:none; letter-spacing:0; }
+  .question-content { margin:12px 0 10px; font-weight:700; line-height:1.5; }
+  .question-card ol { margin:0; padding-left:25px; color:var(--text-2); font-size:13px; }
+  .question-card li { padding:2px 0; }
+  .question-card li.correct { color:#27814a; font-weight:700; }
+  .question-card footer { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); color:var(--text-3); font-size:12px; }
+  .empty-state { grid-column:1 / -1; display:flex; flex-direction:column; gap:5px; padding:32px; border:1px dashed var(--border); border-radius:16px; text-align:center; color:var(--text-3); background:var(--surface); }
+  .empty-state b { color:var(--text-2); }
+  .load-trigger { height:1px; margin-top:18px; }
+  .load-more { display:flex; justify-content:center; margin:18px 0; }
+  @media (max-width:600px) { .subject-hero { padding:22px; border-radius:16px; flex-direction:column; gap:14px; } .subject-hero h2 { font-size:23px; } .section-heading { align-items:flex-start; flex-direction:column; } }
 </style>

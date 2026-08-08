@@ -1,47 +1,25 @@
-<div class="auth-card">
-  <h2 style="margin:0 0 4px;">Đăng ký</h2>
-  <p style="color:var(--text-3); font-size:13px; margin:0 0 18px;">
-    Tài khoản đăng ký tại đây là tài khoản <b>Sinh viên</b>.
-  </p>
-
-  @if (ok()) {
-    <p class="auth-ok" role="status">✅ Đăng ký thành công! Đang chuyển sang trang đăng nhập...</p>
-  }
-  @if (error()) {
-    <p class="auth-error" role="alert">⛔ {{ error() }}</p>
-  }
-
-  <form (ngSubmit)="submit()">
-    <div class="fld">
-      <label for="rg-user">Tên đăng nhập <span class="req">*</span></label>
-      <input id="rg-user" name="username" [(ngModel)]="form.username" autocomplete="username"
-             placeholder="VD: sv02" [disabled]="loading() || ok()" />
-    </div>
-
-    <div class="fld">
-      <label for="rg-name">Họ tên <span class="req">*</span></label>
-      <input id="rg-name" name="full_name" [(ngModel)]="form.full_name" autocomplete="name"
-             placeholder="VD: Nguyễn Văn A" [disabled]="loading() || ok()" />
-    </div>
-
-    <div class="fld">
-      <label for="rg-mail">Email <small style="color:var(--text-3);">(không bắt buộc)</small></label>
-      <input id="rg-mail" name="email" type="email" [(ngModel)]="form.email" autocomplete="email"
-             placeholder="VD: sv02@truong.edu.vn" [disabled]="loading() || ok()" />
-    </div>
-
-    <div class="fld">
-      <label for="rg-pass">Mật khẩu <span class="req">*</span></label>
-      <input id="rg-pass" name="password" type="password" [(ngModel)]="form.password"
-             autocomplete="new-password" placeholder="Ít nhất 6 ký tự" [disabled]="loading() || ok()" />
-    </div>
-
-    <button type="submit" class="auth-btn" [disabled]="loading() || ok()">
-      {{ loading() ? 'Đang đăng ký...' : 'Đăng ký' }}
-    </button>
-  </form>
-
-  <p style="margin:16px 0 0; font-size:14px; text-align:center;">
-    Đã có tài khoản? <a routerLink="/login">Đăng nhập</a>
-  </p>
-</div>
+@if (verifying()) {
+  <section class="auth-card otp-card">
+    <p class="eyebrow">BƯỚC CUỐI</p><h2>Xác minh email</h2>
+    <p>Chúng tôi đã gửi mã OTP 6 số đến <b>{{ form.email }}</b>. Mã có hiệu lực trong 10 phút.</p>
+    @if (error()) { <p class="auth-error">{{ error() }}</p> }
+    @if (message()) { <p class="auth-ok">{{ message() }}</p> }
+    <input [(ngModel)]="otp" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="Nhập 6 số" />
+    <button class="auth-btn" (click)="verify()" [disabled]="verifyLoading() || resendLoading()">{{ verifyLoading() ? 'Đang xác minh…' : 'Xác minh tài khoản' }}</button><button class="btn-outline" style="width:100%;margin-top:8px" (click)="resend()" [disabled]="verifyLoading() || resendLoading()">{{ resendLoading() ? 'Đang gửi lại…' : 'Gửi lại OTP' }}</button>
+  </section>
+} @else {
+  <section class="auth-card">
+    <p class="eyebrow">NGÂN HÀNG ĐỀ THI ĐẠI HỌC</p><h2>Tạo tài khoản sinh viên</h2>
+    <p class="auth-note">Email là bắt buộc để xác minh và khôi phục tài khoản.</p>
+    @if (error()) { <p class="auth-error">{{ error() }}</p> }
+    @if (ok()) { <p class="auth-ok">Đăng ký thành công. Kiểm tra Gmail để lấy OTP.</p> }
+    <form (ngSubmit)="submit()">
+      <div class="fld"><label>Tên đăng nhập *</label><input name="username" [(ngModel)]="form.username" autocomplete="username" placeholder="Ví dụ: sv_nguyenvana" /></div>
+      <div class="fld"><label>Họ và tên *</label><input name="full_name" [(ngModel)]="form.full_name" autocomplete="name" placeholder="Nguyễn Văn A" /></div>
+      <div class="fld"><label>Gmail *</label><input name="email" type="email" [(ngModel)]="form.email" autocomplete="email" placeholder="you@gmail.com" /></div>
+      <div class="fld"><label>Mật khẩu *</label><input name="password" type="password" [(ngModel)]="form.password" autocomplete="new-password" placeholder="Ít nhất 6 ký tự" /></div>
+      <button type="submit" class="auth-btn" [disabled]="loading()">{{ loading() ? 'Đang gửi OTP...' : 'Đăng ký và nhận OTP' }}</button>
+    </form>
+    <p class="auth-hint">Đã có tài khoản? <a routerLink="/login">Đăng nhập</a></p>
+  </section>
+}

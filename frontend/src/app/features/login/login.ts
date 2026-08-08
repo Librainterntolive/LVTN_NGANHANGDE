@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -8,14 +8,21 @@ import { AuthService } from '../../services/auth.service';
   imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
 })
-export class Login {
+export class Login implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   username = '';
   password = '';
   error = signal<string>('');
   loading = signal<boolean>(false); // chặn bấm nhiều lần -> gửi trùng request
+
+  ngOnInit() {
+    if (this.route.snapshot.queryParamMap.get('reason') === 'expired') {
+      this.error.set('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    }
+  }
 
   submit() {
     if (this.loading()) return;
@@ -31,7 +38,7 @@ export class Login {
     this.auth.login(this.username.trim(), this.password).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate([this.homeFor(this.auth.getRole())]);
+        this.router.navigate([this.auth.currentUser()?.must_change_password ? '/change-password' : this.homeFor(this.auth.getRole())]);
       },
       error: (e) => {
         this.loading.set(false);

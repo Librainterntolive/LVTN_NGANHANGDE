@@ -16,16 +16,16 @@
 <div class="notebook-box">
   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
     <b style="font-size:16px;">📕 Sổ tay câu sai
-      <span class="nb-count">{{ wrongQuestions().length }} câu</span>
+      <span class="nb-count">{{ wrongTotal() }} câu</span>
     </b>
     <div style="display:flex; gap:8px;">
-      @if (wrongQuestions().length > 0) {
+      @if (wrongTotal() > 0) {
         <button (click)="startPractice()">🔁 Luyện lại câu sai</button>
         <button (click)="toggleNotebook()" class="btn-outline">{{ showNotebook() ? 'Ẩn danh sách' : 'Xem danh sách' }}</button>
       }
     </div>
   </div>
-  @if (wrongQuestions().length === 0) {
+  @if (wrongTotal() === 0) {
     <p style="color:var(--text-3); margin:10px 0 0;">🎉 Bạn chưa có câu sai nào cần luyện. Làm bài thi để hệ thống ghi nhận câu cần ôn.</p>
   } @else {
     <p style="color:var(--text-3); font-size:13px; margin:8px 0 0;">
@@ -45,6 +45,10 @@
     }
   }
 </div>
+
+@if (showNotebook() && hasMoreWrongQuestions()) {
+  <p style="text-align:center; margin:10px 0 20px;"><button class="btn-outline" (click)="loadWrongQuestions(false)" [disabled]="wrongLoading()">{{ wrongLoading() ? 'Đang tải…' : 'Tải thêm câu sai' }}</button><span appInfiniteScroll (scrolled)="loadWrongQuestions(false)" style="display:block;height:1px"></span></p>
+}
 
 <div class="st-layout">
   <!-- ===== Cây thư mục ===== -->
@@ -117,6 +121,7 @@
             <p style="color:var(--text-3);">Thư mục này chưa có đề. Lưu từ ngân hàng đề bên dưới.</p>
           }
         </div>
+        @if (hasMoreFolderExams()) { <p style="text-align:center;margin:20px 0 0;"><button class="btn-outline" (click)="loadFolderExams(false)" [disabled]="folderExamLoading()">{{ folderExamLoading() ? 'Đang tải…' : 'Tải thêm đề đã lưu' }}</button><span appInfiniteScroll (scrolled)="loadFolderExams(false)" style="display:block;height:1px;"></span></p> }
       }
     </section>
 
@@ -126,12 +131,15 @@
 
       <!-- lọc + tìm -->
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-        <input [value]="bankKeyword()" (input)="bankKeyword.set($any($event.target).value)"
+        <input [value]="bankKeyword()" (input)="bankKeyword.set($any($event.target).value)" (keyup.enter)="searchBank()"
                placeholder="🔍 Tìm đề theo tên..." style="flex:1; min-width:180px;" />
-        <select [value]="bankSubject()" (change)="bankSubject.set(+$any($event.target).value)">
+        <select [value]="bankSubject()" (change)="setBankSubject(+$any($event.target).value)">
           <option [value]="0">-- Mọi môn --</option>
+          @if (subjectsLoading() && !subjects().length) { <option disabled>Đang tải môn học…</option> }
           @for (s of subjects(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
         </select>
+        @if (hasMoreSubjects()) { <button class="btn-outline" (click)="loadSubjects(false)" [disabled]="subjectsLoading()">{{ subjectsLoading() ? 'Đang tải…' : 'Thêm môn' }}</button> }
+        <button class="btn-outline" (click)="searchBank()">Tìm</button>
       </div>
 
       <div class="card-row">
@@ -156,6 +164,7 @@
           <p style="color:var(--text-3);">Không có đề nào khớp bộ lọc.</p>
         }
       </div>
+      @if (hasMoreBank()) { <p style="text-align:center;margin:20px 0 0;"><button class="btn-outline" (click)="loadBank(false)" [disabled]="bankLoading()">{{ bankLoading() ? 'Đang tải…' : 'Tải thêm đề' }}</button><span appInfiniteScroll (scrolled)="loadBank(false)" style="display:block;height:1px;"></span></p> }
     </section>
   </div>
 </div>

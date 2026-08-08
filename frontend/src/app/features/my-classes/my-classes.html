@@ -1,32 +1,38 @@
-<h2>Lớp của tôi</h2>
+<section class="page-head"><div><span>KHÔNG GIAN HỌC TẬP</span><h2>Lớp của tôi</h2><p>Vào lớp để theo dõi bảng tin, bài tập, hạn nộp và điểm số.</p></div></section>
 
 <!-- Tham gia lớp bằng mã -->
-<div style="background:var(--surface); border-radius:10px; padding:18px; margin-bottom:18px; box-shadow:0 2px 8px rgba(0,0,0,.08); max-width:460px;">
+<div class="join-card">
   <h3 style="margin-top:0;">Tham gia lớp mới</h3>
   <p style="font-size:13px; color:var(--text-3); margin-top:0;">Nhập mã lớp do giáo viên cung cấp.</p>
   <input [(ngModel)]="code" placeholder="VD: ABC123" style="text-transform:uppercase; letter-spacing:1px; margin-right:8px;" (keyup.enter)="join()" />
-  <button (click)="join()">Tham gia</button>
+  <button (click)="join()" [disabled]="joining()">{{ joining() ? 'Đang tham gia…' : 'Tham gia' }}</button>
   @if (message()) { <p style="color:green; margin:8px 0 0;">{{ message() }}</p> }
   @if (error()) { <p style="color:red; margin:8px 0 0;">{{ error() }}</p> }
 </div>
 
 <!-- Danh sách lớp đã tham gia -->
-<h3>Lớp đã tham gia ({{ classes().length }})</h3>
-<div style="display:flex; flex-wrap:wrap; gap:16px;">
+<div class="list-head"><h3>Lớp đã tham gia <small>{{ total() }} lớp</small></h3><button class="btn-outline" (click)="load(true)" [disabled]="loading()">Tải lại</button></div>
+@if (listError()) { <p class="list-error" role="alert">{{ listError() }}</p> }
+<div class="class-grid">
   @for (c of classes(); track c.id) {
     <div class="class-card">
-      <h3 style="margin:0 0 4px; color:var(--accent);">🏫 {{ c.name }}</h3>
-      <p style="color:var(--text-3); font-size:13px; margin:0 0 8px;">{{ c.description || 'Không có mô tả' }}</p>
-      <p style="font-size:12px; color:var(--text-3); margin:0;">👩‍🏫 GV: {{ c.creator_name || '—' }}</p>
+      <div class="class-icon">🏫</div><h3>{{ c.name }}</h3>
+      <p>{{ c.description || 'Không có mô tả cho lớp học này.' }}</p>
+      <small>Giảng viên: {{ c.creator_name || '—' }}</small>
+      <a [routerLink]="['/classes', c.id]" class="open-class">Mở lớp học</a>
     </div>
   } @empty {
-    <p>Bạn chưa tham gia lớp nào. Nhập mã lớp ở trên để vào lớp.</p>
+    @if (!loading()) { <p class="empty">Bạn chưa tham gia lớp nào. Nhập mã lớp ở trên để vào lớp.</p> }
   }
 </div>
 
+@if (hasMore()) {
+  <div class="load-more"><button class="btn-outline" (click)="load(false)" [disabled]="loading()">{{ loading() ? 'Đang tải…' : 'Tải thêm lớp học' }}</button><div appInfiniteScroll (scrolled)="load(false)" style="height:1px;"></div></div>
+}
+
 <style>
-  .class-card {
-    background:var(--surface); border-radius:12px; padding:18px; width:240px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-  }
+  .page-head span { color:var(--accent); font-size:11px; font-weight:800; letter-spacing:1.1px; }.page-head h2 { margin:3px 0 4px; font-size:27px; }.page-head p { margin:0; color:var(--text-3); font-size:14px; }
+  .join-card { max-width:520px; margin:20px 0; padding:20px; border:1px solid var(--border); border-radius:16px; background:var(--surface); box-shadow:var(--shadow); }.join-card h3 { margin:0 0 5px; }.join-card input { min-width:220px; }
+  .list-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:24px; }.list-head h3 { margin:0; }.list-head small { color:var(--text-3); font-size:13px; font-weight:500; }.list-error { padding:10px 12px; border:1px solid #efc0c5; border-radius:10px; background:#fff1f2; color:#b42318; }.class-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(238px,1fr)); gap:15px; margin-top:14px; }
+  .class-card { position:relative; display:flex; flex-direction:column; min-height:184px; overflow:hidden; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow); transition:transform .18s ease,box-shadow .18s ease; }.class-card::before { content:''; position:absolute; inset:0 0 auto; height:4px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }.class-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }.class-icon { display:grid; place-items:center; width:38px; height:38px; margin-bottom:13px; border-radius:12px; background:var(--accent-soft); font-size:19px; }.class-card h3 { margin:0; color:var(--text); font-size:16px; }.class-card p { min-height:38px; margin:8px 0; color:var(--text-3); font-size:13px; line-height:1.5; }.class-card small { color:var(--text-3); font-size:12px; }.open-class { display:flex; justify-content:space-between; margin-top:auto; padding-top:13px; border-top:1px solid var(--border); color:var(--accent); font-size:13px; font-weight:800; text-decoration:none; }.open-class::after { content:'→'; font-size:17px; line-height:13px; }.open-class:hover { color:var(--accent-hover); text-decoration:none; }.load-more { text-align:center; margin:22px 0; }.empty { grid-column:1/-1; padding:30px; border:1px dashed var(--border); border-radius:14px; color:var(--text-3); text-align:center; background:var(--surface); }@media(max-width:600px){.join-card input{width:100%;margin:0 0 9px!important}.join-card button{width:100%}}
 </style>

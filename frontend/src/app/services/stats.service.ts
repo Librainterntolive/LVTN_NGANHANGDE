@@ -6,6 +6,8 @@ import { environment } from '../../environments/environment';
 export interface Overview {
   total_users: number;
   total_questions: number;
+  total_approved_questions: number;
+  total_verified_sources: number;
   total_exams: number;
   total_submissions: number;
 }
@@ -29,5 +31,8 @@ export class StatsService {
   }
   getExamStats(): Observable<ExamStat[]> {
     return this.http.get<ExamStat[]>(`${this.url}/exams`);
+  }
+  getExamStatsPaged(page = 1, limit = 12): Observable<{items: ExamStat[]; total: number; page: number; limit: number}> {
+    return this.http.get<{items: ExamStat[]; total: number; page: number; limit: number}>(`${this.url}/exams/paged?page=${page}&limit=${limit}`);
   }
 }

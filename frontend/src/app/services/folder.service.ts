@@ -61,6 +61,9 @@ export class FolderService {
   getExams(folderId: number): Observable<SavedExam[]> {
     return this.http.get<SavedExam[]>(`${this.api}/folders/${folderId}/exams`);
   }
+  getExamsPaged(folderId: number, page = 1, limit = 12): Observable<{ items: SavedExam[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ items: SavedExam[]; total: number; page: number; limit: number }>(`${this.api}/folders/${folderId}/exams/paged?page=${page}&limit=${limit}`);
+  }
   addExam(folderId: number, examId: number): Observable<any> {
     return this.http.post(`${this.api}/folders/${folderId}/exams`, { exam_id: examId });
   }
@@ -76,6 +79,12 @@ export class FolderService {
   getExamBank(): Observable<Exam[]> {
     return this.http.get<Exam[]>(`${this.api}/exam-bank`);
   }
+  getExamBankPaged(page = 1, limit = 12, subjectId = 0, keyword = ''): Observable<{ items: Exam[]; total: number; page: number; limit: number }> {
+    const query = [`page=${page}`, `limit=${limit}`];
+    if (subjectId) query.push(`subject_id=${subjectId}`);
+    if (keyword.trim()) query.push(`keyword=${encodeURIComponent(keyword.trim())}`);
+    return this.http.get<{ items: Exam[]; total: number; page: number; limit: number }>(`${this.api}/exam-bank/paged?${query.join('&')}`);
+  }
   // id các đề đã lưu (badge "Đã lưu")
   getSavedExamIds(): Observable<number[]> {
     return this.http.get<number[]>(`${this.api}/saved-exams`);
@@ -88,8 +97,11 @@ export class FolderService {
 
   // ----- sổ tay câu sai -----
   getWrongQuestions(): Observable<WrongQuestion[]> {
-    return this.http.get<WrongQuestion[]>(`${this.api}/practice/wrong-questions`);
+		return this.http.get<WrongQuestion[]>(`${this.api}/practice/wrong-questions`);
   }
+	getWrongQuestionsPaged(page = 1, limit = 12): Observable<{ items: WrongQuestion[]; total: number }> {
+		return this.http.get<{ items: WrongQuestion[]; total: number }>(`${this.api}/practice/wrong-questions/paged?page=${page}&limit=${limit}`);
+	}
   getPracticeSet(): Observable<any[]> {
     return this.http.get<any[]>(`${this.api}/practice/wrong-questions/take`);
   }

@@ -1,6 +1,12 @@
-<h2>Quản lý người dùng</h2>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;"><h2 style="margin:0;">Quản lý người dùng <span style="font-size:14px;color:var(--text-3);">({{ total() }})</span></h2><input [(ngModel)]="keyword" (keyup.enter)="load()" placeholder="Tìm username, họ tên, email..." /></div>
 
 @if (error()) { <p style="color:red">{{ error() }}</p> }
+
+<section style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin:0 0 20px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;"><h3 style="margin:0;">Yêu cầu cấp lại mật khẩu</h3><button class="btn-outline" (click)="loadResetRequests()">Tải lại</button></div>
+  @if (resetRequestsLoading() && !resetRequests().length) { <p style="color:var(--text-3);">Đang tải yêu cầu...</p> } @else { @for (request of resetRequests(); track request.id) { <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);"><span>Tài khoản ID <b>{{ request.user_id }}</b> · {{ request.created_at | date:'dd/MM/yyyy HH:mm' }}</span><button (click)="approveReset(request)">Duyệt và gửi mật khẩu tạm</button></div> } @empty { <p style="color:var(--text-3);">Không có yêu cầu chờ duyệt.</p> } }
+  @if (hasMoreResetRequests()) { <div style="text-align:center;margin-top:12px;" appInfiniteScroll (scrolled)="loadResetRequests(false)"><button class="btn-outline" (click)="loadResetRequests(false)" [disabled]="resetRequestsLoading()">{{ resetRequestsLoading() ? 'Đang tải…' : 'Tải thêm yêu cầu' }}</button></div> }
+</section>
 
 <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:20px; max-width:640px;">
   <h3 style="margin-top:0;">{{ editingId() ? 'Sửa người dùng' : 'Thêm người dùng' }}</h3>
@@ -68,9 +74,11 @@
           </div>
         </td>
       </tr>
-    } @empty { <tr><td colspan="7">Chưa có người dùng.</td></tr> }
+    } @empty { @if (!loading()) { <tr><td colspan="7">Chưa có người dùng.</td></tr> } }
   </tbody>
 </table>
+@if (loading() && !users().length) { <p style="text-align:center;color:var(--text-3);">Đang tải người dùng...</p> }
+@if (users().length < total()) { <div style="text-align:center;margin:18px 0;" appInfiniteScroll (scrolled)="loadMore()"><button class="btn-outline" (click)="loadMore()" [disabled]="loading()">{{ loading() ? 'Đang tải…' : 'Tải thêm người dùng' }}</button></div> }
 
 <style>
   .badge {

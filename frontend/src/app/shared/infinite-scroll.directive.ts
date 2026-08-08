@@ -9,12 +9,18 @@ export class InfiniteScrollDirective implements AfterViewInit, OnDestroy {
   @Output() scrolled = new EventEmitter<void>();
   private el = inject(ElementRef);
   private observer?: IntersectionObserver;
+  private intersecting = false;
 
   ngAfterViewInit() {
     this.observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        this.scrolled.emit();
+      const entry = entries[0];
+      if (!entry?.isIntersecting) {
+        this.intersecting = false;
+        return;
       }
+      if (this.intersecting) return;
+      this.intersecting = true;
+      this.scrolled.emit();
     }, { rootMargin: '120px' });
     this.observer.observe(this.el.nativeElement);
   }

@@ -4,7 +4,11 @@
     <div class="pv-box" (click)="$event.stopPropagation()">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:12px;">
         <h2 style="margin:0;">📄 {{ p.exam.title }}</h2>
-        <button (click)="closePreview()" class="btn-outline">✕ Đóng</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+          <button (click)="printExam(p.exam.id!)" class="btn-outline">🖨 In / Lưu PDF</button>
+          <button (click)="downloadPrintPaper(p.exam.id!, p.exam.title)" class="btn-outline">⬇ Tải bản in</button>
+          <button (click)="closePreview()" class="btn-outline">✕ Đóng</button>
+        </div>
       </div>
       <p style="color:var(--text-2); font-size:14px; margin:0 0 14px;">
         Môn: <b>{{ subjectName(p.exam.subject_id) }}</b> ·
@@ -43,13 +47,14 @@
     <input [(ngModel)]="form.title" placeholder="Tên đề thi" />
     <div>
       <select [(ngModel)]="pickLevel" style="width:48%;">
-        <option value="">-- Mọi khối --</option>
         @for (lv of levels; track lv) { <option [value]="lv">{{ lv }}</option> }
       </select>
       <select [(ngModel)]="form.subject_id" (ngModelChange)="onFormSubjectChange()" style="width:48%;">
         <option [ngValue]="0" disabled>-- Chọn môn --</option>
+        @if (subjectsLoading() && !subjects().length) { <option disabled>Đang tải môn học…</option> }
         @for (s of subjectsForLevel(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
       </select>
+      @if (hasMoreSubjects()) { <button type="button" class="btn-outline" (click)="loadSubjects(false)" [disabled]="subjectsLoading()" style="margin-top:6px;">{{ subjectsLoading() ? 'Đang tải…' : 'Tải thêm môn' }}</button> }
     </div>
     <label>Thời gian (phút): <input type="number" [(ngModel)]="form.duration" style="width:80px;" /></label>
     <label>Điểm đậu (/10): <input type="number" [(ngModel)]="form.pass_score" style="width:80px;" /></label>
@@ -230,7 +235,7 @@
               <input type="file" accept=".csv,.xlsx" (change)="onFileChange($event)" hidden />
             </label>
           </div>
-          <div style="font-size:12px; color:var(--text-3); margin-top:4px;">Câu hỏi trong file sẽ được lưu vào ngân hàng (của bạn) theo môn đã chọn.</div>
+          <div style="font-size:12px; color:var(--text-3); margin-top:4px;">Chỉ nhận .xlsx/.csv tối đa 20 MB và 2.000 dòng. Câu hỏi hợp lệ sẽ được lưu vào ngân hàng theo môn đã chọn.</div>
         }
       </div>
 
@@ -274,6 +279,9 @@
         </button>
       } @empty { <i style="color:var(--text-3);">Chưa có lớp của bạn. Tạo lớp ở mục "Lớp học".</i> }
     </div>
+    @if (hasMoreAssignableClasses()) {
+      <div style="margin-top:8px;" appInfiniteScroll (scrolled)="loadAssignableClasses(false)"><button type="button" class="btn-outline" (click)="loadAssignableClasses(false)" [disabled]="classesLoading()">{{ classesLoading() ? 'Đang tải…' : 'Tải thêm lớp' }}</button></div>
+    }
     @if (selectedClassIds.size > 0) {
       <p style="font-size:12px; color:var(--text-3); margin:6px 0 0;">Đã chọn {{ selectedClassIds.size }} lớp</p>
     }
@@ -296,7 +304,7 @@
   <button (click)="clearSearch()" class="btn-outline">Xóa lọc</button>
 </div>
 
-<p style="color:var(--text-3); font-size:13px;">Hiển thị {{ displayedExams().length }} / {{ exams().length }} đề — cuộn xuống để xem thêm</p>
+<p style="color:var(--text-3); font-size:13px;">Hiển thị {{ displayedExams().length }} / {{ examTotal() }} đề — cuộn xuống để xem thêm</p>
 <table style="width:100%;">
   <thead><tr><th>ID</th><th>Tên đề</th><th>Môn</th><th>Trạng thái</th><th>Truy cập</th><th style="width:250px;"></th></tr></thead>
   <tbody>
@@ -317,6 +325,8 @@
         <td>
           <div class="row-act">
             <button (click)="showPreview(e.id!)">👁 Xem đề</button>
+            <button (click)="printExam(e.id!)" class="btn-outline">🖨 In / Lưu PDF</button>
+            <button (click)="downloadPrintPaper(e.id!, e.title)" class="btn-outline">⬇ Tải bản in</button>
             <button (click)="edit(e.id!)" class="btn-outline">Sửa</button>
             <button (click)="remove(e.id)" style="background:#e53935;">Xóa</button>
           </div>

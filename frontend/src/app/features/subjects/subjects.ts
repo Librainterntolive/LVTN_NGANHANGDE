@@ -4,10 +4,11 @@ import { RouterLink } from '@angular/router';
 import { SubjectService, Subject } from '../../services/subject.service';
 import { AuthService } from '../../services/auth.service';
 import { DialogService } from '../../services/dialog.service';
+import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
 
 @Component({
   selector: 'app-subjects',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, InfiniteScrollDirective],
   templateUrl: './subjects.html',
 })
 export class Subjects implements OnInit {
@@ -16,82 +17,80 @@ export class Subjects implements OnInit {
   private dialog = inject(DialogService);
 
   subjects = signal<Subject[]>([]);
-  error = signal<string>('');
-
-  // các khối hướng tới Cấp 3 + Đại học
-  levels = ['Khối 10', 'Khối 11', 'Khối 12', 'Đại học', 'Khác'];
-  filterLevel = '';
+  total = signal(0);
+  loading = signal(false);
+  error = signal('');
   keyword = '';
+  private page = 1;
 
-  // form thêm/sửa
   form: Subject = this.empty();
   editingId = signal<number | null>(null);
-  showForm = signal<boolean>(false);
+  showForm = signal(false);
 
-  empty(): Subject { return { name: '', level: 'Khối 10', description: '' }; }
+  empty(): Subject { return { name: '', level: 'Đại học', description: '' }; }
 
   isStaff(): boolean {
-    const r = this.auth.getRole();
-    return r === 'Admin' || r === 'Teacher';
+    const role = this.auth.getRole();
+    return role === 'Admin' || role === 'Teacher';
   }
 
   ngOnInit() { this.load(); }
 
-  load() {
-    this.service.getAll().subscribe({
-      next: (data) => this.subjects.set(data ?? []),
-      error: () => this.error.set('Không gọi được API. Backend đã chạy chưa?'),
-    });
-  }
-
-  // lọc theo khối + từ khóa
-  filtered(): Subject[] {
-    return this.subjects().filter((s) => {
-      const okLevel = !this.filterLevel || s.level === this.filterLevel;
-      const okKw = !this.keyword || s.name.toLowerCase().includes(this.keyword.toLowerCase());
-      return okLevel && okKw;
-    });
-  }
-
-  // đếm số môn theo khối (cho chip)
-  countLevel(lv: string): number {
-    return this.subjects().filter((s) => s.level === lv).length;
-  }
-
-  // màu nhãn theo khối
-  levelColor(level?: string): string {
-    switch (level) {
-      case 'Khối 10': return '#1976d2';
-      case 'Khối 11': return '#7b1fa2';
-      case 'Khối 12': return '#c2185b';
-      case 'Đại học': return '#2e7d32';
-      default: return '#607d8b';
+  load(reset = true) {
+    if (this.loading()) return;
+    if (reset) {
+      this.page = 1;
+      this.subjects.set([]);
+      this.total.set(0);
     }
+    this.loading.set(true);
+    this.error.set('');
+    this.service.getPaged(this.page, 12, this.keyword).subscribe({
+      next: (result) => {
+        this.subjects.update(items => [...items, ...(result.items ?? [])]);
+        this.total.set(result.total ?? 0);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Không gọi được API. Hãy kiểm tra Backend đang chạy.');
+        this.loading.set(false);
+      },
+    });
   }
+
+  search() { this.load(true); }
+  hasMore() { return this.subjects().length < this.total(); }
+  loadMore() {
+    if (this.loading() || !this.hasMore()) return;
+    this.page++;
+    this.load(false);
+  }
+
+  levelColor(): string { return 'linear-gradient(135deg, #3156c7, #6856c9)'; }
 
   openAdd() { this.editingId.set(null); this.form = this.empty(); this.showForm.set(true); }
-  edit(s: Subject) { this.editingId.set(s.id!); this.form = { ...s }; this.showForm.set(true); }
+  edit(subject: Subject) { this.editingId.set(subject.id!); this.form = { ...subject }; this.showForm.set(true); }
   cancel() { this.showForm.set(false); this.editingId.set(null); this.form = this.empty(); }
 
   save() {
-    if (!this.form.name.trim()) { this.error.set('Nhập tên môn học'); return; }
+    if (!this.form.name.trim()) { this.error.set('Nhập tên học phần trước khi lưu.'); return; }
     this.error.set('');
-    const req = this.editingId()
+    const request = this.editingId()
       ? this.service.update(this.editingId()!, this.form)
       : this.service.create(this.form);
-    req.subscribe({
+    request.subscribe({
       next: () => { this.cancel(); this.load(); },
-      error: () => this.error.set('Lưu thất bại.'),
+      error: () => this.error.set('Không thể lưu học phần.'),
     });
   }
 
   remove(id?: number) {
     if (!id) return;
-    this.dialog.confirm('Xóa môn học', 'Bạn chắc chắn muốn xóa môn học này?').then((ok) => {
-      if (!ok) return;
+    this.dialog.confirm('Xóa học phần', 'Bạn chắc chắn muốn xóa học phần này?').then((confirmed) => {
+      if (!confirmed) return;
       this.service.remove(id).subscribe({
         next: () => this.load(),
-        error: () => this.error.set('Không xóa được (có thể môn đang có câu hỏi/đề thi).'),
+        error: () => this.error.set('Không thể xóa vì học phần đang có câu hỏi hoặc đề thi.'),
       });
     });
   }

@@ -23,9 +23,21 @@ export class ClassService {
   getAll(): Observable<AppClass[]> {
     return this.http.get<AppClass[]>(this.url);
   }
+  getPaged(page = 1, limit = 12): Observable<{ items: AppClass[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ items: AppClass[]; total: number; page: number; limit: number }>(`${this.url}/paged?page=${page}&limit=${limit}`);
+  }
+  getOne(classId: number): Observable<AppClass> {
+    return this.http.get<AppClass>(`${this.url}/${classId}`);
+  }
+  searchStudents(keyword: string): Observable<AppUser[]> {
+    return this.http.get<AppUser[]>(`${environment.apiUrl}/students/search?query=${encodeURIComponent(keyword)}`);
+  }
   // lớp có thể giao đề: của mình + lớp dùng chung
   getAssignable(): Observable<AppClass[]> {
     return this.http.get<AppClass[]>(`${this.url}/assignable`);
+  }
+  getAssignablePaged(page = 1, limit = 12): Observable<{ items: AppClass[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ items: AppClass[]; total: number; page: number; limit: number }>(`${this.url}/assignable/paged?page=${page}&limit=${limit}`);
   }
   create(data: AppClass): Observable<AppClass> {
     return this.http.post<AppClass>(this.url, data);
@@ -40,9 +52,15 @@ export class ClassService {
   getStudents(classId: number): Observable<AppUser[]> {
     return this.http.get<AppUser[]>(`${this.url}/${classId}/students`);
   }
+  getStudentsPaged(classId: number, page = 1, limit = 12): Observable<{ items: AppUser[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ items: AppUser[]; total: number; page: number; limit: number }>(`${this.url}/${classId}/students/paged?page=${page}&limit=${limit}`);
+  }
   // đề thi đã giao cho lớp
   getExams(classId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.url}/${classId}/exams`);
+  }
+  getExamsPaged(classId: number, page = 1, limit = 12): Observable<{ items: any[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ items: any[]; total: number; page: number; limit: number }>(`${this.url}/${classId}/exams/paged?page=${page}&limit=${limit}`);
   }
   addStudent(classId: number, studentId: number): Observable<any> {
     return this.http.post(`${this.url}/${classId}/students`, { student_id: studentId });
@@ -57,5 +75,8 @@ export class ClassService {
   }
   getMyClasses(): Observable<AppClass[]> {
     return this.http.get<AppClass[]>(`${environment.apiUrl}/my-classes`);
+  }
+  getMyClassesPaged(page = 1, limit = 12): Observable<{ items: AppClass[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ items: AppClass[]; total: number; page: number; limit: number }>(`${environment.apiUrl}/my-classes/paged?page=${page}&limit=${limit}`);
   }
 }

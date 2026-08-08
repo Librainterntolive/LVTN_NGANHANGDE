@@ -13,6 +13,8 @@ export interface TakeExamData {
   // remaining_seconds = -1 nghĩa là đề không giới hạn thời gian.
   submission_id?: number;
   remaining_seconds?: number;
+  is_guest_trial?: boolean;
+  question_limit?: number;
 }
 export interface SubmitResult {
   submission_id: number;
@@ -28,6 +30,14 @@ export interface SubmissionRow {
   total_score: number;
   is_passed: boolean;
   submit_time: string;
+  status: string;
+}
+export interface MyLearningStats {
+  saved_exams: number;
+  attempts: number;
+  avg_score: number;
+  wrong_count: number;
+  streak_days: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -38,10 +48,18 @@ export class StudentService {
   getMyExams(): Observable<Exam[]> {
     return this.http.get<Exam[]>(`${this.api}/my-exams`);
   }
+  getMyExamsPaged(page = 1, limit = 12): Observable<{ items: Exam[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ items: Exam[]; total: number; page: number; limit: number }>(`${this.api}/my-exams/paged?page=${page}&limit=${limit}`);
+  }
 
   // đề công khai cho khách dùng thử (không cần đăng nhập)
   getPublicExams(): Observable<Exam[]> {
     return this.http.get<Exam[]>(`${this.api}/public-exams`);
+  }
+  getPublicExamsPaged(page = 1, limit = 12, subjectId?: number): Observable<{items: Exam[]; total: number; page: number; limit: number}> {
+    const query = [`page=${page}`, `limit=${limit}`];
+    if (subjectId) query.push(`subject_id=${subjectId}`);
+    return this.http.get<{items: Exam[]; total: number; page: number; limit: number}>(`${this.api}/public-exams/paged?${query.join('&')}`);
   }
   take(examId: number): Observable<TakeExamData> {
     return this.http.get<TakeExamData>(`${this.api}/exams/${examId}/take`);
@@ -51,5 +69,14 @@ export class StudentService {
   }
   getMySubmissions(): Observable<SubmissionRow[]> {
     return this.http.get<SubmissionRow[]>(`${this.api}/my-submissions`);
+  }
+  getMySubmissionsPaged(page = 1, limit = 12): Observable<{ items: SubmissionRow[]; total: number; page: number; limit: number }> {
+    return this.http.get<{ items: SubmissionRow[]; total: number; page: number; limit: number }>(`${this.api}/my-submissions/paged?page=${page}&limit=${limit}`);
+  }
+  getSubmissionResult(submissionId: number): Observable<SubmitResult> {
+    return this.http.get<SubmitResult>(`${this.api}/my-submissions/${submissionId}/result`);
+  }
+  getMyStats(): Observable<MyLearningStats> {
+    return this.http.get<MyLearningStats>(`${this.api}/my-stats`);
   }
 }

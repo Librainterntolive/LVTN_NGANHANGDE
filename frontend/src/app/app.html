@@ -11,7 +11,7 @@
       <a routerLink="/" class="brand" (click)="closeMobile()">
         <span class="brand-badge">QS</span>
         <span class="brand-tx">
-          <b>Quiz System</b>
+          <b>QuizBank</b>
           <small>{{ i18n.t('app.subtitle') }}</small>
         </span>
       </a>
@@ -49,6 +49,8 @@
         @if (u.role === 'Admin') {
           <div class="side-group">{{ i18n.t('menu.admin') }}</div>
           <a routerLink="/users" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.users'))" [title]="i18n.t('menu.users')"><span class="ic">👤</span><span class="tx">{{ i18n.t('menu.users') }}</span></a>
+          <a routerLink="/sources" routerLinkActive="active" class="side-link" [class.hide]="!mt(i18n.t('menu.sources'))" [title]="i18n.t('menu.sources')"><span class="ic">🔎</span><span class="tx">{{ i18n.t('menu.sources') }}</span></a>
+          <a routerLink="/audit-logs" routerLinkActive="active" class="side-link" [class.hide]="!mt('Nhật ký thao tác')" title="Nhật ký thao tác"><span class="ic">📋</span><span class="tx">Nhật ký thao tác</span></a>
         }
         @if (u.role === 'Student') {
           <div class="side-group">{{ i18n.t('menu.learning') }}</div>

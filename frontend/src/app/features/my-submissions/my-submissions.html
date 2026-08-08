@@ -8,10 +8,12 @@
     @for (r of rows(); track r.id) {
       <tr>
         <td>{{ r.exam_title }}</td>
-        <td>{{ r.total_score | number:'1.0-2' }}</td>
-        <td [style.color]="r.is_passed ? 'green' : 'red'">{{ r.is_passed ? 'Đậu' : 'Chưa đậu' }}</td>
+        <td>{{ r.status === 'expired' ? '—' : (r.total_score | number:'1.0-2') }}</td>
+        <td [style.color]="r.status === 'expired' ? '#b66200' : (r.is_passed ? 'green' : 'red')">{{ r.status === 'expired' ? 'Hết giờ' : (r.is_passed ? 'Đạt' : 'Chưa đạt') }}</td>
         <td>{{ r.submit_time }}</td>
       </tr>
     } @empty { <tr><td colspan="4">Bạn chưa làm bài nào.</td></tr> }
   </tbody>
 </table>
+
+@if (hasMore()) { <p style="text-align:center;margin:20px 0;"><button class="btn-outline" (click)="load(false)" [disabled]="loading()">{{ loading() ? 'Đang tải…' : 'Tải thêm lịch sử' }}</button><span appInfiniteScroll (scrolled)="load(false)" style="display:block;height:1px;"></span></p> }

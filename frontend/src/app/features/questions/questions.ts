@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QuestionService, Question, ImportResult } from '../../services/question.service';
 import { SubjectService, Subject } from '../../services/subject.service';
@@ -6,10 +7,12 @@ import { ChapterService, Chapter } from '../../services/chapter.service';
 import { AuthService } from '../../services/auth.service';
 import { DialogService } from '../../services/dialog.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { SourceService, Source } from '../../services/source.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-questions',
-  imports: [FormsModule, InfiniteScrollDirective],
+  imports: [FormsModule, InfiniteScrollDirective, DecimalPipe],
   templateUrl: './questions.html',
 })
 export class Questions implements OnInit {
@@ -18,11 +21,21 @@ export class Questions implements OnInit {
   private chapterService = inject(ChapterService);
   private auth = inject(AuthService);
   private dialog = inject(DialogService);
+  private sourceService = inject(SourceService);
+  private toast = inject(ToastService);
 
   subjects = signal<Subject[]>([]);
+  subjectTotal = signal<number>(0);
+  subjectLoading = signal<boolean>(false);
   items = signal<Question[]>([]);
   total = signal<number>(0);
   error = signal<string>('');
+  sources = signal<Source[]>([]);
+  sourceTotal = signal<number>(0);
+  sourceLoading = signal<boolean>(false);
+  sourceMessage = signal<string>('');
+  showSourceForm = signal<boolean>(false);
+  sourceForm: Source = { title: '', publisher: '', url: '', published_year: '', license_note: '' };
 
   myId = this.auth.currentUser()?.id ?? 0;
 
@@ -30,6 +43,7 @@ export class Questions implements OnInit {
   subjectId = 0;          // 0 = chưa chọn môn
   keyword = '';
   owner = signal<'all' | 'mine' | 'others'>('all');
+  reviewFilter = signal<string>('');
 
   // chương/chủ đề
   chapters = signal<Chapter[]>([]);          // chương của môn đang xem
@@ -43,6 +57,7 @@ export class Questions implements OnInit {
   // phân trang
   private page = 1;
   private readonly limit = 12;
+  private subjectPage = 1;
   loading = signal<boolean>(false);
   hasMore = signal<boolean>(false);
 
@@ -58,13 +73,32 @@ export class Questions implements OnInit {
   importResult = signal<ImportResult | null>(null);
 
   ngOnInit() {
-    this.subjectService.getAll().subscribe({ next: (d) => this.subjects.set(d ?? []) });
+    this.loadSubjects();
+    this.loadSources();
   }
+
+  loadSubjects(reset = true) {
+    if (this.subjectLoading()) return;
+    const page = reset ? 1 : this.subjectPage + 1;
+    if (reset) { this.subjects.set([]); this.subjectTotal.set(0); }
+    this.subjectLoading.set(true);
+    this.subjectService.getPaged(page, 12).subscribe({
+      next: result => {
+        this.subjects.set(reset ? (result.items ?? []) : [...this.subjects(), ...(result.items ?? [])]);
+        this.subjectTotal.set(result.total ?? 0);
+        this.subjectPage = page;
+        this.subjectLoading.set(false);
+      },
+      error: () => { this.error.set('Không tải được danh sách môn học.'); this.subjectLoading.set(false); },
+    });
+  }
+
+  hasMoreSubjects() { return this.subjects().length < this.subjectTotal(); }
 
   emptyForm(): Question {
     return {
       subject_id: 0, chapter_id: null, content: '', question_type: 'single',
-      difficulty: 'medium', status: 'active',
+		 difficulty: 'medium', status: 'draft', review_status: 'draft', source_id: null, source_reference: '',
       answers: [{ content: '', is_correct: true }, { content: '', is_correct: false }],
     };
   }
@@ -72,6 +106,58 @@ export class Questions implements OnInit {
   ownerParam(): string {
     return this.owner() === 'mine' ? 'me' : this.owner() === 'others' ? 'others' : '';
   }
+
+	 get isAdmin(): boolean { return this.auth.currentUser()?.role === 'Admin'; }
+
+	 private sourcePage = 1;
+	 loadSources(reset = true) {
+		if (this.sourceLoading()) return;
+		if (reset) { this.sourcePage = 1; this.sources.set([]); this.sourceTotal.set(0); }
+		this.sourceLoading.set(true);
+		this.sourceService.getPaged(this.sourcePage, 12).subscribe({
+			next: (res) => { this.sources.update(items => [...items, ...(res.items ?? [])]); this.sourceTotal.set(res.total ?? 0); this.sourcePage++; this.sourceLoading.set(false); },
+			error: () => { this.error.set('Khong tai duoc danh sach nguon tai lieu.'); this.sourceLoading.set(false); },
+		});
+	 }
+	 hasMoreSources() { return this.sources().length < this.sourceTotal(); }
+	 loadMoreSources() { if (!this.sourceLoading() && this.hasMoreSources()) this.loadSources(false); }
+
+	 toggleSourceForm() { this.showSourceForm.update((value) => !value); }
+
+	 createSource() {
+		this.error.set('');
+		this.sourceMessage.set('');
+		this.sourceService.create(this.sourceForm).subscribe({
+			next: (source) => {
+				this.sources.update((items) => [source, ...items]);
+				this.sourceTotal.update((count) => count + 1);
+				this.sourceForm = { title: '', publisher: '', url: '', published_year: '', license_note: '' };
+				this.showSourceForm.set(false);
+				this.sourceMessage.set('Đã gửi nguồn để xác thực. Chỉ có thể chọn nguồn này sau khi quản trị viên duyệt.');
+				this.toast.success('Đã gửi nguồn tài liệu để xác thực.');
+			},
+			error: (e) => {
+				const message = e?.error?.error ?? 'Khong them duoc nguon tai lieu';
+				this.error.set(message);
+				this.toast.error(message);
+			},
+		});
+	 }
+
+	 pendingSources(): Source[] { return this.sources().filter(source => source.verification_status === 'pending'); }
+	 reviewSource(source: Source, status: 'verified' | 'rejected') {
+		this.sourceService.review(source.id!, status).subscribe({
+			next: updated => {
+				this.sources.update(items => items.map(item => item.id === updated.id ? updated : item));
+				this.toast.success(status === 'verified' ? 'Đã xác thực nguồn tài liệu.' : 'Đã từ chối nguồn tài liệu.');
+			},
+			error: error => {
+				const message = error?.error?.error ?? 'Khong cap nhat duoc nguon';
+				this.error.set(message);
+				this.toast.error(message);
+			},
+		});
+	 }
 
   // gọi khi đổi môn: reset bộ lọc chương + tải danh sách chương của môn mới
   onSubjectChange() {
@@ -103,6 +189,7 @@ export class Questions implements OnInit {
       subjectId: this.subjectId, keyword: this.keyword || undefined,
       owner: this.ownerParam() || undefined,
       chapter: ch === 'all' ? undefined : ch,
+		 reviewStatus: this.reviewFilter() || undefined,
       page: this.page, limit: this.limit,
     }).subscribe({
       next: (res) => {
@@ -122,11 +209,27 @@ export class Questions implements OnInit {
   }
 
   setOwner(o: 'all' | 'mine' | 'others') { this.owner.set(o); this.reload(); }
+	 setReviewFilter(status: string) { this.reviewFilter.set(status); this.reload(); }
   search() { this.reload(); }
   clearSearch() { this.keyword = ''; this.reload(); }
 
   isMine(q: Question): boolean { return q.created_by === this.myId; }
   isUsed(q: Question): boolean { return (q.used_count ?? 0) > 0; }
+	 isPending(q: Question): boolean { return q.review_status === 'pending'; }
+
+	 approve(q: Question) {
+		this.qService.review(q.id!, 'approved').subscribe({
+			next: () => { this.toast.success('Đã duyệt câu hỏi.'); this.reload(); },
+			error: (e) => { const message = e?.error?.error ?? 'Khong duyet duoc cau hoi'; this.error.set(message); this.toast.error(message); },
+		});
+	 }
+
+	 reject(q: Question) {
+		this.qService.review(q.id!, 'rejected').subscribe({
+			next: () => { this.toast.success('Đã từ chối câu hỏi.'); this.reload(); },
+			error: (e) => { const message = e?.error?.error ?? 'Khong tu choi duoc cau hoi'; this.error.set(message); this.toast.error(message); },
+		});
+	 }
 
   chapterName(id?: number | null): string {
     if (!id) return '';
@@ -142,8 +245,8 @@ export class Questions implements OnInit {
     const name = this.newChapterName.trim();
     if (!name || !this.subjectId) return;
     this.chapterService.create({ subject_id: this.subjectId, name, order_index: this.chapters().length + 1 }).subscribe({
-      next: () => { this.newChapterName = ''; this.loadChapters(); },
-      error: (e) => this.error.set(e?.error?.error ?? 'Không thêm được chương'),
+      next: () => { this.newChapterName = ''; this.loadChapters(); this.toast.success('Đã thêm chương / chủ đề.'); },
+      error: (e) => { const message = e?.error?.error ?? 'Không thêm được chương'; this.error.set(message); this.toast.error(message); },
     });
   }
 
@@ -156,8 +259,8 @@ export class Questions implements OnInit {
     const name = this.editChapterName.trim();
     if (!name) return;
     this.chapterService.update(ch.id!, { ...ch, name }).subscribe({
-      next: () => { this.editChapterId.set(null); this.loadChapters(); this.reload(); },
-      error: (e) => this.error.set(e?.error?.error ?? 'Không sửa được chương'),
+      next: () => { this.editChapterId.set(null); this.loadChapters(); this.reload(); this.toast.success('Đã cập nhật chương / chủ đề.'); },
+      error: (e) => { const message = e?.error?.error ?? 'Không sửa được chương'; this.error.set(message); this.toast.error(message); },
     });
   }
 
@@ -169,9 +272,9 @@ export class Questions implements OnInit {
       this.chapterService.remove(ch.id!).subscribe({
         next: () => {
           if (this.chapterFilter() === ch.id) this.chapterFilter.set('all');
-          this.loadChapters(); this.reload();
+          this.loadChapters(); this.reload(); this.toast.success('Đã xóa chương / chủ đề.');
         },
-        error: (e) => this.error.set(e?.error?.error ?? 'Không xóa được chương'),
+        error: (e) => { const message = e?.error?.error ?? 'Không xóa được chương'; this.error.set(message); this.toast.error(message); },
       });
     });
   }
@@ -196,7 +299,23 @@ export class Questions implements OnInit {
 
   onImportFileChange(e: Event) {
     const input = e.target as HTMLInputElement;
-    this.importFile = input.files?.[0] ?? null;
+    const file = input.files?.[0] ?? null;
+    if (!file) { this.importFile = null; return; }
+    const name = file.name.toLowerCase();
+    if (!name.endsWith('.csv') && !name.endsWith('.xlsx')) {
+      this.importFile = null;
+      input.value = '';
+      this.error.set('Chỉ hỗ trợ file .csv hoặc .xlsx');
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      this.importFile = null;
+      input.value = '';
+      this.error.set('File quá lớn (tối đa 20MB)');
+      return;
+    }
+    this.error.set('');
+    this.importFile = file;
   }
 
   doImport() {
@@ -207,8 +326,8 @@ export class Questions implements OnInit {
     if (!name.endsWith('.csv') && !name.endsWith('.xlsx')) {
       this.error.set('Chỉ hỗ trợ file .csv hoặc .xlsx'); return;
     }
-    if (this.importFile.size > 50 * 1024 * 1024) {
-      this.error.set('File quá lớn (tối đa 50MB)'); return;
+    if (this.importFile.size > 20 * 1024 * 1024) {
+      this.error.set('File quá lớn (tối đa 20MB)'); return;
     }
     this.qService.importFile(this.importFile).subscribe({
       next: (r) => {
@@ -223,8 +342,9 @@ export class Questions implements OnInit {
         }
         this.loadChapters();
         this.reload();
+			this.toast.success(`Đã import ${r.imported} câu hỏi. Các câu hỏi sẽ chờ duyệt trước khi dùng cho đề công khai.`);
       },
-      error: (e) => this.error.set(e?.error?.error ?? 'Import thất bại'),
+      error: (e) => { const message = e?.error?.error ?? 'Import thất bại'; this.error.set(message); this.toast.error(message); },
     });
   }
 
@@ -238,13 +358,16 @@ export class Questions implements OnInit {
   }
 
   downloadTemplate() {
-    this.qService.downloadTemplate().subscribe((blob) => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mau-import-cau-hoi.xlsx';
-      a.click();
-      URL.revokeObjectURL(url);
+    this.qService.downloadTemplate().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mau-import-cau-hoi.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.toast.error('Không tải được mẫu import. Vui lòng thử lại.'),
     });
   }
 
@@ -264,6 +387,7 @@ export class Questions implements OnInit {
       subject_id: q.subject_id, chapter_id: q.chapter_id ?? null,
       content: q.content, question_type: q.question_type ?? 'single',
       difficulty: q.difficulty ?? 'medium', status: 'draft', // bản sao bắt đầu ở trạng thái nháp
+		 source_id: q.source_id ?? null, source_reference: q.source_reference ?? '', review_status: 'draft',
       answers: q.answers.map((a) => ({ content: a.content, is_correct: a.is_correct })),
     };
     this.correctIndex = this.form.answers.findIndex((a) => a.is_correct);
@@ -277,12 +401,18 @@ export class Questions implements OnInit {
     if (this.correctIndex >= this.form.answers.length) this.correctIndex = 0;
   }
 
-  save() {
+  save(submitForReview = false) {
     this.error.set('');
     if (!this.form.subject_id) { this.error.set('Vui lòng chọn môn học'); return; }
-    this.form.answers.forEach((a, i) => (a.is_correct = i === this.correctIndex));
-    const req = this.editingId()
-      ? this.qService.update(this.editingId()!, this.form)
+	if (!this.form.source_id || !this.form.source_reference?.trim()) {
+		this.error.set('Vui long chon nguon tai lieu va ghi vi tri tham chieu');
+		return;
+	}
+	this.form.submit_for_review = submitForReview;
+	this.form.answers.forEach((a, i) => (a.is_correct = i === this.correctIndex));
+    const editingId = this.editingId();
+    const req = editingId
+      ? this.qService.update(editingId, this.form)
       : this.qService.create(this.form);
     req.subscribe({
       next: () => {
@@ -290,8 +420,9 @@ export class Questions implements OnInit {
         this.cancelEdit();
         if (this.subjectId !== savedSubject) { this.subjectId = savedSubject; this.onSubjectChange(); }
         else { this.loadChapters(); this.reload(); }
+			this.toast.success(submitForReview ? 'Đã gửi câu hỏi để duyệt.' : editingId ? 'Đã cập nhật câu hỏi.' : 'Đã lưu câu hỏi nháp.');
       },
-      error: (e) => this.error.set(e?.error?.error ?? 'Lưu thất bại'),
+      error: (e) => { const message = e?.error?.error ?? 'Lưu thất bại'; this.error.set(message); this.toast.error(message); },
     });
   }
 
@@ -303,6 +434,9 @@ export class Questions implements OnInit {
       subject_id: q.subject_id, chapter_id: q.chapter_id ?? null, content: q.content,
       question_type: q.question_type ?? 'single', difficulty: q.difficulty ?? 'medium',
       status: q.status ?? 'active',
+      source_id: q.source_id ?? null,
+      source_reference: q.source_reference ?? '',
+      review_status: q.review_status ?? 'draft',
       answers: q.answers.map((a) => ({ content: a.content, is_correct: a.is_correct })),
     };
     this.correctIndex = this.form.answers.findIndex((a) => a.is_correct);
@@ -322,8 +456,8 @@ export class Questions implements OnInit {
     this.dialog.confirm('Xóa câu hỏi', 'Bạn chắc chắn muốn xóa câu hỏi này?').then((ok) => {
       if (!ok) return;
       this.qService.remove(id).subscribe({
-        next: () => { this.loadChapters(); this.reload(); },
-        error: (e) => this.error.set(e?.error?.error ?? 'Không xóa được câu hỏi'),
+        next: () => { this.loadChapters(); this.reload(); this.toast.success('Đã xóa câu hỏi.'); },
+        error: (e) => { const message = e?.error?.error ?? 'Không xóa được câu hỏi'; this.error.set(message); this.toast.error(message); },
       });
     });
   }

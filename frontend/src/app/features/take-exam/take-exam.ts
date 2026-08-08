@@ -21,6 +21,8 @@ export class TakeExam implements OnInit, OnDestroy {
   data = signal<TakeExamData | null>(null);
   error = signal<string>('');
   result = signal<SubmitResult | null>(null);
+  submitting = signal<boolean>(false);
+  draftRestored = signal<boolean>(false);
 
   // modal xác nhận nộp khi còn câu chưa làm
   showConfirm = signal<boolean>(false);
@@ -39,6 +41,7 @@ export class TakeExam implements OnInit, OnDestroy {
     this.service.take(this.examId).subscribe({
       next: (d) => {
         this.data.set(d);
+        this.restoreDraft(d);
         this.startTimer(d);
       },
       error: (e) => this.error.set(e?.error?.error ?? 'Không tải được đề'),
@@ -79,6 +82,14 @@ export class TakeExam implements OnInit, OnDestroy {
     return !!this.selected[qid];
   }
 
+  saveDraft() {
+    const key = this.draftKey();
+    if (!key || this.result()) return;
+    try {
+      localStorage.setItem(key, JSON.stringify({ saved_at: Date.now(), selected: this.selected }));
+    } catch {}
+  }
+
   // số câu đã làm
   answeredCount(): number {
     const d = this.data();
@@ -108,16 +119,78 @@ export class TakeExam implements OnInit, OnDestroy {
   cancelSubmit() { this.showConfirm.set(false); }
 
   submit() {
-    if (this.result()) return; // tránh nộp 2 lần
-    if (this.timer) clearInterval(this.timer);
+    if (this.result() || this.submitting()) return; // tránh nộp 2 lần
+    this.error.set('');
+    this.submitting.set(true);
     const answers = Object.entries(this.selected).map(([qid, aid]) => ({
       question_id: Number(qid),
       selected_answer_id: Number(aid),
     }));
     this.service.submit(this.examId, answers).subscribe({
-      next: (r) => { this.result.set(r); this.layout.fullscreen.set(false); },
-      error: (e) => this.error.set(e?.error?.error ?? 'Nộp bài thất bại'),
+      next: (result) => this.finishSubmission(result),
+      error: (error) => this.recoverSubmissionAfterNetworkError(error),
     });
+  }
+
+  private finishSubmission(result: SubmitResult) {
+    if (this.timer) clearInterval(this.timer);
+    this.clearDraft();
+    this.result.set(result);
+    this.submitting.set(false);
+    this.layout.fullscreen.set(false);
+  }
+
+  private recoverSubmissionAfterNetworkError(error: any) {
+    const submissionId = this.data()?.submission_id;
+    if (!this.auth.isLoggedIn() || !submissionId) {
+      this.submitting.set(false);
+      this.error.set(error?.error?.error ?? 'Không thể nộp bài. Kiểm tra kết nối rồi thử lại.');
+      return;
+    }
+
+    this.service.getSubmissionResult(submissionId).subscribe({
+      next: (result) => this.finishSubmission(result),
+      error: () => {
+        this.submitting.set(false);
+        this.error.set('Kết nối bị gián đoạn. Bài chưa được xác nhận; hãy kiểm tra mạng và bấm nộp lại.');
+      },
+    });
+  }
+
+  private draftKey(): string | null {
+    const submissionId = this.data()?.submission_id;
+    return submissionId ? `quiz-exam-draft-${submissionId}` : null;
+  }
+
+  private restoreDraft(data: TakeExamData) {
+    const key = this.draftKey();
+    if (!key) return;
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { saved_at?: number; selected?: Record<string, number> };
+      if (!draft.saved_at || Date.now() - draft.saved_at > 24 * 60 * 60 * 1000 || !draft.selected) {
+        localStorage.removeItem(key);
+        return;
+      }
+      const validAnswers = new Map(data.questions.map((question) => [question.id, new Set(question.answers.map((answer) => answer.id))]));
+      const restored: Record<number, number> = {};
+      for (const [questionId, answerId] of Object.entries(draft.selected)) {
+        const id = Number(questionId);
+        const answer = Number(answerId);
+        if (validAnswers.get(id)?.has(answer)) restored[id] = answer;
+      }
+      this.selected = restored;
+      this.draftRestored.set(Object.keys(restored).length > 0);
+    } catch {
+      localStorage.removeItem(key);
+    }
+  }
+
+  private clearDraft() {
+    const key = this.draftKey();
+    if (!key) return;
+    try { localStorage.removeItem(key); } catch {}
   }
 
   ngOnDestroy() {

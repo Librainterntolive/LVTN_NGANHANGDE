@@ -1,4 +1,4 @@
-@if (error()) { <p style="color:red; padding:16px;">{{ error() }}</p> }
+@if (error()) { <p class="submit-error" role="alert">{{ error() }}</p> }
 
 <!-- ===== Sau khi nộp: kết quả ===== -->
 @if (result(); as r) {
@@ -21,10 +21,13 @@
 
 <!-- ===== Đang làm bài ===== -->
 @if (data() && !result(); as d) {
+  @if (data()!.is_guest_trial) { <div class="guest-trial">Bạn đang làm thử với tư cách khách: chỉ hiển thị tối đa {{ data()!.question_limit || 20 }} câu. Đăng nhập để làm đầy đủ đề và lưu kết quả.</div> }
+  @if (draftRestored()) { <div class="draft-notice" role="status">Đã khôi phục các đáp án bạn chọn trước khi tải lại trang.</div> }
   <!-- thanh trên cố định -->
   <div class="exam-top">
     <div class="exam-title">📝 {{ data()!.exam.title }}</div>
     <div class="exam-progress">Đã làm <b>{{ answeredCount() }}</b>/{{ data()!.questions.length }}</div>
+    @if (submitting()) { <div class="submit-status" aria-live="polite">Đang gửi bài…</div> }
     @if (remaining() > 0) {
       <div class="exam-timer" [class.warn]="remaining() <= 30">⏱ {{ formatTime() }}</div>
     } @else {
@@ -40,13 +43,13 @@
           <p class="q-title"><span class="q-num">{{ i + 1 }}</span> {{ q.content }}</p>
           @for (a of q.answers; track a.id) {
             <label class="ans" [class.picked]="selected[q.id] === a.id">
-              <input type="radio" [name]="'q' + q.id" [value]="a.id" [(ngModel)]="selected[q.id]" />
+              <input type="radio" [name]="'q' + q.id" [value]="a.id" [(ngModel)]="selected[q.id]" (ngModelChange)="saveDraft()" />
               <span class="ans-label">{{ a.label }}</span> {{ a.content }}
             </label>
           }
         </div>
       }
-      <button (click)="submitWithConfirm()" class="submit-btn" style="margin-top:8px;">Nộp bài</button>
+      <button (click)="submitWithConfirm()" class="submit-btn" style="margin-top:8px;" [disabled]="submitting()">{{ submitting() ? 'Đang nộp bài…' : 'Nộp bài' }}</button>
     </div>
 
     <!-- Bảng điều hướng -->
@@ -65,7 +68,7 @@
       <div style="font-size:12px; color:var(--text-3); margin:10px 0;">
         <span class="dot done-dot"></span> Đã làm &nbsp; <span class="dot todo-dot"></span> Chưa làm
       </div>
-      <button (click)="submitWithConfirm()" class="submit-btn" style="width:100%;">Nộp bài</button>
+      <button (click)="submitWithConfirm()" class="submit-btn" style="width:100%;" [disabled]="submitting()">{{ submitting() ? 'Đang nộp bài…' : 'Nộp bài' }}</button>
     </aside>
   </div>
 
@@ -78,7 +81,7 @@
         <p style="color:var(--text-2); margin:0 0 16px;">Bạn có chắc chắn muốn nộp bài không?</p>
         <div style="display:flex; gap:10px; justify-content:center;">
           <button (click)="cancelSubmit()" class="btn-outline">Tiếp tục làm</button>
-          <button (click)="confirmSubmit()" class="submit-btn">Nộp luôn</button>
+          <button (click)="confirmSubmit()" class="submit-btn" [disabled]="submitting()">{{ submitting() ? 'Đang nộp…' : 'Nộp luôn' }}</button>
         </div>
       </div>
     </div>
@@ -86,10 +89,14 @@
 }
 
 <style>
+  .submit-error { max-width:1080px; margin:12px auto; padding:11px 14px; border:1px solid #f3c1c7; border-radius:10px; background:#fff1f2; color:#b42318; font-size:14px; }
+  .submit-status { padding:6px 10px; border-radius:999px; background:#fff5df; color:#8a5300; font-size:13px; font-weight:700; }
   .result-box {
     max-width:440px; margin:48px auto; padding:30px; text-align:center;
     background:var(--surface); border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,.12);
   }
+  .guest-trial { max-width:1080px; margin:12px auto 0; padding:10px 14px; border-radius:10px; background:#fff5df; color:#8a5300; font-size:14px; }
+  .draft-notice { max-width:1080px; margin:12px auto 0; padding:10px 14px; border-radius:10px; background:#e8f4ff; color:#175b9b; font-size:14px; }
   .reg-link { display:inline-block; margin-top:8px; padding:9px 20px; background:var(--accent); color:#fff; border-radius:6px; text-decoration:none; }
   .reg-link:hover { background:var(--accent-hover); text-decoration:none; }
 
@@ -146,6 +153,7 @@
     border-radius:8px; font-weight:600; cursor:pointer;
   }
   .submit-btn:hover { background:var(--accent-hover); }
+  .submit-btn:disabled { cursor:not-allowed; opacity:.68; }
 
   .take-nav {
     width:236px; flex-shrink:0; position:sticky; top:78px;

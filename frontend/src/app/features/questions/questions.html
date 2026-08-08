@@ -1,219 +1,80 @@
-<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-  <h2 style="margin:0;">Ngân hàng câu hỏi</h2>
-  <div style="display:flex; gap:8px;">
-    <button (click)="openImport()" class="btn-outline">⬆️ Import từ file</button>
-    <button (click)="openAdd()">➕ Thêm câu hỏi</button>
+<header class="page-header">
+  <div>
+    <p class="eyebrow">NGÂN HÀNG ĐỀ THI ĐẠI HỌC</p>
+    <h2>Ngân hàng câu hỏi có kiểm duyệt</h2>
+    <p class="muted">Mỗi câu hỏi phải có nguồn và vị trí tham chiếu trước khi đưa vào đề thi.</p>
   </div>
-</div>
+  <div class="actions">
+    <button class="btn-outline" (click)="openImport()">Import file</button>
+    <button (click)="openAdd()">+ Thêm câu hỏi</button>
+  </div>
+</header>
 
-@if (error()) { <p style="color:red">{{ error() }}</p> }
+@if (error()) { <p class="error">{{ error() }}</p> }
 
-<!-- ====== PANEL Import từ file (gộp từ trang Import cũ) ====== -->
 @if (showImport()) {
-  <div style="background:var(--surface); border-radius:10px; padding:16px; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.08); max-width:640px;">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h3 style="margin:0;">Import câu hỏi từ file</h3>
-      <button (click)="closeImport()" class="btn-outline" style="padding:4px 10px;">✕</button>
-    </div>
-    <p style="margin:10px 0 6px;"><b>Hỗ trợ:</b> Excel <code>.xlsx</code> hoặc <code>.csv</code> (tối đa 50MB).</p>
-    <div style="background:var(--accent-soft); padding:10px 12px; border-radius:6px; margin-bottom:12px;">
-      💡 Chưa biết định dạng? Tải file mẫu về điền rồi import lên.
-      <button (click)="downloadTemplate()" style="margin-left:8px;">⬇ Tải file mẫu Excel</button>
-    </div>
-    <pre style="background:var(--surface-2); padding:8px 10px; border-radius:4px; font-size:13px;">subject_id | content (Câu hỏi) | A | B | C | D | correct (Đáp án đúng)
-Tùy chọn thêm: difficulty (easy/medium/hard) | chapter_id (mã chương)</pre>
-    <div style="margin:12px 0;">
-      <input type="file" accept=".csv,.xlsx" (change)="onImportFileChange($event)" />
-      <button (click)="doImport()">Import</button>
-    </div>
-    @if (importResult(); as r) {
-      <div style="border:1px solid #4caf50; border-radius:6px; padding:10px;">
-        <p style="color:green; margin:0;">
-          Đã import thành công <b>{{ r.imported }}</b> câu hỏi
-          @if (importedSubjectNames()) { vào môn <b>{{ importedSubjectNames() }}</b> }.
-        </p>
-        @if (r.imported > 0) {
-          <p style="color:var(--text-2); font-size:13px; margin:6px 0 0;">
-            Danh sách bên dưới đã chuyển sang môn này để bạn xem kết quả ngay.
-          </p>
-        }
-        @if (r.errors && r.errors.length) {
-          <p style="color:#e65100; margin:8px 0 4px;">Một số dòng bị bỏ qua:</p>
-          <ul style="margin:0;">
-            @for (er of r.errors; track er) { <li>{{ er }}</li> }
-          </ul>
-        }
-      </div>
+  <section class="panel">
+    <div class="panel-title"><h3>Import câu hỏi có kiểm soát</h3><button class="btn-outline" (click)="closeImport()">Đóng</button></div>
+    <p>Chấp nhận <code>.xlsx</code> và <code>.csv</code>, dung lượng tối đa 20 MB, tối đa 2.000 dòng. Mỗi dòng phải có nguồn: <code>source_title</code>, <code>source_url</code>, <code>source_reference</code>.</p>
+    <p class="notice">File sai định dạng, vượt dung lượng, quá nhiều dòng/cột hoặc thiếu nguồn sẽ bị báo lỗi; các câu được nhận sẽ ở trạng thái <b>chờ duyệt</b>.</p>
+    <button (click)="downloadTemplate()">Tải mẫu Excel</button>
+    <input type="file" accept=".csv,.xlsx" (change)="onImportFileChange($event)" />
+    <button [disabled]="!importFile" (click)="doImport()">Bắt đầu import</button>
+    @if (importResult(); as result) {
+      <p class="success">Đã nhận {{ result.imported }} câu hỏi @if (importedSubjectNames()) { cho môn {{ importedSubjectNames() }} }.</p>
+      @if (result.errors?.length) { <ul class="error-list">@for (item of result.errors; track item) { <li>{{ item }}</li> }</ul> }
     }
-  </div>
+  </section>
 }
 
-<!-- ====== FORM thêm/sửa (ẩn/hiện) ====== -->
 @if (showForm()) {
-  <div style="background:var(--surface); border-radius:10px; padding:16px; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.08); max-width:680px;">
-    <h3 style="margin-top:0;">{{ editingId() ? 'Sửa câu hỏi' : 'Thêm câu hỏi mới' }}</h3>
-    <div style="margin-bottom:10px; display:flex; gap:10px; flex-wrap:wrap;">
-      <select [(ngModel)]="form.subject_id" (ngModelChange)="onFormSubjectChange()">
-        <option [ngValue]="0" disabled>-- Chọn môn --</option>
-        @for (s of subjects(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
-      </select>
-      <select [(ngModel)]="form.chapter_id">
-        <option [ngValue]="null">-- Chưa phân chương --</option>
-        @for (ch of formChapters(); track ch.id) { <option [ngValue]="ch.id">{{ ch.name }}</option> }
-      </select>
-      <select [(ngModel)]="form.question_type">
-        <option value="single">1 đáp án</option><option value="truefalse">Đúng/Sai</option>
-      </select>
-      <select [(ngModel)]="form.difficulty">
-        <option value="easy">Dễ</option><option value="medium">Trung bình</option><option value="hard">Khó</option>
-      </select>
-      <select [(ngModel)]="form.status" title="Câu nháp không được đưa vào đề thi">
-        <option value="active">✅ Chính thức</option><option value="draft">📝 Nháp</option>
-      </select>
+  <section class="panel form-panel">
+    <div class="panel-title"><h3>{{ editingId() ? 'Cập nhật câu hỏi' : 'Soạn câu hỏi mới' }}</h3><button class="btn-outline" (click)="cancelEdit()">Đóng</button></div>
+    <div class="form-grid">
+      <label>Môn học<select [(ngModel)]="form.subject_id" (ngModelChange)="onFormSubjectChange()"><option [ngValue]="0">Chọn môn học</option>@if (subjectLoading() && !subjects().length) { <option disabled>Đang tải môn học…</option> } @for (subject of subjects(); track subject.id) { <option [ngValue]="subject.id">{{ subject.name }}</option> }</select></label>
+      <label>Chương / chủ đề<select [(ngModel)]="form.chapter_id"><option [ngValue]="null">Chưa phân chương</option>@for (chapter of formChapters(); track chapter.id) { <option [ngValue]="chapter.id">{{ chapter.name }}</option> }</select></label>
+      <label>Độ khó<select [(ngModel)]="form.difficulty"><option value="easy">Dễ</option><option value="medium">Trung bình</option><option value="hard">Khó</option></select></label>
+      <label>Loại câu<select [(ngModel)]="form.question_type"><option value="single">Một đáp án đúng</option><option value="truefalse">Đúng / Sai</option></select></label>
     </div>
-    <textarea [(ngModel)]="form.content" rows="2" style="width:100%; margin-bottom:10px;" placeholder="Nội dung câu hỏi"></textarea>
-    <div style="margin-bottom:10px;">
-      <label style="font-size:13px; color:var(--text-2);">Đáp án (chọn ô tròn = ĐÚNG):</label>
-      @for (a of form.answers; track $index) {
-        <div style="display:flex; align-items:center; gap:8px; margin:4px 0;">
-          <input type="radio" name="correct" [value]="$index" [(ngModel)]="correctIndex" />
-          <span style="width:18px;">{{ ['A','B','C','D','E','F'][$index] }}.</span>
-          <input [(ngModel)]="a.content" placeholder="Nội dung đáp án" style="flex:1;" />
-          <button (click)="removeAnswerRow($index)" [disabled]="form.answers.length <= 2" class="btn-outline" style="padding:5px 10px;">x</button>
-        </div>
-      }
-      <button (click)="addAnswerRow()" class="btn-outline" style="margin-top:6px;">+ Thêm đáp án</button>
-    </div>
-    <button (click)="save()">{{ editingId() ? 'Cập nhật' : 'Lưu câu hỏi' }}</button>
-    <button (click)="cancelEdit()" class="btn-outline" style="margin-left:6px;">Hủy</button>
-  </div>
+    @if (hasMoreSubjects()) { <button type="button" class="btn-outline" (click)="loadSubjects(false)" [disabled]="subjectLoading()">{{ subjectLoading() ? 'Đang tải…' : 'Tải thêm môn học' }}</button> }
+    <label class="block-label">Nội dung câu hỏi<textarea [(ngModel)]="form.content" rows="3" placeholder="Nhập nội dung câu hỏi"></textarea></label>
+    <fieldset><legend>Đáp án — tích tròn đáp án đúng</legend>@for (answer of form.answers; track $index) { <div class="answer-row"><input type="radio" name="correct" [value]="$index" [(ngModel)]="correctIndex"/><b>{{ ['A','B','C','D','E','F'][$index] }}.</b><input [(ngModel)]="answer.content" placeholder="Nội dung đáp án"/><button class="btn-outline" [disabled]="form.answers.length <= 2" (click)="removeAnswerRow($index)">Xóa</button></div> }<button class="btn-outline" (click)="addAnswerRow()">+ Thêm đáp án</button></fieldset>
+    <fieldset><legend>Nguồn tài liệu bắt buộc</legend>
+      <div class="form-grid"><label>Nguồn<select [(ngModel)]="form.source_id"><option [ngValue]="null">Chọn nguồn đã khai báo</option>@for (source of sources(); track source.id) { <option [ngValue]="source.id" [disabled]="source.verification_status !== 'verified'">[{{ source.verification_status === 'verified' ? 'Đã xác thực' : source.verification_status === 'rejected' ? 'Từ chối' : 'Chờ xác thực' }}] {{ source.title }} — {{ source.publisher || source.url }}</option> }</select>@if (hasMoreSources()) { <button type="button" class="btn-outline" (click)="loadMoreSources()" [disabled]="sourceLoading()">{{ sourceLoading() ? 'Đang tải…' : 'Tải thêm nguồn' }}</button> }</label><label>Vị trí tham chiếu<input [(ngModel)]="form.source_reference" placeholder="Ví dụ: Chương 2, trang 35 hoặc Điều 4" /></label></div>
+      <button class="btn-outline" (click)="toggleSourceForm()">+ Khai báo nguồn mới</button>
+      @if (showSourceForm()) { <div class="source-form"><label>Tên tài liệu<input [(ngModel)]="sourceForm.title" /></label><label>Đơn vị phát hành<input [(ngModel)]="sourceForm.publisher" /></label><label>URL nguồn gốc<input [(ngModel)]="sourceForm.url" type="url" placeholder="https://..." /></label><label>Năm phát hành<input [(ngModel)]="sourceForm.published_year" /></label><label>Ghi chú bản quyền<input [(ngModel)]="sourceForm.license_note" /></label><button (click)="createSource()">Lưu nguồn</button></div> }
+      @if (sourceMessage()) { <p class="source-notice" aria-live="polite">{{ sourceMessage() }}</p> }
+    </fieldset>
+    @if (isAdmin && pendingSources().length) { <section class="source-review"><b>Nguồn chờ xác thực ({{ pendingSources().length }})</b>@for (source of pendingSources(); track source.id) { <div><a [href]="source.url" target="_blank" rel="noopener">{{ source.title }}</a><span>{{ source.publisher || source.url }}</span><button (click)="reviewSource(source, 'verified')">Xác thực</button><button class="btn-outline" (click)="reviewSource(source, 'rejected')">Từ chối</button></div> }</section> }
+    <div class="actions"><button class="btn-outline" (click)="save(false)">Lưu nháp</button><button (click)="save(true)">Gửi duyệt</button></div>
+  </section>
 }
 
-<!-- ====== BƯỚC 1: chọn môn ====== -->
-<div style="margin:14px 0; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-  <b>Chọn môn học:</b>
-  <select [(ngModel)]="subjectId" (ngModelChange)="onSubjectChange()" style="min-width:240px;">
-    <option [ngValue]="0">-- Chọn môn để xem câu hỏi --</option>
-    @for (s of subjects(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
-  </select>
-  @if (subjectId) {
-    <input [(ngModel)]="keyword" placeholder="🔍 Tìm trong môn..." (keyup.enter)="search()" style="width:220px;" />
-    <button (click)="search()">Tìm</button>
-    <button (click)="clearSearch()" class="btn-outline">Xóa</button>
-  }
-</div>
+<section class="filters">
+  <label>Môn học<select [(ngModel)]="subjectId" (ngModelChange)="onSubjectChange()"><option [ngValue]="0">Chọn môn để xem câu hỏi</option>@if (subjectLoading() && !subjects().length) { <option disabled>Đang tải môn học…</option> } @for (subject of subjects(); track subject.id) { <option [ngValue]="subject.id">{{ subject.name }}</option> }</select></label>
+  @if (hasMoreSubjects()) { <button class="btn-outline" (click)="loadSubjects(false)" [disabled]="subjectLoading()">{{ subjectLoading() ? 'Đang tải…' : 'Tải thêm môn' }}</button> }
+  @if (subjectId) { <input [(ngModel)]="keyword" (keyup.enter)="search()" placeholder="Tìm nội dung câu hỏi"/><button (click)="search()">Tìm</button><button class="btn-outline" (click)="clearSearch()">Xóa lọc</button> }
+</section>
 
-@if (!subjectId) {
-  <div style="text-align:center; color:var(--text-3); padding:40px;">
-    👈 Hãy <b>chọn một môn học</b> để xem các câu hỏi hiện có.
-  </div>
-} @else {
-  <!-- Tab phân loại kho -->
-  <div style="margin-bottom:12px;">
-    <span class="chip" [class.active]="owner() === 'all'" (click)="setOwner('all')">📦 Tất cả</span>
-    <span class="chip" [class.active]="owner() === 'mine'" (click)="setOwner('mine')">👤 Của tôi</span>
-    <span class="chip" [class.active]="owner() === 'others'" (click)="setOwner('others')">👥 Của người khác</span>
-    <span style="color:var(--text-3); font-size:14px; margin-left:8px;">Tổng: {{ total() }} câu</span>
-  </div>
-
-  <!-- Lọc theo chương/chủ đề -->
-  <div style="margin-bottom:12px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-    <span class="chip" [class.active]="chapterFilter() === 'all'" (click)="setChapter('all')">📚 Tất cả chương</span>
-    @for (ch of chapters(); track ch.id) {
-      <span class="chip" [class.active]="chapterFilter() === ch.id" (click)="setChapter(ch.id!)">
-        {{ ch.name }} ({{ ch.question_count ?? 0 }})
-      </span>
-    }
-    <span class="chip" [class.active]="chapterFilter() === 'none'" (click)="setChapter('none')">❓ Chưa phân chương</span>
-    <button (click)="toggleChapterMgr()" class="btn-outline" style="padding:4px 12px; font-size:13px;">⚙️ Quản lý chương</button>
-  </div>
-
-  <!-- Panel quản lý chương -->
-  @if (showChapterMgr()) {
-    <div style="background:var(--surface); border-radius:10px; padding:14px 16px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,.08); max-width:560px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h4 style="margin:0;">Chương / chủ đề của môn</h4>
-        <button (click)="toggleChapterMgr()" class="btn-outline" style="padding:2px 10px;">✕</button>
-      </div>
-      @for (ch of chapters(); track ch.id) {
-        <div style="display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--border);">
-          @if (editChapterId() === ch.id) {
-            <input [(ngModel)]="editChapterName" (keyup.enter)="saveChapter(ch)" style="flex:1;" />
-            <button (click)="saveChapter(ch)" style="padding:4px 10px;">Lưu</button>
-            <button (click)="cancelEditChapter()" class="btn-outline" style="padding:4px 10px;">Hủy</button>
-          } @else {
-            <span style="flex:1;">{{ ch.name }}
-              <span style="color:var(--text-3); font-size:12px;">({{ ch.question_count ?? 0 }} câu)</span>
-            </span>
-            <button (click)="startEditChapter(ch)" class="btn-outline" style="padding:4px 10px;">✏️</button>
-            <button (click)="deleteChapter(ch)" class="btn-outline" style="padding:4px 10px; color:#e53935;">🗑</button>
-          }
-        </div>
-      } @empty {
-        <p style="color:var(--text-3); margin:6px 0;">Môn này chưa có chương nào — thêm chương bên dưới để phân loại câu hỏi.</p>
-      }
-      <div style="display:flex; gap:8px; margin-top:10px;">
-        <input [(ngModel)]="newChapterName" (keyup.enter)="addChapter()" placeholder="Tên chương mới (VD: Chương 1. Hàm số)" style="flex:1;" />
-        <button (click)="addChapter()">➕ Thêm</button>
-      </div>
-    </div>
-  }
-
-  <!-- Danh sách (lazy-load) -->
+@if (!subjectId) { <div class="empty"><strong>Chọn học phần để bắt đầu</strong><span>Hệ thống chỉ tải 12 câu hỏi mỗi lần; cuộn xuống để xem tiếp, không tải toàn bộ ngân hàng cùng lúc.</span></div> }
+@else {
+  <div class="tabs"><button [class.active]="owner() === 'all'" (click)="setOwner('all')">Tất cả</button><button [class.active]="owner() === 'mine'" (click)="setOwner('mine')">Của tôi</button><button [class.active]="owner() === 'others'" (click)="setOwner('others')">Nguồn khác</button>@if (isAdmin) { <button [class.active]="reviewFilter() === 'pending'" (click)="setReviewFilter(reviewFilter() === 'pending' ? '' : 'pending')">Chờ duyệt</button> }<span class="result-count">Hiển thị {{ items().length }} / {{ total() }} câu</span></div>
+  <div class="chips"><button [class.active]="chapterFilter() === 'all'" (click)="setChapter('all')">Tất cả chương</button>@for (chapter of chapters(); track chapter.id) { <button [class.active]="chapterFilter() === chapter.id" (click)="setChapter(chapter.id!)">{{ chapter.name }}</button> }<button [class.active]="chapterFilter() === 'none'" (click)="setChapter('none')">Chưa phân chương</button></div>
   <div class="q-grid">
-    @for (q of items(); track q.id) {
-      <div class="q-card fade-in" [class.q-mine]="isMine(q)">
-        <div style="display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;">
-          <span class="q-subject">{{ subjectName(q.subject_id) }}</span>
-          @if (isMine(q)) { <span class="q-badge-mine">Của bạn</span> }
-          @else { <span class="q-badge-other">👥 {{ q.creator_name || 'Khác' }}</span> }
-        </div>
-        <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:6px;">
-          @if (chapterName(q.chapter_id)) { <span class="q-tag">📖 {{ chapterName(q.chapter_id) }}</span> }
-          @else { <span class="q-tag" style="opacity:.6;">❓ Chưa phân chương</span> }
-          @if (q.status === 'draft') { <span class="q-tag q-tag-draft">📝 Nháp</span> }
-          @if (isUsed(q)) { <span class="q-tag q-tag-used" title="Câu đã dùng trong đề thi được khóa để bảo toàn đề">🔒 Trong {{ q.used_count }} đề</span> }
-        </div>
-        <p style="font-weight:600; margin:8px 0 6px;">{{ q.content }}
-          <span style="color:var(--text-3); font-size:12px; font-weight:normal;">({{ q.difficulty }})</span>
-        </p>
-        <ul style="margin:0 0 10px; padding-left:18px;">
-          @for (a of q.answers; track a.id) {
-            <li [style.color]="a.is_correct ? '#2e7d32' : 'var(--text-2)'" [style.fontWeight]="a.is_correct ? '600' : 'normal'">
-              {{ a.label }}. {{ a.content }} @if (a.is_correct) { ✔ }
-            </li>
-          }
-        </ul>
-        <div style="display:flex; gap:6px;">
-          <button (click)="edit(q)" [disabled]="isUsed(q)" class="btn-outline" style="flex:1; padding:5px;"
-                  [title]="isUsed(q) ? 'Đã dùng trong đề thi, không thể sửa — hãy Nhân bản' : ''">Sửa</button>
-          <button (click)="duplicate(q)" class="btn-outline" style="flex:1; padding:5px;" title="Tạo bản sao để chỉnh sửa">Nhân bản</button>
-          <button (click)="remove(q.id)" [disabled]="isUsed(q)" style="flex:1; padding:5px; background:#e53935;"
-                  [title]="isUsed(q) ? 'Đã dùng trong đề thi, không thể xóa' : ''">Xóa</button>
-        </div>
-      </div>
-    } @empty {
-      @if (!loading()) { <p>Không có câu hỏi nào trong mục này.</p> }
-    }
+    @for (question of items(); track question.id) {
+      <article class="q-card"><div class="card-top"><span>{{ chapterName(question.chapter_id) || 'Chưa phân chương' }}</span><span class="review" [class.approved]="question.review_status === 'approved'" [class.pending]="question.review_status === 'pending'">{{ question.review_status === 'approved' ? 'Đã duyệt' : question.review_status === 'pending' ? 'Chờ duyệt' : question.review_status === 'rejected' ? 'Bị từ chối' : 'Nháp' }}</span></div>
+      <h4>{{ question.content }}</h4><ol type="A">@for (answer of question.answers; track answer.id) { <li [class.correct]="answer.is_correct">{{ answer.content }}</li> }</ol>
+      <p class="source">Nguồn: <a [href]="question.source?.url" target="_blank" rel="noopener">{{ question.source?.title || 'Chưa có' }}</a><br/>Tham chiếu: {{ question.source_reference || 'Chưa có' }}</p>
+      @if ((question.attempt_count ?? 0) > 0) { <p class="question-performance" title="Tính từ các bài đã nộp, không tính phiên đang làm dở">Đã xuất hiện {{ question.attempt_count }} lượt · Tỷ lệ đúng {{ (question.correct_rate ?? 0) | number:'1.0-1' }}%</p> }
+      <div class="card-actions">@if (isAdmin && isPending(question)) { <button (click)="approve(question)">Duyệt</button><button class="btn-outline" (click)="reject(question)">Từ chối</button> } @if (isMine(question) || isAdmin) { <button class="btn-outline" [disabled]="isUsed(question)" (click)="edit(question)">Sửa</button><button class="danger" [disabled]="isUsed(question)" (click)="remove(question.id)">Xóa</button> }<button class="btn-outline" (click)="duplicate(question)">Nhân bản</button></div>
+      </article>
+    } @empty { @if (!loading()) { <div class="empty inline-empty"><strong>Chưa có câu hỏi phù hợp</strong><span>Thử đổi bộ lọc, tìm kiếm khác hoặc thêm câu hỏi có nguồn tham chiếu.</span><button (click)="openAdd()">+ Thêm câu hỏi</button></div> } }
   </div>
-
-  <!-- spinner + sentinel cuộn để tải thêm -->
-  @if (loading()) { <div class="loader"></div> }
-  @if (hasMore() && !loading()) {
-    <div appInfiniteScroll (scrolled)="loadMore()" style="height:1px;"></div>
-  }
+  @if (loading()) { <p class="muted">Đang tải thêm câu hỏi...</p> }
+  @if (hasMore() && !loading()) { <div appInfiniteScroll (scrolled)="loadMore()" class="scroll-sentinel"></div> }
 }
 
 <style>
-  .q-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
-  .q-card { background:var(--surface); border-radius:10px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,.07); border-left:4px solid var(--border); transition:transform .15s, box-shadow .15s; }
-  .q-card:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
-  .q-mine { border-left-color:var(--accent); }
-  .q-subject { background:var(--accent-soft); color:var(--accent); font-size:12px; padding:2px 10px; border-radius:10px; }
-  .q-badge-mine { background:var(--accent); color:#fff; font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap; }
-  .q-badge-other { background:var(--border); color:var(--text-2); font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap; }
-  .q-tag { background:var(--surface-2); color:var(--text-2); font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap; }
-  .q-tag-draft { background:#fff3e0; color:#e65100; }
-  .q-tag-used { background:#e8eaf6; color:#3949ab; }
-  button:disabled { opacity:.45; cursor:not-allowed; }
+.page-header,.panel-title,.actions,.tabs,.chips,.card-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.page-header,.panel-title{justify-content:space-between}.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--accent);margin:0}.page-header h2{margin:4px 0}.muted{color:var(--text-3)}.error{color:#b42318}.success{color:#067647}.panel,.filters{background:var(--surface);padding:18px;border:1px solid var(--border);border-radius:16px;margin:14px 0;box-shadow:var(--shadow-sm)}.notice{padding:10px;background:#fff7e6;border-radius:8px}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.form-grid label,.block-label,.source-form label{display:grid;gap:5px;font-size:14px}textarea,input,select{width:100%;box-sizing:border-box;padding:8px}fieldset{border:1px solid var(--border);border-radius:12px;margin:14px 0;padding:12px}.answer-row{display:flex;gap:8px;align-items:center;margin:7px 0}.answer-row input[type=text],.answer-row input:not([type]){flex:1}.source-form{margin-top:10px;display:grid;gap:8px;padding:10px;background:var(--surface-2)}.source-notice{margin:10px 0 0;padding:9px 10px;border-radius:8px;background:#fff7e6;color:#7a5200;font-size:13px}.source-review{margin-top:12px;padding:10px;border:1px solid var(--border);border-radius:12px}.source-review>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--border)}.source-review span{font-size:12px;color:var(--text-3);flex:1}.filters{display:flex;gap:8px;align-items:end;flex-wrap:wrap}.filters label{min-width:260px}.tabs{padding:2px 0 10px;border-bottom:1px solid var(--border)}.tabs button,.chips button{border:0;background:var(--surface-2);padding:7px 12px;border-radius:999px}.tabs button.active,.chips button.active{background:var(--accent);color:white}.result-count{margin-left:auto;font-size:13px;color:var(--text-3);font-weight:650}.chips{padding:12px 0}.q-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}.q-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s ease}.q-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}.card-top{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--text-2)}.q-card h4{line-height:1.55;margin:14px 0 10px}.review{padding:3px 8px;border-radius:999px;background:#f0f0f0;white-space:nowrap}.review.pending{background:#fff3cd;color:#7a5200}.review.approved{background:#e7f6ec;color:#176b31}.correct{color:#176b31;font-weight:600}.source{font-size:13px;color:var(--text-2);border-top:1px solid var(--border);padding-top:8px}.danger{background:#d92d20}.scroll-sentinel{height:2px}.empty{display:grid;gap:8px;justify-items:center;padding:42px 24px;text-align:center;color:var(--text-3);border:1px dashed var(--border);border-radius:16px;background:var(--surface)}.empty strong{color:var(--text);font-size:16px}.inline-empty{grid-column:1/-1;min-height:150px}@media(max-width:600px){.page-header{align-items:flex-start}.answer-row{align-items:stretch;flex-wrap:wrap}.q-grid{grid-template-columns:1fr}.result-count{width:100%;margin-left:0}.filters label{min-width:100%}}
 </style>
+<style>.question-performance{margin:8px 0;padding:7px 9px;border-radius:8px;background:#eef2ff;color:#3345a6;font-size:12px;font-weight:650}</style>

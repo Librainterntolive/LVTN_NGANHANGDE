@@ -33,6 +33,9 @@ export class SubjectDetail implements OnInit {
 
   // đề thi của môn
   exams = signal<Exam[]>([]);
+  examTotal = signal<number>(0);
+  examLoading = signal<boolean>(false);
+  private examPage = 1;
 
   isStaff(): boolean {
     const r = this.auth.getRole();
@@ -43,18 +46,34 @@ export class SubjectDetail implements OnInit {
     this.subjectId = Number(this.route.snapshot.paramMap.get('id'));
     this.subjectService.getOne(this.subjectId).subscribe((s) => this.subject.set(s));
     this.loadExams();
-    if (this.isStaff()) this.loadQuestions();
   }
 
-  loadExams() {
-    if (this.isStaff()) {
-      this.examService.getAll(undefined, this.subjectId).subscribe((d) => this.exams.set(d ?? []));
-    } else {
-      // khách/SV: chỉ thấy đề công khai của môn này
-      this.studentService.getPublicExams().subscribe((d) =>
-        this.exams.set((d ?? []).filter((e) => e.subject_id === this.subjectId)));
+  selectTab(tab: 'exams' | 'questions') {
+    this.tab.set(tab);
+    if (tab === 'questions' && this.isStaff() && !this.questions().length && !this.qLoading()) {
+      this.loadQuestions();
     }
   }
+
+  loadExams(reset = true) {
+    if (this.examLoading()) return;
+    if (reset) { this.examPage = 1; this.exams.set([]); this.examTotal.set(0); }
+    this.examLoading.set(true);
+    if (this.isStaff()) {
+      this.examService.getPaged(this.examPage, 12, undefined, this.subjectId).subscribe({
+        next: result => { this.exams.update(items => [...items, ...(result.items ?? [])]); this.examTotal.set(result.total); this.examLoading.set(false); },
+        error: () => this.examLoading.set(false),
+      });
+    } else {
+      this.studentService.getPublicExamsPaged(this.examPage, 12, this.subjectId).subscribe({
+        next: result => { this.exams.update(items => [...items, ...(result.items ?? [])]); this.examTotal.set(result.total); this.examLoading.set(false); },
+        error: () => this.examLoading.set(false),
+      });
+    }
+  }
+
+  hasMoreExams() { return this.exams().length < this.examTotal(); }
+  loadMoreExams() { if (!this.examLoading() && this.hasMoreExams()) { this.examPage++; this.loadExams(false); } }
 
   loadQuestions() {
     if (this.qLoading()) return;

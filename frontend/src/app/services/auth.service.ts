@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 
 export interface LoginResult {
   token: string;
-  user: { id: number; username: string; full_name: string; role: string };
+  user: { id: number; username: string; full_name: string; role: string; must_change_password?: boolean };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +29,13 @@ export class AuthService {
   register(data: any): Observable<any> {
     return this.http.post(`${this.url}/register`, data);
   }
+  verifyOTP(email: string, code: string): Observable<any> {
+    return this.http.post(`${this.url}/verify-otp`, { email, code });
+  }
+  resendOTP(email: string): Observable<any> { return this.http.post(`${this.url}/resend-otp`, { email }); }
+  requestPasswordOTP(email: string): Observable<any> { return this.http.post(`${this.url}/password-reset-otp`, { email }); }
+  requestPasswordReset(email: string, code: string): Observable<any> { return this.http.post(`${this.url}/forgot-password`, { email, code }); }
+  changePassword(currentPassword:string,newPassword:string): Observable<any> { return this.http.post(`${environment.apiUrl}/auth/change-password`, { current_password:currentPassword, new_password:newPassword }); }
 
   logout() {
     localStorage.removeItem('token');
@@ -41,7 +48,9 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    const valid = this.isTokenValid(this.getToken());
+    if (!valid && this.getToken()) this.logout();
+    return valid;
   }
 
   getRole(): string | null {
@@ -49,7 +58,32 @@ export class AuthService {
   }
 
   private readUser(): LoginResult['user'] | null {
+    if (!this.isTokenValid(this.getToken())) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return null;
+    }
     const raw = localStorage.getItem('user');
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      localStorage.removeItem('user');
+      return null;
+    }
+  }
+
+  private isTokenValid(token: string | null): boolean {
+    if (!token) return false;
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    try {
+      const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const decoded = atob(payload.padEnd(Math.ceil(payload.length / 4) * 4, '='));
+      const expiry = JSON.parse(decoded).exp;
+      return typeof expiry === 'number' && expiry * 1000 > Date.now();
+    } catch {
+      return false;
+    }
   }
 }

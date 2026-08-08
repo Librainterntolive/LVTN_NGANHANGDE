@@ -38,6 +38,12 @@ export class ExamService {
     const q = p.length ? `?${p.join('&')}` : '';
     return this.http.get<Exam[]>(`${this.url}${q}`);
   }
+  getPaged(page = 1, limit = 12, keyword?: string, subjectId?: number): Observable<{items:Exam[];total:number;page:number;limit:number}> {
+    const params = [`page=${page}`, `limit=${limit}`];
+    if (keyword) params.push(`keyword=${encodeURIComponent(keyword)}`);
+    if (subjectId) params.push(`subject_id=${subjectId}`);
+    return this.http.get<{items:Exam[];total:number;page:number;limit:number}>(`${this.url}/paged?${params.join('&')}`);
+  }
   getOne(id: number): Observable<ExamDetail> {
     return this.http.get<ExamDetail>(`${this.url}/${id}`);
   }
@@ -45,6 +51,9 @@ export class ExamService {
   // xem nội dung đề (câu hỏi + đáp án) cho GV
   preview(id: number): Observable<{ exam: Exam; questions: any[] }> {
     return this.http.get<{ exam: Exam; questions: any[] }>(`${this.url}/${id}/preview`);
+  }
+  printPaper(id: number): Observable<Blob> {
+    return this.http.get(`${this.url}/${id}/print`, { responseType: 'blob' });
   }
   create(data: any): Observable<Exam> {
     return this.http.post<Exam>(this.url, data);

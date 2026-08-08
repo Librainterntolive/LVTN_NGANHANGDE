@@ -25,7 +25,13 @@ export class Exams implements OnInit {
 
   exams = signal<Exam[]>([]);
   subjects = signal<Subject[]>([]);
+  subjectTotal = signal(0);
+  subjectsLoading = signal(false);
+  subjectPage = 1;
   classes = signal<AppClass[]>([]);
+  classTotal = signal(0);
+  classPage = 1;
+  classesLoading = signal(false);
   error = signal<string>('');
   message = signal<string>('');
   editingId = signal<number | null>(null);
@@ -34,8 +40,8 @@ export class Exams implements OnInit {
   preview = signal<{ exam: Exam; questions: any[] } | null>(null);
 
   // khối để lọc môn
-  levels = ['Khối 10', 'Khối 11', 'Khối 12', 'Đại học', 'Khác'];
-  pickLevel = '';
+  levels = ['Đại học'];
+  pickLevel = 'Đại học';
 
   // cấu hình đề
   form: Exam = this.empty();
@@ -70,11 +76,24 @@ export class Exams implements OnInit {
   keyword = '';
 
   ngOnInit() {
-    this.subjectService.getAll().subscribe((d) => this.subjects.set(d ?? []));
+    this.loadSubjects();
     // chỉ lấy lớp của mình + lớp dùng chung
-    this.classService.getAssignable().subscribe((d) => this.classes.set(d ?? []));
+    this.loadAssignableClasses();
     this.load();
   }
+
+  loadAssignableClasses(reset = true) {
+    if (this.classesLoading()) return;
+    const page = reset ? 1 : this.classPage + 1;
+    if (reset) { this.classes.set([]); this.classTotal.set(0); }
+    this.classesLoading.set(true);
+    this.classService.getAssignablePaged(page).subscribe({
+      next: result => { this.classes.set(reset ? (result.items ?? []) : [...this.classes(), ...(result.items ?? [])]); this.classTotal.set(result.total ?? 0); this.classPage = page; this.classesLoading.set(false); },
+      error: () => { this.error.set('Không tải được danh sách lớp học.'); this.classesLoading.set(false); },
+    });
+  }
+
+  hasMoreAssignableClasses() { return this.classes().length < this.classTotal(); }
 
   empty(): Exam {
     return {
@@ -89,26 +108,47 @@ export class Exams implements OnInit {
     return this.subjects().filter((s) => s.level === this.pickLevel);
   }
 
-  // lazy-load bảng: mỗi lần hiện 10 dòng, cuộn tới cuối mới hiện tiếp
-  displayLimit = signal<number>(10);
+  loadSubjects(reset = true) {
+    if (this.subjectsLoading()) return;
+    const page = reset ? 1 : this.subjectPage + 1;
+    if (reset) { this.subjects.set([]); this.subjectTotal.set(0); }
+    this.subjectsLoading.set(true);
+    this.subjectService.getPaged(page, 12).subscribe({
+      next: result => {
+        this.subjects.set(reset ? (result.items ?? []) : [...this.subjects(), ...(result.items ?? [])]);
+        this.subjectTotal.set(result.total ?? 0);
+        this.subjectPage = page;
+        this.subjectsLoading.set(false);
+      },
+      error: () => { this.error.set('Không tải được danh sách môn học.'); this.subjectsLoading.set(false); },
+    });
+  }
+
+  hasMoreSubjects() { return this.subjects().length < this.subjectTotal(); }
+
+  examTotal = signal<number>(0);
+  private examPage = 1;
+  examLoading = signal<boolean>(false);
 
   load() {
-    this.examService.getAll(this.keyword || undefined).subscribe({
-      next: (d) => { this.exams.set(d ?? []); this.displayLimit.set(10); },
-      error: () => this.error.set('Không tải được đề thi.'),
-    });
+    this.examPage = 1; this.exams.set([]); this.examTotal.set(0); this.loadMoreRows();
   }
   search() { this.load(); }
   clearSearch() { this.keyword = ''; this.load(); }
 
   displayedExams(): Exam[] {
-    return this.exams().slice(0, this.displayLimit());
+    return this.exams();
   }
   hasMoreRows(): boolean {
-    return this.displayLimit() < this.exams().length;
+    return this.exams().length < this.examTotal();
   }
   loadMoreRows() {
-    if (this.hasMoreRows()) this.displayLimit.update((v) => v + 10);
+    if (this.examLoading() || (this.examTotal() > 0 && !this.hasMoreRows())) return;
+    this.examLoading.set(true);
+    this.examService.getPaged(this.examPage, 12, this.keyword || undefined).subscribe({
+      next: (data) => { this.exams.update((rows) => [...rows, ...(data.items ?? [])]); this.examTotal.set(data.total); this.examPage++; this.examLoading.set(false); },
+      error: () => { this.error.set('Không tải được đề thi.'); this.examLoading.set(false); },
+    });
   }
 
   // badge màu cho trạng thái / truy cập
@@ -121,29 +161,50 @@ export class Exams implements OnInit {
 
   // tải file Excel mẫu để giáo viên điền câu hỏi theo đúng định dạng
   downloadTemplate() {
-    this.questionService.downloadTemplate().subscribe((blob) => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mau-cau-hoi-de-thi.xlsx';
-      a.click();
-      URL.revokeObjectURL(url);
+    this.questionService.downloadTemplate().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mau-cau-hoi-de-thi.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.toast.error('Không tải được mẫu câu hỏi. Vui lòng thử lại.'),
     });
   }
 
   // ----- kéo thả file -----
   onFileChange(e: Event) {
     const input = e.target as HTMLInputElement;
-    this.file = input.files?.[0] ?? null;
+    this.setImportFile(input.files?.[0] ?? null);
+    if (!this.file) input.value = '';
   }
   onDrop(e: DragEvent) {
     e.preventDefault();
     this.dragOver.set(false);
-    if (e.dataTransfer?.files?.length) this.file = e.dataTransfer.files[0];
+    if (e.dataTransfer?.files?.length) this.setImportFile(e.dataTransfer.files[0]);
   }
   onDragOver(e: DragEvent) { e.preventDefault(); this.dragOver.set(true); }
   onDragLeave(e: DragEvent) { e.preventDefault(); this.dragOver.set(false); }
   clearFile() { this.file = null; }
+
+  private setImportFile(file: File | null) {
+    if (!file) { this.file = null; return; }
+    const name = file.name.toLowerCase();
+    if (!name.endsWith('.csv') && !name.endsWith('.xlsx')) {
+      this.file = null;
+      this.error.set('Chỉ hỗ trợ file .csv hoặc .xlsx');
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      this.file = null;
+      this.error.set('File quá lớn (tối đa 20MB)');
+      return;
+    }
+    this.error.set('');
+    this.file = file;
+  }
 
   toggleClass(id: number) {
     this.selectedClassIds.has(id) ? this.selectedClassIds.delete(id) : this.selectedClassIds.add(id);
@@ -324,31 +385,88 @@ export class Exams implements OnInit {
         this.preview.set(d);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      error: () => this.error.set('Không tải được nội dung đề.'),
+      error: () => {
+        this.error.set('Không tải được nội dung đề.');
+        this.toast.error('Không tải được nội dung đề.');
+      },
     });
   }
   closePreview() { this.preview.set(null); }
 
+  printExam(id: number) {
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      this.toast.error('Trinh duyet dang chan cua so in. Hay cho phep pop-up va thu lai.');
+      return;
+    }
+    popup.opener = null;
+    popup.document.title = 'Dang tao ban in...';
+    this.examService.printPaper(id).subscribe({
+      next: (paper) => {
+        const url = URL.createObjectURL(paper);
+        popup.location.replace(url);
+        popup.addEventListener('load', () => { popup.focus(); popup.print(); }, { once: true });
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      },
+      error: (e) => {
+        popup.close();
+        this.toast.error(e?.error?.error ?? 'Khong tao duoc ban in de thi.');
+      },
+    });
+  }
+
+  downloadPrintPaper(id: number, title: string) {
+    this.examService.printPaper(id).subscribe({
+      next: (paper) => {
+        const url = URL.createObjectURL(paper);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${this.printFileName(title)}.html`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        this.toast.success('Da tai ban in. Mo file HTML de in hoac luu PDF.');
+      },
+      error: (e) => this.toast.error(e?.error?.error ?? 'Khong tai duoc ban in de thi.'),
+    });
+  }
+
+  private printFileName(title: string) {
+    const base = title.normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[đĐ]/g, character => character === 'đ' ? 'd' : 'D')
+      .replace(/[^a-zA-Z0-9._-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return base || `de-thi-${Date.now()}`;
+  }
+
   // ===== SỬA đề (cấu hình + thay đổi được danh sách câu hỏi) =====
   edit(id: number) {
-    this.examService.getOne(id).subscribe((d) => {
-      this.editingId.set(id);
-      this.form = { ...d.exam };
-      this.existingQuestionIds = d.question_ids ?? [];
-      this.selectedClassIds = new Set(d.class_ids ?? []);
+    this.examService.getOne(id).subscribe({
+      next: (d) => {
+        this.editingId.set(id);
+        this.form = { ...d.exam };
+        this.existingQuestionIds = d.question_ids ?? [];
+        this.selectedClassIds = new Set(d.class_ids ?? []);
 
-      // nạp câu hỏi hiện có của đề vào danh sách đã tick
-      this.pickedIds = new Set(this.existingQuestionIds);
-      this.pickedPreview.clear();
-      this.examService.preview(id).subscribe((p) => {
-        for (const q of p.questions ?? []) this.pickedPreview.set(q.id, q.content);
-      });
-      if (this.form.subject_id) {
-        this.chapterService.getBySubject(this.form.subject_id).subscribe((c) => this.pickerChapters.set(c ?? []));
-      }
-      this.pickerItems.set([]);
-      this.pickerTotal.set(0);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+        // nạp câu hỏi hiện có của đề vào danh sách đã tick
+        this.pickedIds = new Set(this.existingQuestionIds);
+        this.pickedPreview.clear();
+        this.examService.preview(id).subscribe({
+          next: (preview) => {
+            for (const question of preview.questions ?? []) this.pickedPreview.set(question.id, question.content);
+          },
+          error: () => this.toast.error('Không tải được danh sách câu hỏi của đề.'),
+        });
+        if (this.form.subject_id) {
+          this.chapterService.getBySubject(this.form.subject_id).subscribe((c) => this.pickerChapters.set(c ?? []));
+        }
+        this.pickerItems.set([]);
+        this.pickerTotal.set(0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+      error: () => this.toast.error('Không tải được cấu hình đề thi.'),
     });
   }
 
@@ -362,7 +480,11 @@ export class Exams implements OnInit {
     };
     this.examService.update(this.editingId()!, payload).subscribe({
       next: () => { this.toast.success('Đã cập nhật đề thi.'); this.cancel(); this.load(); },
-      error: (e) => this.error.set(e?.error?.error ?? 'Lưu thất bại'),
+      error: (e) => {
+        const message = e?.error?.error ?? 'Lưu thất bại';
+        this.error.set(message);
+        this.toast.error(message);
+      },
     });
   }
 
@@ -388,7 +510,14 @@ export class Exams implements OnInit {
   remove(id?: number) {
     if (!id) return;
     this.dialog.confirm('Xóa đề thi', 'Bạn chắc chắn muốn xóa đề thi này?').then((ok) => {
-      if (ok) this.examService.remove(id).subscribe(() => this.load());
+      if (!ok) return;
+      this.examService.remove(id).subscribe({
+        next: () => {
+          this.load();
+          this.toast.success('Đã xóa đề thi.');
+        },
+        error: (error) => this.toast.error(error?.error?.error ?? 'Không thể xóa đề thi.'),
+      });
     });
   }
 

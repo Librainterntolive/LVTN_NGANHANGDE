@@ -18,6 +18,7 @@ const DICT: Record<string, { vi: string; en: string }> = {
   'menu.stats': { vi: 'Thống kê', en: 'Statistics' },
   'menu.admin': { vi: 'Quản trị', en: 'Admin' },
   'menu.users': { vi: 'Người dùng', en: 'Users' },
+  'menu.sources': { vi: 'Kiểm duyệt nguồn', en: 'Source review' },
   'menu.learning': { vi: 'Học tập', en: 'Learning' },
   'menu.myexams': { vi: 'Đề thi của tôi', en: 'My Exams' },
   'menu.myclasses': { vi: 'Lớp của tôi', en: 'My Classes' },

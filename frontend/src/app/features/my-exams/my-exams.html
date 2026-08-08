@@ -17,6 +17,8 @@
   }
 </div>
 
+@if (hasMore()) { <div class="load-more"><button class="btn-outline" (click)="load(false)" [disabled]="loading()">{{ loading() ? 'Đang tải…' : 'Tải thêm đề thi' }}</button><div appInfiniteScroll (scrolled)="load(false)" style="height:1px;"></div></div> }
+
 <style>
   .exam-card {
     background:var(--surface); border-radius:10px; padding:20px; width:240px;
@@ -29,4 +31,5 @@
     background:var(--accent); color:#fff; border-radius:6px; text-decoration:none; font-weight:600;
   }
   .take-btn:hover { background:var(--accent-hover); text-decoration:none; }
+  .load-more { text-align:center; margin:22px 0; }
 </style>
