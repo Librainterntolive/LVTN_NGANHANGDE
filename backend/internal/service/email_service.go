@@ -77,11 +77,15 @@ func SendClassPostPublished(to, className, authorName, content string) error {
 }
 
 func sendEmail(to, subject, body string) error {
-	host := os.Getenv("SMTP_HOST")
-	username := os.Getenv("SMTP_USERNAME")
-	password := os.Getenv("SMTP_PASSWORD")
-	port := os.Getenv("SMTP_PORT")
-	from := os.Getenv("SMTP_FROM")
+	host := strings.TrimSpace(os.Getenv("SMTP_HOST"))
+	username := strings.TrimSpace(os.Getenv("SMTP_USERNAME"))
+	// Google hien thi mat khau ung dung theo dang "abcd efgh ijkl mnop".
+	// Nguoi dung thuong dan y nguyen ca khoang trang, trong khi giao thuc SMTP
+	// gui chuoi nguyen van nen may chu se tu choi voi ma 535. Bo moi khoang
+	// trang de dan kieu nao cung chay.
+	password := strings.Join(strings.Fields(os.Getenv("SMTP_PASSWORD")), "")
+	port := strings.TrimSpace(os.Getenv("SMTP_PORT"))
+	from := strings.TrimSpace(os.Getenv("SMTP_FROM"))
 	if host == "" || username == "" || password == "" {
 		log.Printf("gửi thư thất bại: chưa cấu hình SMTP_HOST/SMTP_USERNAME/SMTP_PASSWORD")
 		return ErrEmailNotSent
