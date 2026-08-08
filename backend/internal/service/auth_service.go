@@ -177,10 +177,36 @@ func (s *AuthService) ChangePassword(userID uint, in dto.ChangePasswordInput) er
 	return s.userRepo.Update(user)
 }
 func (s *AuthService) PendingResetRequests() ([]entity.PasswordResetRequest, error) {
-	return s.userRepo.PendingResetRequests()
+	list, err := s.userRepo.PendingResetRequests()
+	if err != nil {
+		return nil, err
+	}
+	s.fillResetRequestUsers(list)
+	return list, nil
 }
 func (s *AuthService) PendingResetRequestsPaged(limit, offset int) ([]entity.PasswordResetRequest, int64, error) {
-	return s.userRepo.PendingResetRequestsPaged(limit, offset)
+	list, total, err := s.userRepo.PendingResetRequestsPaged(limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	s.fillResetRequestUsers(list)
+	return list, total, nil
+}
+
+// fillResetRequestUsers điền tên và email của người gửi yêu cầu vào từng dòng,
+// để quản trị viên biết mình đang cấp lại mật khẩu cho ai trước khi bấm duyệt.
+func (s *AuthService) fillResetRequestUsers(list []entity.PasswordResetRequest) {
+	for i := range list {
+		user, err := s.userRepo.FindByID(fmt.Sprint(list[i].UserID))
+		if err != nil {
+			continue
+		}
+		list[i].Username = user.Username
+		list[i].FullName = user.FullName
+		if user.Email != nil {
+			list[i].Email = *user.Email
+		}
+	}
 }
 func (s *AuthService) ApproveResetRequest(id string) error {
 	request, err := s.userRepo.FindResetRequest(id)

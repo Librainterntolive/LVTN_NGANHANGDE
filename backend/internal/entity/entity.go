@@ -28,11 +28,17 @@ type EmailOTP struct {
 }
 
 type PasswordResetRequest struct {
-	ID         uint   `gorm:"primaryKey"`
-	UserID     uint   `gorm:"index"`
-	Status     string `gorm:"size:20;default:pending"`
-	CreatedAt  time.Time
-	ApprovedAt *time.Time
+	ID         uint       `gorm:"primaryKey" json:"id"`
+	UserID     uint       `gorm:"index" json:"user_id"`
+	Status     string     `gorm:"size:20;default:pending" json:"status"`
+	CreatedAt  time.Time  `json:"created_at"`
+	ApprovedAt *time.Time `json:"approved_at,omitempty"`
+	// Thông tin người yêu cầu, không lưu trong bảng mà điền khi đọc. Thiếu ba
+	// trường này thì màn hình duyệt chỉ hiện mã số, quản trị viên không biết
+	// đang cấp lại mật khẩu cho ai.
+	Username string `gorm:"-" json:"username"`
+	FullName string `gorm:"-" json:"full_name"`
+	Email    string `gorm:"-" json:"email"`
 }
 
 // AUDIT_LOGS: dấu vết các thao tác quản trị quan trọng, không lưu mật khẩu hay OTP.

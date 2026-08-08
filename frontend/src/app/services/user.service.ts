@@ -13,7 +13,7 @@ export interface AppUser {
   status?: string; // active/locked
   lock_reason?: string; // lý do tạm khóa
 }
-export interface PasswordResetRequest { id:number; user_id:number; status:string; created_at:string; approved_at?:string; }
+export interface PasswordResetRequest { id:number; user_id:number; status:string; created_at:string; approved_at?:string; username?:string; full_name?:string; email?:string; }
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
