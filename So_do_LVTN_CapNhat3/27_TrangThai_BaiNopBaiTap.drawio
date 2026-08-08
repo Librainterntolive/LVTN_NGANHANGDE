@@ -1,0 +1,17 @@
+<mxfile host="app.diagrams.net">
+<diagram id="d1" name="Trang-1">
+<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="920" pageHeight="680" math="0" shadow="0"><root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="T" value="Sơ đồ trạng thái — Bài nộp bài tập (assignment submission)" style="text;html=1;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="40" y="8" width="760" height="26" as="geometry"/></mxCell>
+<mxCell id="I" value="" style="ellipse;fillColor=#000000;html=1;" vertex="1" parent="1"><mxGeometry x="440" y="100" width="30" height="30" as="geometry"/></mxCell>
+<mxCell id="S1" value="Nộp muộn (late)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" vertex="1" parent="1"><mxGeometry x="30" y="250" width="260" height="60" as="geometry"/></mxCell>
+<mxCell id="S2" value="Đã nộp đúng hạn (on_time)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" vertex="1" parent="1"><mxGeometry x="590" y="250" width="260" height="60" as="geometry"/></mxCell>
+<mxCell id="S3" value="Đã chấm điểm (graded)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=40;" vertex="1" parent="1"><mxGeometry x="310" y="420" width="260" height="60" as="geometry"/></mxCell>
+<mxCell id="F" value="" style="ellipse;fillColor=none;html=1;shape=endState;" vertex="1" parent="1"><mxGeometry x="440" y="590" width="34" height="34" as="geometry"/></mxCell>
+<mxCell id="e0" value="Nộp trước due_at" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="I" target="S2"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e1" value="Nộp sau due_at, trước late_until" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="I" target="S1"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e2" value="Giảng viên chấm điểm" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="S2" target="S3"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e3" value="Giảng viên chấm điểm" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="S1" target="S3"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e4" value="Không cho nộp lại" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="S3" target="F"><mxGeometry relative="1" as="geometry"/></mxCell>
+</root></mxGraphModel></diagram></mxfile>

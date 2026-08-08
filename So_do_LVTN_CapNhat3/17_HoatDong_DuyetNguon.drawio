@@ -1,0 +1,33 @@
+<mxfile host="app.diagrams.net">
+<diagram id="d1" name="Trang-1">
+<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="980" math="0" shadow="0"><root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="T" value="Sơ đồ hoạt động — Duyệt nguồn tài liệu (thay Sửa/Xóa)" style="text;html=1;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="40" y="8" width="760" height="26" as="geometry"/></mxCell>
+<mxCell id="I" value="" style="ellipse;fillColor=#000000;html=1;" vertex="1" parent="1"><mxGeometry x="486" y="40" width="28" height="28" as="geometry"/></mxCell>
+<mxCell id="A" value="Chọn nguồn tài liệu đang chờ duyệt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=30;" vertex="1" parent="1"><mxGeometry x="400" y="110" width="200" height="50" as="geometry"/></mxCell>
+<mxCell id="eIA" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="I" target="A"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="B" value="Sửa hay Xóa?" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="420" y="200" width="160" height="70" as="geometry"/></mxCell>
+<mxCell id="eAB" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="A" target="B"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="C1" value="Xem lại thông tin nguồn (URL, tiêu đề, năm XB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=30;" vertex="1" parent="1"><mxGeometry x="60" y="340" width="240" height="54" as="geometry"/></mxCell>
+<mxCell id="eBC1" value="Sửa" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="B" target="C1"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="C2" value="Thông tin đủ căn cứ xác thực?" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="60" y="440" width="240" height="70" as="geometry"/></mxCell>
+<mxCell id="eC1C2" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="C1" target="C2"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="C3" value="Từ chối (verification_status = rejected)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=30;" vertex="1" parent="1"><mxGeometry x="350" y="460" width="220" height="50" as="geometry"/></mxCell>
+<mxCell id="eC2C3" value="Không hợp lệ" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="C2" target="C3"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="eC3C1" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="C3" target="C1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="460" y="485"/><mxPoint x="460" y="367"/><mxPoint x="300" y="367"/></Array></mxGeometry></mxCell>
+<mxCell id="C4" value="Xác thực (verification_status = verified)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=30;" vertex="1" parent="1"><mxGeometry x="60" y="570" width="240" height="54" as="geometry"/></mxCell>
+<mxCell id="eC2C4" value="Hợp lệ" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="C2" target="C4"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="D1" value="Nguồn đang được câu hỏi nào tham chiếu?" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="780" y="340" width="240" height="70" as="geometry"/></mxCell>
+<mxCell id="eBD1" value="Xóa" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="B" target="D1"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="D2" value="Không xóa — chỉ có thể chuyển trạng thái duyệt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=30;" vertex="1" parent="1"><mxGeometry x="780" y="460" width="240" height="54" as="geometry"/></mxCell>
+<mxCell id="eD1D2" value="Còn ràng buộc" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="D1" target="D2"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="D3" value="Giữ nguyên, không hỗ trợ xóa nguồn" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=30;" vertex="1" parent="1"><mxGeometry x="780" y="570" width="240" height="54" as="geometry"/></mxCell>
+<mxCell id="eD1D3" value="Không còn ràng buộc" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="D1" target="D3"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="G" value="Hiển thị kết quả cho người dùng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;arcSize=30;" vertex="1" parent="1"><mxGeometry x="330" y="700" width="340" height="56" as="geometry"/></mxCell>
+<mxCell id="eC4G" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="C4" target="G"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="eD2G" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="D2" target="G"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="eD3G" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="D3" target="G"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+<mxCell id="F" value="" style="ellipse;fillColor=none;html=1;shape=endState;" vertex="1" parent="1"><mxGeometry x="483" y="800" width="34" height="34" as="geometry"/></mxCell>
+<mxCell id="eGF" value="" style="endArrow=open;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="G" target="F"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+</root></mxGraphModel></diagram></mxfile>

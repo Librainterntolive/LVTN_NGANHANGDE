@@ -1,0 +1,21 @@
+<mxfile host="app.diagrams.net">
+<diagram id="d1" name="Trang-1">
+<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0"><root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="T" value="Sơ đồ tuần tự — Quên mật khẩu (OTP và Admin duyệt)" style="text;html=1;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="40" y="8" width="850" height="26" as="geometry"/></mxCell>
+<mxCell id="p0" value="Người dùng" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="102" y="40" width="36" height="60" as="geometry"/></mxCell>
+<mxCell id="ll0" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="120" y="106" as="sourcePoint"/><mxPoint x="120" y="715" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="p1" value="&quot;Hệ thống&quot;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="350" y="40" width="140" height="34" as="geometry"/></mxCell>
+<mxCell id="ll1" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="74" as="sourcePoint"/><mxPoint x="420" y="715" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="p2" value="Quản trị viên" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="702" y="40" width="36" height="60" as="geometry"/></mxCell>
+<mxCell id="ll2" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="720" y="106" as="sourcePoint"/><mxPoint x="720" y="715" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m0" value="1. Nhập email, yêu cầu OTP quên mật khẩu" style="endArrow=open;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="120" y="135" as="sourcePoint"/><mxPoint x="420" y="135" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m1" value="1.1. Gửi mã OTP qua email" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="205" as="sourcePoint"/><mxPoint x="120" y="205" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m2" value="1.2. Nhập mã OTP, xác minh danh tính" style="endArrow=open;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="120" y="275" as="sourcePoint"/><mxPoint x="420" y="275" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m3" value="1.3. Tạo yêu cầu cấp lại mật khẩu (status=pending)" style="endArrow=open;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="345" as="sourcePoint"/><mxPoint x="420" y="345" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m4" value="2. Hiển thị yêu cầu chờ duyệt trong danh sách Admin" style="endArrow=open;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="415" as="sourcePoint"/><mxPoint x="720" y="415" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m5" value="2.1. Duyệt yêu cầu cấp lại mật khẩu" style="endArrow=open;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="720" y="485" as="sourcePoint"/><mxPoint x="420" y="485" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m6" value="2.2. Sinh mật khẩu tạm 14 ký tự, must_change_password=true" style="endArrow=open;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="555" as="sourcePoint"/><mxPoint x="420" y="555" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="m7" value="2.3. Gửi mật khẩu tạm qua email cho người dùng" style="endArrow=open;dashed=1;html=1;endFill=0;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="625" as="sourcePoint"/><mxPoint x="120" y="625" as="targetPoint"/></mxGeometry></mxCell>
+</root></mxGraphModel></diagram></mxfile>
