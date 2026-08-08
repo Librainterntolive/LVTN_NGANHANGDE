@@ -67,7 +67,8 @@ export class Subjects implements OnInit {
     this.load(false);
   }
 
-  levelColor(): string { return 'linear-gradient(135deg, #3156c7, #6856c9)'; }
+  // Lấy từ bảng màu chung để đổi theo theme sáng/tối, không đặt mã màu cứng.
+  levelColor(): string { return 'var(--hero-bg)'; }
 
   openAdd() { this.editingId.set(null); this.form = this.empty(); this.showForm.set(true); }
   edit(subject: Subject) { this.editingId.set(subject.id!); this.form = { ...subject }; this.showForm.set(true); }
