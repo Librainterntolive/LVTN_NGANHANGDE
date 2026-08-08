@@ -35,12 +35,37 @@ func NewTemporaryPassword() (string, error) {
 	return string(bytes), nil
 }
 
+// otpEmailContent tach rieng de vua dung khi gui that, vua dung khi xem truoc.
+func otpEmailContent(code string) (textBody, htmlBody string) {
+	return buildEmail(
+		"Xác minh địa chỉ email",
+		[]emailBlock{
+			{Text: "Nhập mã dưới đây để hoàn tất việc xác minh tài khoản của bạn."},
+			{Code: code},
+			{Text: "Mã có hiệu lực trong 10 phút kể từ khi email này được gửi."},
+			{Note: "Không chia sẻ mã này cho bất kỳ ai, kể cả người tự xưng là quản trị viên. Nếu bạn không yêu cầu mã, hãy bỏ qua email này — tài khoản của bạn vẫn an toàn."},
+		},
+		"Bạn nhận được email này vì địa chỉ này được dùng để đăng ký tài khoản.",
+	)
+}
+
 func SendOTP(to, code string) error {
-	return sendEmail(to, "Mã xác minh QuizBank", "Mã OTP của bạn: "+code+"\r\nMã có hiệu lực trong 10 phút.")
+	text, htmlBody := otpEmailContent(code)
+	return sendRichEmail(to, "Mã xác minh "+brandName, text, htmlBody)
 }
 
 func SendTemporaryPassword(to, password string) error {
-	return sendEmail(to, "Mật khẩu tạm QuizBank", "Mật khẩu tạm của bạn: "+password+"\r\nHãy đăng nhập và đổi mật khẩu ngay.")
+	text, htmlBody := buildEmail(
+		"Mật khẩu tạm thời",
+		[]emailBlock{
+			{Text: "Quản trị viên đã duyệt yêu cầu cấp lại mật khẩu của bạn. Dùng mật khẩu tạm dưới đây để đăng nhập."},
+			{Code: password},
+			{Text: "Hãy đổi mật khẩu ngay sau khi đăng nhập."},
+			{Note: "Không chia sẻ mật khẩu này cho bất kỳ ai. Nếu bạn không yêu cầu cấp lại mật khẩu, hãy liên hệ quản trị viên ngay."},
+		},
+		"Bạn nhận được email này vì có yêu cầu cấp lại mật khẩu cho tài khoản dùng địa chỉ này.",
+	)
+	return sendRichEmail(to, "Mật khẩu tạm "+brandName, text, htmlBody)
 }
 
 func SendClassJoined(to, className, classCode string) error {
@@ -76,7 +101,33 @@ func SendClassPostPublished(to, className, authorName, content string) error {
 	return sendEmail(to, "Thông báo mới từ lớp "+className, authorName+" vừa đăng thông báo mới trong lớp "+className+":\r\n\r\n"+preview+"\r\n\r\nĐăng nhập QuizBank để xem đầy đủ.")
 }
 
+// buildMessage dung thu theo chuan MIME. Neu co ban HTML thi gui kem ca ban
+// van ban thuan (multipart/alternative): ung dung mail nao khong hien duoc
+// HTML se roi ve ban van ban, va bo loc thu rac danh gia cao thu co du hai ban.
+func buildMessage(to, from, subject, textBody, htmlBody string) string {
+	head := "To: " + to + "\r\nFrom: " + from + "\r\nSubject: " + subject + "\r\nMIME-Version: 1.0\r\n"
+	if htmlBody == "" {
+		return head + "Content-Type: text/plain; charset=UTF-8\r\n\r\n" + textBody + "\r\n"
+	}
+	// Ranh gioi phai la chuoi khong the xuat hien trong noi dung thu.
+	const boundary = "quizbank-boundary-8f4c1d92e7"
+	return head +
+		"Content-Type: multipart/alternative; boundary=\"" + boundary + "\"\r\n\r\n" +
+		"--" + boundary + "\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" + textBody + "\r\n" +
+		"--" + boundary + "\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n" + htmlBody + "\r\n" +
+		"--" + boundary + "--\r\n"
+}
+
 func sendEmail(to, subject, body string) error {
+	return sendMail(to, subject, body, "")
+}
+
+// sendRichEmail gui thu co ca ban HTML va ban van ban thuan.
+func sendRichEmail(to, subject, textBody, htmlBody string) error {
+	return sendMail(to, subject, textBody, htmlBody)
+}
+
+func sendMail(to, subject, body, htmlBody string) error {
 	host := strings.TrimSpace(os.Getenv("SMTP_HOST"))
 	username := strings.TrimSpace(os.Getenv("SMTP_USERNAME"))
 	// Google hien thi mat khau ung dung theo dang "abcd efgh ijkl mnop".
@@ -99,7 +150,7 @@ func sendEmail(to, subject, body string) error {
 	to = sanitizeMailHeader(to)
 	from = sanitizeMailHeader(from)
 	subject = encodeMailSubject(subject)
-	message := []byte("To: " + to + "\r\nFrom: " + from + "\r\nSubject: " + subject + "\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" + body + "\r\n")
+	message := []byte(buildMessage(to, from, subject, body, htmlBody))
 	if err := smtp.SendMail(host+":"+port, smtp.PlainAuth("", username, password, host), username, []string{to}, message); err != nil {
 		// Chi tiet loi cua may chu thu (ma 535, duong dan ho tro cua Google...)
 		// chi ghi vao log cho quan tri vien. Nguoi dung cuoi khong can biet, va
