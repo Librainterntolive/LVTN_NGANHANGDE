@@ -405,7 +405,7 @@ export class Questions implements OnInit {
     this.error.set('');
     if (!this.form.subject_id) { this.error.set('Vui lòng chọn môn học'); return; }
 	if (!this.form.source_id || !this.form.source_reference?.trim()) {
-		this.error.set('Vui long chon nguon tai lieu va ghi vi tri tham chieu');
+		this.error.set('Vui lòng chọn nguồn tài liệu và ghi vị trí tham chiếu');
 		return;
 	}
 	this.form.submit_for_review = submitForReview;
