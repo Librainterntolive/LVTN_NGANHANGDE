@@ -3,6 +3,7 @@ package service
 import (
 	"crypto/rand"
 	"fmt"
+	"mime"
 	"net/smtp"
 	"os"
 	"strings"
@@ -49,16 +50,16 @@ func SendAssignmentPublished(to, className, assignmentTitle, dueAt string) error
 }
 
 func SendAssignmentSubmitted(to, assignmentTitle, studentName, submissionStatus string) error {
-	return sendEmail(to, "Sinh vien da nop bai: "+assignmentTitle, "Sinh vien "+studentName+" vua nop bai tap: "+assignmentTitle+"\r\nTrang thai: "+submissionStatus+".\r\nDang nhap QuizBank de xem tep nop va cham diem.")
+	return sendEmail(to, "Sinh viên đã nộp bài: "+assignmentTitle, "Sinh viên "+studentName+" vừa nộp bài tập: "+assignmentTitle+"\r\nTrạng thái: "+submissionStatus+".\r\nĐăng nhập QuizBank để xem tệp nộp và chấm điểm.")
 }
 
 func SendAssignmentGraded(to, assignmentTitle, score, feedback string) error {
-	body := "Giang vien da cham bai tap: " + assignmentTitle + "\r\nDiem: " + score
+	body := "Giảng viên đã chấm bài tập: " + assignmentTitle + "\r\nĐiểm: " + score
 	if strings.TrimSpace(feedback) != "" {
-		body += "\r\nNhan xet: " + feedback
+		body += "\r\nNhận xét: " + feedback
 	}
-	body += "\r\nDang nhap QuizBank de xem ket qua chi tiet."
-	return sendEmail(to, "Da co diem bai tap: "+assignmentTitle, body)
+	body += "\r\nĐăng nhập QuizBank để xem kết quả chi tiết."
+	return sendEmail(to, "Đã có điểm bài tập: "+assignmentTitle, body)
 }
 
 func SendClassPostPublished(to, className, authorName, content string) error {
@@ -66,7 +67,7 @@ func SendClassPostPublished(to, className, authorName, content string) error {
 	if len([]rune(preview)) > 220 {
 		preview = string([]rune(preview)[:220]) + "..."
 	}
-	return sendEmail(to, "Thong bao moi tu lop "+className, authorName+" vua dang thong bao moi trong lop "+className+":\r\n\r\n"+preview+"\r\n\r\nDang nhap QuizBank de xem day du.")
+	return sendEmail(to, "Thông báo mới từ lớp "+className, authorName+" vừa đăng thông báo mới trong lớp "+className+":\r\n\r\n"+preview+"\r\n\r\nĐăng nhập QuizBank để xem đầy đủ.")
 }
 
 func sendEmail(to, subject, body string) error {
@@ -86,9 +87,17 @@ func sendEmail(to, subject, body string) error {
 	}
 	to = sanitizeMailHeader(to)
 	from = sanitizeMailHeader(from)
-	subject = sanitizeMailHeader(subject)
+	subject = encodeMailSubject(subject)
 	message := []byte("To: " + to + "\r\nFrom: " + from + "\r\nSubject: " + subject + "\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" + body + "\r\n")
 	return smtp.SendMail(host+":"+port, smtp.PlainAuth("", username, password, host), username, []string{to}, message)
+}
+
+// encodeMailSubject chuan bi tieu de thu de dat vao header Subject.
+// Header thu chi duoc chua ASCII (RFC 5322), nen tieu de tieng Viet co dau
+// phai duoc ma hoa thanh encoded-word (RFC 2047); neu khong mot so ung dung
+// mail se hien sai font. QEncoding tu giu nguyen chuoi da thuan ASCII.
+func encodeMailSubject(subject string) string {
+	return mime.QEncoding.Encode("UTF-8", sanitizeMailHeader(subject))
 }
 
 func sanitizeMailHeader(value string) string {

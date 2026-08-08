@@ -76,9 +76,9 @@ func (s *SubjectService) Update(id string, in dto.SubjectInput) (*entity.Subject
 func (s *SubjectService) Delete(id string) error {
 	questions, exams := s.repo.CountUsage(id)
 	if questions > 0 || exams > 0 {
-		return errors.New("mon hoc dang co " + strconv.FormatInt(questions, 10) +
-			" cau hoi va " + strconv.FormatInt(exams, 10) +
-			" de thi, khong the xoa - hay chuyen hoac xoa chung truoc")
+		return errors.New("Học phần đang có " + strconv.FormatInt(questions, 10) +
+			" câu hỏi và " + strconv.FormatInt(exams, 10) +
+			" đề thi, không thể xóa — hãy chuyển hoặc xóa chúng trước.")
 	}
 	return s.repo.Delete(id)
 }

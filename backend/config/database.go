@@ -58,7 +58,7 @@ func ConnectDatabase() {
 	if strings.EqualFold(os.Getenv("AUTO_MIGRATE"), "true") {
 		start = time.Now()
 		if err := db.AutoMigrate(entity.AllModels()...); err != nil {
-			log.Fatal("AutoMigrate that bai: ", err)
+			log.Fatal("AutoMigrate thất bại: ", err)
 		}
 		log.Printf("AutoMigrate xong (%v). Doi cau truc bang xong roi thi dat lai AUTO_MIGRATE=false cho khoi dong nhanh.",
 			time.Since(start).Round(time.Millisecond))

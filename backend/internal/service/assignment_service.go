@@ -96,7 +96,7 @@ func (s *AssignmentService) notifyAssignmentPublished(item *entity.Assignment) {
 			continue
 		}
 		if err := SendAssignmentPublished(*student.Email, class.Name, item.Title, dueAt); err != nil {
-			log.Printf("gui email bai tap moi that bai: %v", err)
+			log.Printf("gửi email bài tập mới thất bại: %v", err)
 		}
 	}
 }
@@ -243,7 +243,7 @@ func (s *AssignmentService) notifyAssignmentGraded(submission *entity.Assignment
 	}
 	score := strconv.FormatFloat(*submission.Score, 'f', -1, 64)
 	if err := SendAssignmentGraded(*student.Email, assignment.Title, score, submission.Feedback); err != nil {
-		log.Printf("gui email cham bai that bai: %v", err)
+		log.Printf("gửi email chấm bài thất bại: %v", err)
 	}
 }
 

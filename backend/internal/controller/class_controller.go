@@ -239,7 +239,7 @@ func (ctl *ClassController) AddStudent(c *gin.Context) {
 		return
 	}
 	entityID, _ := strconv.Atoi(c.Param("id"))
-	ctl.audit.Log(getUserID(c), "class.student_added", "class", uint(entityID), "Thêm sinh viên #"+strconv.FormatUint(uint64(in.StudentID), 10)+" vao lop")
+	ctl.audit.Log(getUserID(c), "class.student_added", "class", uint(entityID), "Thêm sinh viên #"+strconv.FormatUint(uint64(in.StudentID), 10)+" vào lớp")
 	c.JSON(http.StatusCreated, gin.H{"message": "Đã thêm"})
 }
 
@@ -254,6 +254,6 @@ func (ctl *ClassController) RemoveStudent(c *gin.Context) {
 	}
 	entityID, _ := strconv.Atoi(c.Param("id"))
 	studentID, _ := strconv.Atoi(c.Param("studentId"))
-	ctl.audit.Log(getUserID(c), "class.student_removed", "class", uint(entityID), "Xóa sinh viên #"+strconv.Itoa(studentID)+" khoi lop")
+	ctl.audit.Log(getUserID(c), "class.student_removed", "class", uint(entityID), "Xóa sinh viên #"+strconv.Itoa(studentID)+" khỏi lớp")
 	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa khỏi lớp"})
 }
