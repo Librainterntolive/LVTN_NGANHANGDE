@@ -3,3 +3,7 @@
 /bin/
 /tmp/
 /backups/
+
+# Ban dump toan bo CSDL: chua hat mat khau va email that cua nguoi dung.
+# Cau truc bang da co day du trong database/migrations nen khong can dua len repo.
+/database/quiz_db.sql

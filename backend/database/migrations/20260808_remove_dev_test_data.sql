@@ -2,7 +2,7 @@
 --
 -- Nguyen tac: he thong chi luu du lieu that. Cac lop va tai khoan duoi day duoc
 -- tao ra de thu chuc nang trong luc lam do an (ten khong dau, email rac nhu
--- dasds@gmail.com / asdasfas@gmail.com), khong phai lop hoc va sinh vien co that.
+-- dia chi email vo nghia), khong phai lop hoc va sinh vien co that.
 --
 -- AN TOAN:
 --   - Da sao luu CSDL truoc khi chay (backend/backups/quiz_db-20260808-134621.sql).
