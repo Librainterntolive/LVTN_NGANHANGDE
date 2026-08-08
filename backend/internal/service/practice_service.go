@@ -215,10 +215,10 @@ type PracticeResult struct {
 // SubmitPractice: chấm bộ câu luyện lại + ghi log để cập nhật sổ tay
 func (s *PracticeService) SubmitPractice(userID uint, answers []dto.SubmitAnswer) ([]PracticeResult, error) {
 	if len(answers) == 0 {
-		return nil, errors.New("chua tra loi cau nao")
+		return nil, errors.New("Chưa trả lời câu nào")
 	}
 	if len(answers) > practiceQuestionLimit {
-		return nil, errors.New("chi duoc nop toi da 20 cau trong mot luot luyen")
+		return nil, errors.New("Chỉ được nộp tối đa 20 câu trong một lượt luyện")
 	}
 	notebook, err := s.practiceNotebook(userID)
 	if err != nil {
@@ -231,7 +231,7 @@ func (s *PracticeService) SubmitPractice(userID uint, answers []dto.SubmitAnswer
 	seen := make(map[uint]bool, len(answers))
 	for _, answer := range answers {
 		if answer.QuestionID == 0 || seen[answer.QuestionID] || !allowed[answer.QuestionID] {
-			return nil, errors.New("co cau hoi khong thuoc bo luyen tap hien tai")
+			return nil, errors.New("Có câu hỏi không thuộc bộ luyện tập hiện tại")
 		}
 		seen[answer.QuestionID] = true
 	}

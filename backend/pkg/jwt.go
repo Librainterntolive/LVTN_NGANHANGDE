@@ -45,7 +45,7 @@ func ParseToken(tokenStr string) (*Claims, error) {
 		return secret(), nil
 	})
 	if err != nil || !token.Valid {
-		return nil, errors.New("token khong hop le")
+		return nil, errors.New("Token không hợp lệ")
 	}
 	return claims, nil
 }

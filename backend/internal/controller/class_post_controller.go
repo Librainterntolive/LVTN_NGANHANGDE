@@ -22,7 +22,7 @@ func NewClassPostController(svc *service.ClassPostService, audit *service.AuditS
 func postClassID(c *gin.Context) (uint, bool) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ma lop khong hop le"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Mã lớp không hợp lệ"})
 		return 0, false
 	}
 	return uint(id), true
@@ -64,7 +64,7 @@ func (ctl *ClassPostController) Create(c *gin.Context) {
 		writeClassPostError(c, err)
 		return
 	}
-	ctl.audit.Log(getUserID(c), "class.post_created", "class_post", item.ID, "Dang thong bao trong lop #"+strconv.FormatUint(uint64(classID), 10))
+	ctl.audit.Log(getUserID(c), "class.post_created", "class_post", item.ID, "Đăng thông báo trong lớp #"+strconv.FormatUint(uint64(classID), 10))
 	c.JSON(http.StatusCreated, item)
 }
 
@@ -79,7 +79,7 @@ func (ctl *ClassPostController) Update(c *gin.Context) {
 		writeClassPostError(c, err)
 		return
 	}
-	ctl.audit.Log(getUserID(c), "class.post_updated", "class_post", item.ID, "Cap nhat thong bao trong lop #"+strconv.FormatUint(uint64(item.ClassID), 10))
+	ctl.audit.Log(getUserID(c), "class.post_updated", "class_post", item.ID, "Cập nhật thông báo trong lớp #"+strconv.FormatUint(uint64(item.ClassID), 10))
 	c.JSON(http.StatusOK, item)
 }
 
@@ -89,8 +89,8 @@ func (ctl *ClassPostController) Delete(c *gin.Context) {
 		writeClassPostError(c, err)
 		return
 	}
-	ctl.audit.Log(getUserID(c), "class.post_deleted", "class_post", item.ID, "Xoa thong bao trong lop #"+strconv.FormatUint(uint64(item.ClassID), 10))
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa thong bao"})
+	ctl.audit.Log(getUserID(c), "class.post_deleted", "class_post", item.ID, "Xóa thông báo trong lớp #"+strconv.FormatUint(uint64(item.ClassID), 10))
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa thông báo"})
 }
 
 func writeClassPostError(c *gin.Context, err error) {

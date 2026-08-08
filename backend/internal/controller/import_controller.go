@@ -23,26 +23,26 @@ const maxImportSize = 20 << 20 // 20 MB
 func (ctl *ImportController) Import(c *gin.Context) {
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Khong nhan duoc file (field 'file')"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Không nhận được file (field 'file')"})
 		return
 	}
 
 	// chốt chặn 1: dung lượng tối đa 20MB
 	if fileHeader.Size > maxImportSize {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File qua lon (toi da 20MB)"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File quá lớn (tối đa 20MB)"})
 		return
 	}
 
 	// chốt chặn 2: chỉ nhận .csv hoặc .xlsx
 	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
 	if ext != ".csv" && ext != ".xlsx" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Chi ho tro file .csv hoac .xlsx"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Chỉ hỗ trợ file .csv hoặc .xlsx"})
 		return
 	}
 
 	f, err := fileHeader.Open()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Khong mo duoc file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không mở được file"})
 		return
 	}
 	defer f.Close()

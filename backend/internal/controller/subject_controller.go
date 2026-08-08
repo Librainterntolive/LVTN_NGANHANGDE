@@ -43,7 +43,7 @@ func (ctl *SubjectController) GetPaged(c *gin.Context) {
 func (ctl *SubjectController) GetByID(c *gin.Context) {
 	s, err := ctl.svc.GetByID(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay mon hoc"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy môn học"})
 		return
 	}
 	c.JSON(http.StatusOK, s)
@@ -67,7 +67,7 @@ func (ctl *SubjectController) Update(c *gin.Context) {
 	}
 	s, err := ctl.svc.Update(c.Param("id"), in)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay mon hoc"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy môn học"})
 		return
 	}
 	c.JSON(http.StatusOK, s)
@@ -78,5 +78,5 @@ func (ctl *SubjectController) Delete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa"})
 }

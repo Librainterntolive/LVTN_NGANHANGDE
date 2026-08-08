@@ -84,7 +84,7 @@ func (ctl *SubmissionController) GetMySubmissionsPaged(c *gin.Context) {
 func (ctl *SubmissionController) GetResult(c *gin.Context) {
 	submissionID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil || submissionID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ma bai lam khong hop le"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Mã bài làm không hợp lệ"})
 		return
 	}
 	result, err := ctl.svc.GetSubmissionResult(uint(submissionID), getUserID(c))

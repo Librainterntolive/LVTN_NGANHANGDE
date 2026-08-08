@@ -76,7 +76,7 @@ func sendEmail(to, subject, body string) error {
 	port := os.Getenv("SMTP_PORT")
 	from := os.Getenv("SMTP_FROM")
 	if host == "" || username == "" || password == "" {
-		return fmt.Errorf("SMTP chua duoc cau hinh")
+		return fmt.Errorf("SMTP chưa được cấu hình")
 	}
 	if port == "" {
 		port = "587"

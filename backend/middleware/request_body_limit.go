@@ -12,7 +12,7 @@ func MaxRequestBody(maxBytes int64) gin.HandlerFunc {
 	}
 	return func(context *gin.Context) {
 		if context.Request.ContentLength > maxBytes {
-			context.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, gin.H{"error": "request qua lon"})
+			context.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, gin.H{"error": "Yêu cầu quá lớn"})
 			return
 		}
 		context.Request.Body = http.MaxBytesReader(context.Writer, context.Request.Body, maxBytes)

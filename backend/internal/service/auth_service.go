@@ -27,11 +27,11 @@ func NewAuthService(userRepo *repository.UserRepository) *AuthService {
 func (s *AuthService) Register(in dto.RegisterInput) (*entity.User, error) {
 	email := emailOrNil(in.Email)
 	if email == nil {
-		return nil, errors.New("email la bat buoc de xac minh")
+		return nil, errors.New("Email là bắt buộc để xác minh")
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, errors.New("mat khau khong hop le (toi da 72 ky tu)")
+		return nil, errors.New("Mật khẩu không hợp lệ (tối đa 72 ký tự)")
 	}
 	user := &entity.User{
 		Username:     in.Username,
@@ -42,7 +42,7 @@ func (s *AuthService) Register(in dto.RegisterInput) (*entity.User, error) {
 		Status:       "pending_verification",
 	}
 	if err := s.userRepo.Create(user); err != nil {
-		return nil, errors.New("username hoac email da ton tai")
+		return nil, errors.New("Tên đăng nhập hoặc email đã tồn tại")
 	}
 	code, err := NewOTP()
 	if err != nil {
@@ -60,21 +60,21 @@ func (s *AuthService) Register(in dto.RegisterInput) (*entity.User, error) {
 func (s *AuthService) VerifyOTP(email, code string) error {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		return errors.New("email khong ton tai")
+		return errors.New("Email không tồn tại")
 	}
 	if user.Status == "active" {
-		return errors.New("email da duoc xac minh")
+		return errors.New("Email đã được xác minh")
 	}
 	otp, err := s.userRepo.LatestOTP(user.ID, "registration")
 	if err != nil || time.Now().After(otp.ExpiresAt) {
-		return errors.New("ma OTP khong hop le hoac da het han")
+		return errors.New("Mã OTP không hợp lệ hoặc đã hết hạn")
 	}
 	if otp.Attempts >= maxOTPAttempts {
-		return errors.New("ma OTP da nhap sai qua nhieu lan, hay gui lai ma moi")
+		return errors.New("Mã OTP đã nhập sai quá nhiều lần, hãy gửi lại mã mới")
 	}
 	if bcrypt.CompareHashAndPassword([]byte(otp.CodeHash), []byte(code)) != nil {
 		_ = s.userRepo.IncrementOTPAttempts(otp.ID)
-		return errors.New("ma OTP khong hop le hoac da het han")
+		return errors.New("Mã OTP không hợp lệ hoặc đã hết hạn")
 	}
 	_ = s.userRepo.ExpireOTP(otp.ID)
 	user.Status = "active"
@@ -83,10 +83,10 @@ func (s *AuthService) VerifyOTP(email, code string) error {
 func (s *AuthService) ResendOTP(email string) error {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		return errors.New("email khong ton tai")
+		return errors.New("Email không tồn tại")
 	}
 	if user.Status == "active" {
-		return errors.New("email da duoc xac minh")
+		return errors.New("Email đã được xác minh")
 	}
 	if err := s.enforceOTPCooldown(user.ID, "registration"); err != nil {
 		return err
@@ -104,10 +104,10 @@ func (s *AuthService) ResendOTP(email string) error {
 func (s *AuthService) SendPasswordResetOTP(email string) error {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		return errors.New("email khong ton tai")
+		return errors.New("Email không tồn tại")
 	}
 	if user.Status != "active" {
-		return errors.New("tai khoan chua xac minh email")
+		return errors.New("Tài khoản chưa xác minh email")
 	}
 	if err := s.enforceOTPCooldown(user.ID, "password_reset"); err != nil {
 		return err
@@ -125,28 +125,28 @@ func (s *AuthService) SendPasswordResetOTP(email string) error {
 func (s *AuthService) RequestPasswordReset(in dto.ForgotPasswordInput) error {
 	user, err := s.userRepo.FindByEmail(in.Email)
 	if err != nil {
-		return errors.New("email khong ton tai")
+		return errors.New("Email không tồn tại")
 	}
 	if user.Status != "active" {
-		return errors.New("tai khoan chua xac minh email")
+		return errors.New("Tài khoản chưa xác minh email")
 	}
 	hasPending, err := s.userRepo.HasPendingResetRequest(user.ID)
 	if err != nil {
 		return err
 	}
 	if hasPending {
-		return errors.New("yeu cau cap lai mat khau dang cho Admin duyet")
+		return errors.New("Yêu cầu cấp lại mật khẩu đang chờ Admin duyệt")
 	}
 	otp, err := s.userRepo.LatestOTP(user.ID, "password_reset")
 	if err != nil || time.Now().After(otp.ExpiresAt) {
-		return errors.New("OTP khong hop le")
+		return errors.New("OTP không hợp lệ")
 	}
 	if otp.Attempts >= maxOTPAttempts {
-		return errors.New("OTP da nhap sai qua nhieu lan, hay gui lai ma moi")
+		return errors.New("OTP đã nhập sai quá nhiều lần, hãy gửi lại mã mới")
 	}
 	if bcrypt.CompareHashAndPassword([]byte(otp.CodeHash), []byte(in.Code)) != nil {
 		_ = s.userRepo.IncrementOTPAttempts(otp.ID)
-		return errors.New("OTP khong hop le")
+		return errors.New("OTP không hợp lệ")
 	}
 	_ = s.userRepo.ExpireOTP(otp.ID)
 	return s.userRepo.CreateResetRequest(&entity.PasswordResetRequest{UserID: user.ID, Status: "pending"})
@@ -159,14 +159,14 @@ func (s *AuthService) enforceOTPCooldown(userID uint, purpose string) error {
 	}
 	issuedAt := otp.ExpiresAt.Add(-10 * time.Minute)
 	if time.Since(issuedAt) < otpResendCooldown {
-		return errors.New("vui long doi it nhat 1 phut truoc khi gui lai OTP")
+		return errors.New("Vui lòng đợi ít nhất 1 phút trước khi gửi lại OTP")
 	}
 	return nil
 }
 func (s *AuthService) ChangePassword(userID uint, in dto.ChangePasswordInput) error {
 	user, err := s.userRepo.FindByID(fmt.Sprint(userID))
 	if err != nil || bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(in.CurrentPassword)) != nil {
-		return errors.New("mat khau hien tai khong dung")
+		return errors.New("Mật khẩu hiện tại không đúng")
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(in.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
@@ -185,11 +185,11 @@ func (s *AuthService) PendingResetRequestsPaged(limit, offset int) ([]entity.Pas
 func (s *AuthService) ApproveResetRequest(id string) error {
 	request, err := s.userRepo.FindResetRequest(id)
 	if err != nil || request.Status != "pending" {
-		return errors.New("yeu cau khong hop le")
+		return errors.New("Yêu cầu không hợp lệ")
 	}
 	user, err := s.userRepo.FindByID(fmt.Sprint(request.UserID))
 	if err != nil || user.Email == nil {
-		return errors.New("khong tim thay email tai khoan")
+		return errors.New("Không tìm thấy email tài khoản")
 	}
 	temporary, err := NewTemporaryPassword()
 	if err != nil {
@@ -214,10 +214,10 @@ func (s *AuthService) ApproveResetRequest(id string) error {
 func (s *AuthService) Login(in dto.LoginInput) (string, *entity.User, error) {
 	user, err := s.userRepo.FindByUsername(in.Username)
 	if err != nil {
-		return "", nil, errors.New("sai tai khoan hoac mat khau")
+		return "", nil, errors.New("Sai tài khoản hoặc mật khẩu")
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(in.Password)); err != nil {
-		return "", nil, errors.New("sai tai khoan hoac mat khau")
+		return "", nil, errors.New("Sai tài khoản hoặc mật khẩu")
 	}
 	// tài khoản bị tạm khóa -> từ chối, báo lý do
 	if user.Status == "locked" {
@@ -228,11 +228,11 @@ func (s *AuthService) Login(in dto.LoginInput) (string, *entity.User, error) {
 		return "", nil, errors.New(msg)
 	}
 	if user.Status != "active" {
-		return "", nil, errors.New("tai khoan chua xac minh email. Hay nhap ma OTP da gui qua Gmail")
+		return "", nil, errors.New("Tài khoản chưa xác minh email. Hãy nhập mã OTP đã gửi qua Gmail")
 	}
 	token, err := pkg.GenerateToken(user.ID, user.Username, user.Role)
 	if err != nil {
-		return "", nil, errors.New("khong tao duoc token")
+		return "", nil, errors.New("Không tạo được token")
 	}
 	return token, user, nil
 }

@@ -33,7 +33,7 @@ func (ctl *AssignmentController) Create(c *gin.Context) {
 		writeAssignmentError(c, err)
 		return
 	}
-	ctl.audit.Log(getUserID(c), "assignment.created", "assignment", item.ID, "Tao bai tap: "+item.Title)
+	ctl.audit.Log(getUserID(c), "assignment.created", "assignment", item.ID, "Tạo bài tập: "+item.Title)
 	c.JSON(http.StatusCreated, item)
 }
 func (ctl *AssignmentController) List(c *gin.Context) {
@@ -91,7 +91,7 @@ func (ctl *AssignmentController) Update(c *gin.Context) {
 		writeAssignmentError(c, err)
 		return
 	}
-	ctl.audit.Log(getUserID(c), "assignment.updated", "assignment", item.ID, "Cap nhat bai tap: "+item.Title)
+	ctl.audit.Log(getUserID(c), "assignment.updated", "assignment", item.ID, "Cập nhật bài tập: "+item.Title)
 	c.JSON(http.StatusOK, item)
 }
 func (ctl *AssignmentController) Delete(c *gin.Context) {
@@ -100,8 +100,8 @@ func (ctl *AssignmentController) Delete(c *gin.Context) {
 		writeAssignmentError(c, err)
 		return
 	}
-	ctl.audit.Log(getUserID(c), "assignment.deleted", "assignment", uint(id), "Xoa bai tap")
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa bai tap"})
+	ctl.audit.Log(getUserID(c), "assignment.deleted", "assignment", uint(id), "Xóa bài tập")
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa bài tập"})
 }
 func (ctl *AssignmentController) StartUpload(c *gin.Context) {
 	var input dto.StartUploadInput
@@ -120,7 +120,7 @@ func (ctl *AssignmentController) StartUpload(c *gin.Context) {
 func (ctl *AssignmentController) UploadChunk(c *gin.Context) {
 	index, err := strconv.Atoi(c.Param("index"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "chi so phan file khong hop le"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Chỉ số phần file không hợp lệ"})
 		return
 	}
 	count, err := ctl.svc.SaveChunk(c.Param("uploadId"), getUserID(c), index, c.Request.Body, c.Request.ContentLength)
@@ -144,7 +144,7 @@ func (ctl *AssignmentController) CompleteUpload(c *gin.Context) {
 		writeAssignmentError(c, err)
 		return
 	}
-	ctl.audit.Log(getUserID(c), "assignment.submitted", "assignment_submission", item.ID, "Nop bai tap: "+item.OriginalName)
+	ctl.audit.Log(getUserID(c), "assignment.submitted", "assignment_submission", item.ID, "Nộp bài tập: "+item.OriginalName)
 	c.JSON(http.StatusCreated, item)
 }
 func (ctl *AssignmentController) ListSubmissions(c *gin.Context) {
@@ -179,7 +179,7 @@ func (ctl *AssignmentController) Grade(c *gin.Context) {
 		writeAssignmentError(c, err)
 		return
 	}
-	ctl.audit.Log(getUserID(c), "assignment.graded", "assignment_submission", item.ID, "Cham bai tap")
+	ctl.audit.Log(getUserID(c), "assignment.graded", "assignment_submission", item.ID, "Chấm bài tập")
 	c.JSON(http.StatusOK, item)
 }
 func (ctl *AssignmentController) Download(c *gin.Context) {

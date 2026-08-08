@@ -56,7 +56,7 @@ func (ctl *FolderController) Delete(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa"})
 }
 
 func (ctl *FolderController) GetExams(c *gin.Context) {
@@ -90,13 +90,13 @@ func (ctl *FolderController) AddExam(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Da luu vao kho"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã lưu vào kho"})
 }
 
 func (ctl *FolderController) RemoveExam(c *gin.Context) {
 	examID, _ := strconv.Atoi(c.Param("examId"))
 	ctl.svc.RemoveExam(c.Param("id"), uint(examID), getUserID(c))
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa khoi kho"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa khỏi kho"})
 }
 
 // SavedExamIDs: id các đề đã lưu ở bất kỳ thư mục nào (badge "Đã lưu")
@@ -117,5 +117,5 @@ func (ctl *FolderController) SetNote(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Da luu ghi chu"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã lưu ghi chú"})
 }

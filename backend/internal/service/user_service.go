@@ -27,13 +27,13 @@ func (s *UserService) GetPaged(keyword string, limit, offset int) ([]entity.User
 
 func (s *UserService) Create(in dto.UserInput) (*entity.User, error) {
 	if in.Password == "" {
-		return nil, errors.New("can nhap mat khau")
+		return nil, errors.New("Cần nhập mật khẩu")
 	}
 	// Bỏ qua lỗi ở đây thì mật khẩu dài quá 72 ký tự sẽ tạo ra tài khoản có
 	// chuỗi băm rỗng - trông như tạo thành công nhưng không bao giờ đăng nhập được.
 	hash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, errors.New("mat khau khong hop le (toi da 72 ky tu)")
+		return nil, errors.New("Mật khẩu không hợp lệ (tối đa 72 ký tự)")
 	}
 	user := &entity.User{
 		Username:     in.Username,
@@ -44,7 +44,7 @@ func (s *UserService) Create(in dto.UserInput) (*entity.User, error) {
 		Status:       defaultStr(in.Status, "active"),
 	}
 	if err := s.repo.Create(user); err != nil {
-		return nil, errors.New("username/email da ton tai")
+		return nil, errors.New("Tên đăng nhập/email đã tồn tại")
 	}
 	return user, nil
 }
@@ -71,7 +71,7 @@ func (s *UserService) Update(id string, in dto.UserInput) (*entity.User, error) 
 	if in.Password != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return nil, errors.New("mat khau khong hop le (toi da 72 ky tu)")
+			return nil, errors.New("Mật khẩu không hợp lệ (tối đa 72 ký tự)")
 		}
 		user.PasswordHash = string(hash)
 	}

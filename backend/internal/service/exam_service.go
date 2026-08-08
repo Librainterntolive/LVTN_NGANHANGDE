@@ -98,7 +98,7 @@ func (s *ExamService) GetDetail(id string, userID uint, role string) (*entity.Ex
 
 func (s *ExamService) Create(in dto.ExamInput, createdBy uint, role string) (*entity.Exam, error) {
 	if n := s.qRepo.CountNotApproved(in.QuestionIDs); n > 0 {
-		return nil, errors.New("de thi chua cau hoi chua duoc duyet hoac thieu nguon")
+		return nil, errors.New("Đề thi chứa câu hỏi chưa được duyệt hoặc thiếu nguồn")
 	}
 	if err := s.validateClassAssignments(in.ClassIDs, createdBy, role); err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (s *ExamService) Create(in dto.ExamInput, createdBy uint, role string) (*en
 
 func (s *ExamService) Update(id string, in dto.ExamInput, userID uint, role string) (*entity.Exam, error) {
 	if n := s.qRepo.CountNotApproved(in.QuestionIDs); n > 0 {
-		return nil, errors.New("de thi chua cau hoi chua duoc duyet hoac thieu nguon")
+		return nil, errors.New("Đề thi chứa câu hỏi chưa được duyệt hoặc thiếu nguồn")
 	}
 	exam, err := s.repo.FindByID(id)
 	if err != nil {
@@ -190,7 +190,7 @@ func (s *ExamService) Generate(in dto.GenerateExamInput, createdBy uint, role st
 		qids = append(qids, ids...)
 	}
 	if len(qids) == 0 {
-		return nil, 0, errors.New("ma tran chua co dong nao hop le (so cau > 0)")
+		return nil, 0, errors.New("Ma trận chưa có dòng nào hợp lệ (số câu > 0)")
 	}
 	in.ExamInput.QuestionIDs = qids
 	exam, err := s.Create(in.ExamInput, createdBy, role)
@@ -202,7 +202,7 @@ func (s *ExamService) Generate(in dto.GenerateExamInput, createdBy uint, role st
 func (s *ExamService) Clone(id string, userID uint) (*entity.Exam, error) {
 	src, err := s.repo.FindByID(id)
 	if err != nil {
-		return nil, errors.New("khong tim thay de goc")
+		return nil, errors.New("Không tìm thấy đề gốc")
 	}
 	if src.CreatedBy != userID && (src.Status != "published" || src.AccessType != "public" || !s.repo.HasVerifiedQuestionSet(src.ID)) {
 		return nil, ErrNotOwner
@@ -231,7 +231,7 @@ func (s *ExamService) Clone(id string, userID uint) (*entity.Exam, error) {
 func (s *ExamService) Delete(id string, userID uint, role string) error {
 	exam, err := s.repo.FindByID(id)
 	if err != nil {
-		return errors.New("khong tim thay de thi")
+		return errors.New("Không tìm thấy đề thi")
 	}
 	if !canModify(exam.CreatedBy, userID, role) {
 		return ErrNotOwner
@@ -256,7 +256,7 @@ func (s *ExamService) validateClassAssignments(classIDs []uint, userID uint, rol
 func (s *ExamService) GetReusableQuestionIDs(examID string, userID uint, role string) ([]uint, error) {
 	exam, err := s.repo.FindByID(examID)
 	if err != nil {
-		return nil, errors.New("khong tim thay de thi")
+		return nil, errors.New("Không tìm thấy đề thi")
 	}
 	if !canModify(exam.CreatedBy, userID, role) && (exam.Status != "published" || exam.AccessType != "public" || !s.repo.HasVerifiedQuestionSet(exam.ID)) {
 		return nil, ErrNotOwner

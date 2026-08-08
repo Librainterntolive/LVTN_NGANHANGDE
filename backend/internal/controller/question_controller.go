@@ -45,7 +45,7 @@ func (ctl *QuestionController) GetByID(c *gin.Context) {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay cau hoi"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy câu hỏi"})
 		return
 	}
 	c.JSON(http.StatusOK, q)
@@ -62,7 +62,7 @@ func (ctl *QuestionController) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "question.created", "question", q.ID, "Tao cau hoi moi")
+	ctl.audit.Log(getUserID(c), "question.created", "question", q.ID, "Tạo câu hỏi mới")
 	c.JSON(http.StatusCreated, q)
 }
 
@@ -81,7 +81,7 @@ func (ctl *QuestionController) Update(c *gin.Context) {
 		c.JSON(status, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "question.updated", "question", q.ID, "Cap nhat cau hoi")
+	ctl.audit.Log(getUserID(c), "question.updated", "question", q.ID, "Cập nhật câu hỏi")
 	c.JSON(http.StatusOK, q)
 }
 
@@ -95,8 +95,8 @@ func (ctl *QuestionController) Delete(c *gin.Context) {
 		return
 	}
 	entityID, _ := strconv.Atoi(c.Param("id"))
-	ctl.audit.Log(getUserID(c), "question.deleted", "question", uint(entityID), "Xoa cau hoi")
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
+	ctl.audit.Log(getUserID(c), "question.deleted", "question", uint(entityID), "Xóa câu hỏi")
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa"})
 }
 
 func (ctl *QuestionController) SubmitForReview(c *gin.Context) {
@@ -109,7 +109,7 @@ func (ctl *QuestionController) SubmitForReview(c *gin.Context) {
 		c.JSON(status, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "question.submitted", "question", q.ID, "Gui cau hoi cho quan tri vien duyet")
+	ctl.audit.Log(getUserID(c), "question.submitted", "question", q.ID, "Gửi câu hỏi cho quản trị viên duyệt")
 	c.JSON(http.StatusOK, q)
 }
 
@@ -124,6 +124,6 @@ func (ctl *QuestionController) Review(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "question.reviewed", "question", q.ID, "Cap nhat trang thai duyet thanh "+q.ReviewStatus)
+	ctl.audit.Log(getUserID(c), "question.reviewed", "question", q.ID, "Cập nhật trạng thái duyệt thành "+q.ReviewStatus)
 	c.JSON(http.StatusOK, q)
 }

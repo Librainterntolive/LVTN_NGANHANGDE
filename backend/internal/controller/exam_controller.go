@@ -63,12 +63,12 @@ func (ctl *ExamController) Build(c *gin.Context) {
 	var fileErrs []string
 	if fh, err := c.FormFile("file"); err == nil {
 		if fh.Size > maxImportSize {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "File qua lon (toi da 20MB)"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "File quá lớn (tối đa 20MB)"})
 			return
 		}
 		ext := strings.ToLower(filepath.Ext(fh.Filename))
 		if ext != ".csv" && ext != ".xlsx" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Chi ho tro file .csv hoac .xlsx"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Chỉ hỗ trợ file .csv hoặc .xlsx"})
 			return
 		}
 		f, _ := fh.Open()
@@ -98,7 +98,7 @@ func (ctl *ExamController) Build(c *gin.Context) {
 	add(picked)
 
 	if len(questionIDs) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Khong co cau hoi nao (kiem tra file hoac de da chon)", "file_errors": fileErrs})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Không có câu hỏi nào (kiểm tra file hoặc đề đã chọn)", "file_errors": fileErrs})
 		return
 	}
 
@@ -126,7 +126,7 @@ func (ctl *ExamController) Build(c *gin.Context) {
 		ClassIDs:       classIDs,
 	}
 	if input.Title == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Thieu ten de thi"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Thiếu tên đề thi"})
 		return
 	}
 
@@ -139,7 +139,7 @@ func (ctl *ExamController) Build(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "exam.built", "exam", exam.ID, "Tao de thi tu kho cau hoi: "+exam.Title)
+	ctl.audit.Log(getUserID(c), "exam.built", "exam", exam.ID, "Tạo đề thi từ kho câu hỏi: "+exam.Title)
 	c.JSON(http.StatusCreated, gin.H{
 		"exam":        exam,
 		"total":       len(questionIDs),
@@ -163,7 +163,7 @@ func (ctl *ExamController) Generate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "exam.generated", "exam", exam.ID, "Sinh de thi theo ma tran: "+exam.Title)
+	ctl.audit.Log(getUserID(c), "exam.generated", "exam", exam.ID, "Sinh đề thi theo ma trận: "+exam.Title)
 	c.JSON(http.StatusCreated, gin.H{"exam": exam, "total": total})
 }
 
@@ -238,7 +238,7 @@ func (ctl *ExamController) Preview(c *gin.Context) {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay de thi"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy đề thi"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"exam": exam, "questions": questions})
@@ -249,11 +249,11 @@ func (ctl *ExamController) Preview(c *gin.Context) {
 func (ctl *ExamController) Print(c *gin.Context) {
 	exam, questions, err := ctl.svc.Preview(c.Param("id"), getUserID(c), getRole(c))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay de thi"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy đề thi"})
 		return
 	}
 	if getRole(c) != "Admin" && exam.CreatedBy != getUserID(c) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Khong co quyen in de thi nay"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Không có quyền in đề thi này"})
 		return
 	}
 
@@ -268,7 +268,7 @@ func (ctl *ExamController) Print(c *gin.Context) {
 		PrintedAt: fmt.Sprintf("%s", exam.CreatedAt.Format("02/01/2006")),
 	}
 	if err := printExamTemplate.Execute(&output, data); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Khong tao duoc ban in"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không tạo được bản in"})
 		return
 	}
 	c.Data(http.StatusOK, "text/html; charset=utf-8", output.Bytes())
@@ -281,7 +281,7 @@ func (ctl *ExamController) GetDetail(c *gin.Context) {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay de thi"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy đề thi"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"exam": exam, "question_ids": qids, "class_ids": cids})
@@ -302,7 +302,7 @@ func (ctl *ExamController) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "exam.created", "exam", exam.ID, "Tao de thi: "+exam.Title)
+	ctl.audit.Log(getUserID(c), "exam.created", "exam", exam.ID, "Tạo đề thi: "+exam.Title)
 	c.JSON(http.StatusCreated, exam)
 }
 
@@ -318,10 +318,10 @@ func (ctl *ExamController) Update(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay de thi"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy đề thi"})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "exam.updated", "exam", exam.ID, "Cap nhat de thi: "+exam.Title)
+	ctl.audit.Log(getUserID(c), "exam.updated", "exam", exam.ID, "Cập nhật đề thi: "+exam.Title)
 	c.JSON(http.StatusOK, exam)
 }
 
@@ -332,7 +332,7 @@ func (ctl *ExamController) Clone(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "exam.cloned", "exam", exam.ID, "Nhan ban de thi ve kho ca nhan: "+exam.Title)
+	ctl.audit.Log(getUserID(c), "exam.cloned", "exam", exam.ID, "Nhân bản đề thi về kho cá nhân: "+exam.Title)
 	c.JSON(http.StatusCreated, exam)
 }
 
@@ -346,6 +346,6 @@ func (ctl *ExamController) Delete(c *gin.Context) {
 		return
 	}
 	entityID, _ := strconv.Atoi(c.Param("id"))
-	ctl.audit.Log(getUserID(c), "exam.deleted", "exam", uint(entityID), "Xoa de thi")
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
+	ctl.audit.Log(getUserID(c), "exam.deleted", "exam", uint(entityID), "Xóa đề thi")
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa"})
 }

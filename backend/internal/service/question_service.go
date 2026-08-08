@@ -103,7 +103,7 @@ func (s *QuestionService) GetByID(id string, userID uint, role string) (*entity.
 // đảm bảo đúng 1 đáp án đúng, tối thiểu 2 đáp án
 func validateOneCorrect(answers []dto.AnswerInput) error {
 	if len(answers) < 2 {
-		return errors.New("cau hoi can it nhat 2 dap an")
+		return errors.New("Câu hỏi cần ít nhất 2 đáp án")
 	}
 	count := 0
 	for _, a := range answers {
@@ -112,7 +112,7 @@ func validateOneCorrect(answers []dto.AnswerInput) error {
 		}
 	}
 	if count != 1 {
-		return errors.New("phai co dung 1 dap an dung")
+		return errors.New("Phải có đúng 1 đáp án đúng")
 	}
 	return nil
 }
@@ -132,10 +132,10 @@ func (s *QuestionService) validateChapter(chapterID *uint, subjectID uint) error
 	}
 	chapter, err := s.chapterRepo.FindByID(strconv.Itoa(int(*chapterID)))
 	if err != nil {
-		return errors.New("chuong khong ton tai")
+		return errors.New("Chương không tồn tại")
 	}
 	if chapter.SubjectID != subjectID {
-		return errors.New("chuong khong thuoc mon hoc da chon")
+		return errors.New("Chương không thuộc môn học đã chọn")
 	}
 	return nil
 }
@@ -153,7 +153,7 @@ func (s *QuestionService) Create(in dto.QuestionInput, createdBy uint) (*entity.
 	if exists, err := s.repo.ContentExists(in.SubjectID, questionContentHash(in.Content), 0); err != nil {
 		return nil, err
 	} else if exists {
-		return nil, errors.New("cau hoi trung noi dung da ton tai trong hoc phan")
+		return nil, errors.New("Câu hỏi trùng nội dung đã tồn tại trong học phần")
 	}
 	reviewStatus := "draft"
 	if in.SubmitForReview {
@@ -201,7 +201,7 @@ func (s *QuestionService) Update(id string, in dto.QuestionInput, userID uint, r
 	if exists, err := s.repo.ContentExists(in.SubjectID, questionContentHash(in.Content), question.ID); err != nil {
 		return nil, err
 	} else if exists {
-		return nil, errors.New("cau hoi trung noi dung da ton tai trong hoc phan")
+		return nil, errors.New("Câu hỏi trùng nội dung đã tồn tại trong học phần")
 	}
 	question.SubjectID = in.SubjectID
 	question.ChapterID = in.ChapterID
@@ -245,7 +245,7 @@ func (s *QuestionService) SubmitForReview(id string, userID uint, role string) (
 		return nil, err
 	}
 	if question.ReviewStatus == "approved" {
-		return nil, errors.New("cau hoi da duoc duyet")
+		return nil, errors.New("Câu hỏi đã được duyệt")
 	}
 	question.ReviewStatus = "pending"
 	question.Status = "draft"
@@ -264,7 +264,7 @@ func (s *QuestionService) Review(id string, in dto.ReviewInput, reviewerID uint)
 		return nil, err
 	}
 	if question.ReviewStatus != "pending" {
-		return nil, errors.New("chi duyet cau hoi dang cho duyet")
+		return nil, errors.New("Chỉ duyệt được câu hỏi đang chờ duyệt")
 	}
 	now := time.Now()
 	question.ReviewStatus = in.Status
@@ -285,7 +285,7 @@ func (s *QuestionService) Review(id string, in dto.ReviewInput, reviewerID uint)
 func (s *QuestionService) Delete(id string, userID uint, role string) error {
 	question, err := s.repo.FindByID(id)
 	if err != nil {
-		return errors.New("khong tim thay cau hoi")
+		return errors.New("Không tìm thấy câu hỏi")
 	}
 	if !canModify(question.CreatedBy, userID, role) {
 		return ErrNotOwner

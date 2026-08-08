@@ -61,18 +61,18 @@ type TakeSession struct {
 // Thứ tự kiểm tra: trạng thái -> khung giờ -> phạm vi (public / lớp được giao).
 func (s *SubmissionService) canAccess(exam *entity.Exam, userID *uint) error {
 	if exam.Status != "published" {
-		return errors.New("de thi chua mo")
+		return errors.New("Đề thi chưa mở")
 	}
 	if !s.examRepo.HasVerifiedQuestionSet(exam.ID) {
-		return errors.New("de thi chua dat tieu chuan nguon cau hoi")
+		return errors.New("Đề thi chưa đạt tiêu chuẩn nguồn câu hỏi")
 	}
 
 	now := time.Now()
 	if !exam.StartTime.IsZero() && now.Before(exam.StartTime) {
-		return errors.New("chua den gio mo de thi")
+		return errors.New("Chưa đến giờ mở đề thi")
 	}
 	if !exam.EndTime.IsZero() && now.After(exam.EndTime) {
-		return errors.New("de thi da dong")
+		return errors.New("Đề thi đã đóng")
 	}
 
 	if exam.AccessType == "public" {
@@ -80,14 +80,14 @@ func (s *SubmissionService) canAccess(exam *entity.Exam, userID *uint) error {
 	}
 	// đề riêng: bắt buộc đăng nhập
 	if userID == nil {
-		return errors.New("de thi rieng, can dang nhap de lam bai")
+		return errors.New("Đề thi riêng, cần đăng nhập để làm bài")
 	}
 	// người tạo đề luôn xem/thử được đề của mình
 	if exam.CreatedBy == *userID {
 		return nil
 	}
 	if !s.examRepo.IsAssignedToStudent(exam.ID, *userID) {
-		return errors.New("ban khong thuoc lop duoc giao de thi nay")
+		return errors.New("Bạn không thuộc lớp được giao đề thi này")
 	}
 	return nil
 }
@@ -98,7 +98,7 @@ func (s *SubmissionService) canAccess(exam *entity.Exam, userID *uint) error {
 func (s *SubmissionService) Take(examID string, userID *uint) (*entity.Exam, []dto.TakeQuestion, *TakeSession, error) {
 	exam, err := s.examRepo.FindByID(examID)
 	if err != nil {
-		return nil, nil, nil, errors.New("khong tim thay de thi")
+		return nil, nil, nil, errors.New("Không tìm thấy đề thi")
 	}
 	if err := s.canAccess(exam, userID); err != nil {
 		return nil, nil, nil, err
@@ -112,7 +112,7 @@ func (s *SubmissionService) Take(examID string, userID *uint) (*entity.Exam, []d
 			// chưa có bài dở -> đây là một lượt làm mới, kiểm tra số lượt còn lại
 			if exam.MaxAttempts > 0 &&
 				s.subRepo.CountAttempts(exam.ID, *userID) >= int64(exam.MaxAttempts) {
-				return nil, nil, nil, errors.New("ban da het so lan lam de thi nay")
+				return nil, nil, nil, errors.New("Bạn đã hết số lần làm đề thi này")
 			}
 			sub = &entity.Submission{
 				ExamID:    exam.ID,
@@ -127,7 +127,7 @@ func (s *SubmissionService) Take(examID string, userID *uint) (*entity.Exam, []d
 		session = &TakeSession{SubmissionID: sub.ID, RemainingSeconds: remainingSeconds(exam, sub)}
 		if session.RemainingSeconds == 0 {
 			_ = s.subRepo.Expire(sub.ID, time.Now())
-			return nil, nil, nil, errors.New("da het thoi gian lam bai")
+			return nil, nil, nil, errors.New("Đã hết thời gian làm bài")
 		}
 	}
 
@@ -227,14 +227,14 @@ func submitResultFromSubmission(submission *entity.Submission, total int64) *Sub
 func (s *SubmissionService) GetSubmissionResult(submissionID, userID uint) (*SubmitResult, error) {
 	submission, err := s.subRepo.FindByIDForUser(submissionID, userID)
 	if err != nil {
-		return nil, errors.New("khong tim thay ket qua bai lam")
+		return nil, errors.New("Không tìm thấy kết quả bài làm")
 	}
 	if submission.Status != "graded" {
-		return nil, errors.New("bai lam chua duoc nop thanh cong")
+		return nil, errors.New("Bài làm chưa được nộp thành công")
 	}
 	total := int64(len(s.examRepo.GetQuestionIDs(submission.ExamID)))
 	if total == 0 {
-		return nil, errors.New("de thi chua co cau hoi")
+		return nil, errors.New("Đề thi chưa có câu hỏi")
 	}
 	return submitResultFromSubmission(submission, total), nil
 }
@@ -243,11 +243,11 @@ func (s *SubmissionService) GetSubmissionResult(submissionID, userID uint) (*Sub
 func (s *SubmissionService) Submit(examID string, in dto.SubmitInput, userID *uint) (*SubmitResult, error) {
 	exam, err := s.examRepo.FindByID(examID)
 	if err != nil {
-		return nil, errors.New("khong tim thay de thi")
+		return nil, errors.New("Không tìm thấy đề thi")
 	}
 	questionIDs := s.examRepo.GetQuestionIDs(exam.ID)
 	if len(questionIDs) == 0 {
-		return nil, errors.New("de thi chua co cau hoi")
+		return nil, errors.New("Đề thi chưa có câu hỏi")
 	}
 	if userID == nil {
 		questionIDs = guestTrialQuestionIDs(exam, questionIDs)
@@ -262,13 +262,13 @@ func (s *SubmissionService) Submit(examID string, in dto.SubmitInput, userID *ui
 		// server ghi nhận, không phải giờ client tự khai.
 		sub = s.subRepo.FindInProgress(exam.ID, *userID)
 		if sub == nil {
-			return nil, errors.New("chua bat dau lam bai hoac bai nay da nop roi")
+			return nil, errors.New("Chưa bắt đầu làm bài hoặc bài này đã nộp rồi")
 		}
 		if exam.Duration > 0 {
 			deadline := sub.StartTime.Add(time.Duration(exam.Duration)*time.Minute + graceSubmit)
 			if now.After(deadline) {
 				_ = s.subRepo.Expire(sub.ID, now)
-				return nil, errors.New("da qua thoi gian lam bai, khong the nop")
+				return nil, errors.New("Đã quá thời gian làm bài, không thể nộp")
 			}
 		}
 	} else {
@@ -284,7 +284,7 @@ func (s *SubmissionService) Submit(examID string, in dto.SubmitInput, userID *ui
 		if userID != nil {
 			_ = s.subRepo.Expire(sub.ID, now)
 		}
-		return nil, errors.New("de thi da dong, khong the nop bai")
+		return nil, errors.New("Đề thi đã đóng, không thể nộp bài")
 	}
 
 	allowedQuestions := make(map[uint]bool, len(questionIDs))

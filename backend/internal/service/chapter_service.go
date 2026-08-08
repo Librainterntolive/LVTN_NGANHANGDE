@@ -33,7 +33,7 @@ func (s *ChapterService) GetBySubject(subjectID string) ([]entity.Chapter, error
 func (s *ChapterService) Create(in dto.ChapterInput) (*entity.Chapter, error) {
 	name := strings.TrimSpace(in.Name)
 	if name == "" {
-		return nil, errors.New("ten chuong khong duoc de trong")
+		return nil, errors.New("Tên chương không được để trống")
 	}
 	chapter := &entity.Chapter{SubjectID: in.SubjectID, Name: name, OrderIndex: in.OrderIndex}
 	err := s.repo.Create(chapter)
@@ -43,7 +43,7 @@ func (s *ChapterService) Create(in dto.ChapterInput) (*entity.Chapter, error) {
 func (s *ChapterService) Update(id string, in dto.ChapterInput) (*entity.Chapter, error) {
 	name := strings.TrimSpace(in.Name)
 	if name == "" {
-		return nil, errors.New("ten chuong khong duoc de trong")
+		return nil, errors.New("Tên chương không được để trống")
 	}
 	chapter, err := s.repo.FindByID(id)
 	if err != nil {

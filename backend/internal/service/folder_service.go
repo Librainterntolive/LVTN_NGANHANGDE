@@ -21,7 +21,7 @@ func (s *FolderService) GetMine(userID uint) ([]entity.Folder, error) {
 
 func (s *FolderService) Create(name string, parentID *uint, userID uint) (*entity.Folder, error) {
 	if name == "" {
-		return nil, errors.New("can ten thu muc")
+		return nil, errors.New("Cần nhập tên thư mục")
 	}
 	f := &entity.Folder{Name: name, ParentID: parentID, UserID: userID}
 	err := s.repo.Create(f)
@@ -31,7 +31,7 @@ func (s *FolderService) Create(name string, parentID *uint, userID uint) (*entit
 func (s *FolderService) Rename(id string, name string, userID uint) (*entity.Folder, error) {
 	f, err := s.repo.FindByID(id)
 	if err != nil || f.UserID != userID {
-		return nil, errors.New("khong tim thay thu muc")
+		return nil, errors.New("Không tìm thấy thư mục")
 	}
 	f.Name = name
 	err = s.repo.Update(f)
@@ -42,7 +42,7 @@ func (s *FolderService) Rename(id string, name string, userID uint) (*entity.Fol
 func (s *FolderService) Delete(id string, userID uint) error {
 	f, err := s.repo.FindByID(id)
 	if err != nil || f.UserID != userID {
-		return errors.New("khong tim thay thu muc")
+		return errors.New("Không tìm thấy thư mục")
 	}
 	s.deleteRecursive(f.ID)
 	return nil
@@ -59,7 +59,7 @@ func (s *FolderService) deleteRecursive(folderID uint) {
 func (s *FolderService) GetExams(folderID string, userID uint) ([]repository.SavedExam, error) {
 	f, err := s.repo.FindByID(folderID)
 	if err != nil || f.UserID != userID {
-		return nil, errors.New("khong tim thay thu muc")
+		return nil, errors.New("Không tìm thấy thư mục")
 	}
 	exams, err := s.repo.FindExams(f.ID, userID)
 	if err != nil {
@@ -79,7 +79,7 @@ func (s *FolderService) GetExams(folderID string, userID uint) ([]repository.Sav
 func (s *FolderService) GetExamsPaged(folderID string, userID uint, limit, offset int) ([]repository.SavedExam, int64, error) {
 	f, err := s.repo.FindByID(folderID)
 	if err != nil || f.UserID != userID {
-		return nil, 0, errors.New("khong tim thay thu muc")
+		return nil, 0, errors.New("Không tìm thấy thư mục")
 	}
 	exams, total, err := s.repo.FindExamsPaged(f.ID, userID, limit, offset)
 	if err != nil {
@@ -104,7 +104,7 @@ func (s *FolderService) SavedExamIDs(userID uint) ([]uint, error) {
 func (s *FolderService) SetNote(folderID string, examID, userID uint, note string) error {
 	f, err := s.repo.FindByID(folderID)
 	if err != nil || f.UserID != userID {
-		return errors.New("khong tim thay thu muc")
+		return errors.New("Không tìm thấy thư mục")
 	}
 	return s.repo.UpdateNote(f.ID, examID, userID, note)
 }
@@ -112,7 +112,7 @@ func (s *FolderService) SetNote(folderID string, examID, userID uint, note strin
 func (s *FolderService) AddExam(folderID string, examID uint, userID uint) error {
 	f, err := s.repo.FindByID(folderID)
 	if err != nil || f.UserID != userID {
-		return errors.New("khong tim thay thu muc")
+		return errors.New("Không tìm thấy thư mục")
 	}
 	if s.repo.ExamExists(f.ID, examID, userID) {
 		return nil // đã có, coi như thành công

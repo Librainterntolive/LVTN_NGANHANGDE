@@ -45,7 +45,7 @@ func (s *SourceService) GetPaged(keyword string, page, limit int) ([]entity.Sour
 
 func (s *SourceService) Create(in dto.SourceInput, createdBy uint) (*entity.Source, error) {
 	if strings.TrimSpace(in.Title) == "" || strings.TrimSpace(in.URL) == "" {
-		return nil, errors.New("nguon phai co ten tai lieu va URL")
+		return nil, errors.New("Nguồn phải có tên tài liệu và URL")
 	}
 	if !validSourceURL(in.URL) {
 		return nil, errors.New("URL nguon phai bat dau bang http:// hoac https://")
@@ -66,17 +66,17 @@ func (s *SourceService) Create(in dto.SourceInput, createdBy uint) (*entity.Sour
 
 func (s *SourceService) RequireValidSource(id *uint, reference string) error {
 	if id == nil || *id == 0 {
-		return errors.New("cau hoi phai gan nguon tai lieu")
+		return errors.New("Câu hỏi phải gắn nguồn tài liệu")
 	}
 	if strings.TrimSpace(reference) == "" {
-		return errors.New("cau hoi phai co vi tri tham chieu trong nguon")
+		return errors.New("Câu hỏi phải có vị trí tham chiếu trong nguồn")
 	}
 	source, err := s.repo.FindByID(*id)
 	if err != nil {
-		return errors.New("nguon tai lieu khong ton tai")
+		return errors.New("Nguồn tài liệu không tồn tại")
 	}
 	if source.VerificationStatus != "verified" {
-		return errors.New("nguon tai lieu chua duoc Admin xac thuc")
+		return errors.New("Nguồn tài liệu chưa được Admin xác thực")
 	}
 	return nil
 }
@@ -84,14 +84,14 @@ func (s *SourceService) RequireValidSource(id *uint, reference string) error {
 func (s *SourceService) Review(id string, status string, reviewerID uint) (*entity.Source, error) {
 	sourceID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, errors.New("ma nguon khong hop le")
+		return nil, errors.New("Mã nguồn không hợp lệ")
 	}
 	source, err := s.repo.FindByID(uint(sourceID))
 	if err != nil {
-		return nil, errors.New("nguon tai lieu khong ton tai")
+		return nil, errors.New("Nguồn tài liệu không tồn tại")
 	}
 	if status != "verified" && status != "rejected" {
-		return nil, errors.New("trang thai xac thuc khong hop le")
+		return nil, errors.New("Trạng thái xác thực không hợp lệ")
 	}
 	source.VerificationStatus = status
 	source.ReviewedBy = &reviewerID

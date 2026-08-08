@@ -24,7 +24,7 @@ func NewClassPostService(repo *repository.ClassPostRepository, classRepo *reposi
 func (s *ClassPostService) canView(classID uint, userID uint, role string) error {
 	classroom, err := s.classRepo.FindByID(strconv.FormatUint(uint64(classID), 10))
 	if err != nil {
-		return errors.New("khong tim thay lop")
+		return errors.New("Không tìm thấy lớp")
 	}
 	if role == "Student" {
 		if !s.classRepo.IsStudentIn(classID, userID) {
@@ -77,7 +77,7 @@ func (s *ClassPostService) Create(classID, userID uint, role string, input dto.C
 	}
 	content := strings.TrimSpace(input.Content)
 	if content == "" {
-		return nil, errors.New("noi dung thong bao khong duoc de trong")
+		return nil, errors.New("Nội dung thông báo không được để trống")
 	}
 	item := &entity.ClassPost{ClassID: classID, CreatedBy: userID, Content: content}
 	if err := s.repo.Create(item); err != nil {
@@ -124,7 +124,7 @@ func (s *ClassPostService) Update(id string, userID uint, role string, input dto
 	}
 	content := strings.TrimSpace(input.Content)
 	if content == "" {
-		return nil, errors.New("noi dung thong bao khong duoc de trong")
+		return nil, errors.New("Nội dung thông báo không được để trống")
 	}
 	item.Content = content
 	if err := s.repo.Update(item); err != nil {

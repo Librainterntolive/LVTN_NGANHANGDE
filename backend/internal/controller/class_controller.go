@@ -77,7 +77,7 @@ func (ctl *ClassController) AssignablePaged(c *gin.Context) {
 // SV tự tham gia lớp bằng mã
 func (ctl *ClassController) Join(c *gin.Context) {
 	if getRole(c) != "Student" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "chi tai khoan sinh vien moi co the tham gia lop"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Chỉ tài khoản sinh viên mới có thể tham gia lớp"})
 		return
 	}
 	var in dto.JoinClassInput
@@ -90,8 +90,8 @@ func (ctl *ClassController) Join(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "class.joined", "class", class.ID, "Sinh vien tham gia lop bang ma lop")
-	c.JSON(http.StatusOK, gin.H{"message": "Da tham gia lop", "class": class})
+	ctl.audit.Log(getUserID(c), "class.joined", "class", class.ID, "Sinh viên tham gia lớp bằng mã lớp")
+	c.JSON(http.StatusOK, gin.H{"message": "Đã tham gia lớp", "class": class})
 }
 
 // SV xem các lớp mình đã tham gia
@@ -101,7 +101,7 @@ func (ctl *ClassController) MyClasses(c *gin.Context) {
 
 func (ctl *ClassController) MyClassesPaged(c *gin.Context) {
 	if getRole(c) != "Student" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "chi tai khoan sinh vien moi co the xem danh sach lop da tham gia"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Chỉ tài khoản sinh viên mới có thể xem danh sách lớp đã tham gia"})
 		return
 	}
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -136,7 +136,7 @@ func (ctl *ClassController) Create(c *gin.Context) {
 		return
 	}
 	cl, _ := ctl.svc.Create(in, getUserID(c))
-	ctl.audit.Log(getUserID(c), "class.created", "class", cl.ID, "Tao lop hoc: "+cl.Name)
+	ctl.audit.Log(getUserID(c), "class.created", "class", cl.ID, "Tạo lớp học: "+cl.Name)
 	c.JSON(http.StatusCreated, cl)
 }
 
@@ -152,10 +152,10 @@ func (ctl *ClassController) Update(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay lop"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy lớp"})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "class.updated", "class", cl.ID, "Cap nhat lop hoc: "+cl.Name)
+	ctl.audit.Log(getUserID(c), "class.updated", "class", cl.ID, "Cập nhật lớp học: "+cl.Name)
 	c.JSON(http.StatusOK, cl)
 }
 
@@ -169,8 +169,8 @@ func (ctl *ClassController) Delete(c *gin.Context) {
 		return
 	}
 	entityID, _ := strconv.Atoi(c.Param("id"))
-	ctl.audit.Log(getUserID(c), "class.deleted", "class", uint(entityID), "Xoa lop hoc")
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
+	ctl.audit.Log(getUserID(c), "class.deleted", "class", uint(entityID), "Xóa lớp học")
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa"})
 }
 
 func (ctl *ClassController) GetStudents(c *gin.Context) {
@@ -239,8 +239,8 @@ func (ctl *ClassController) AddStudent(c *gin.Context) {
 		return
 	}
 	entityID, _ := strconv.Atoi(c.Param("id"))
-	ctl.audit.Log(getUserID(c), "class.student_added", "class", uint(entityID), "Them sinh vien #"+strconv.FormatUint(uint64(in.StudentID), 10)+" vao lop")
-	c.JSON(http.StatusCreated, gin.H{"message": "Da them"})
+	ctl.audit.Log(getUserID(c), "class.student_added", "class", uint(entityID), "Thêm sinh viên #"+strconv.FormatUint(uint64(in.StudentID), 10)+" vao lop")
+	c.JSON(http.StatusCreated, gin.H{"message": "Đã thêm"})
 }
 
 func (ctl *ClassController) RemoveStudent(c *gin.Context) {
@@ -254,6 +254,6 @@ func (ctl *ClassController) RemoveStudent(c *gin.Context) {
 	}
 	entityID, _ := strconv.Atoi(c.Param("id"))
 	studentID, _ := strconv.Atoi(c.Param("studentId"))
-	ctl.audit.Log(getUserID(c), "class.student_removed", "class", uint(entityID), "Xoa sinh vien #"+strconv.Itoa(studentID)+" khoi lop")
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa khoi lop"})
+	ctl.audit.Log(getUserID(c), "class.student_removed", "class", uint(entityID), "Xóa sinh viên #"+strconv.Itoa(studentID)+" khoi lop")
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa khỏi lớp"})
 }

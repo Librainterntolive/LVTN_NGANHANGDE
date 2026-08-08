@@ -51,7 +51,7 @@ func RateLimit(limit int, window time.Duration) gin.HandlerFunc {
 				retryAfter = 1
 			}
 			context.Header("Retry-After", strconv.Itoa(retryAfter))
-			context.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "qua nhieu yeu cau, vui long thu lai sau"})
+			context.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Quá nhiều yêu cầu, vui lòng thử lại sau"})
 			return
 		}
 		context.Next()

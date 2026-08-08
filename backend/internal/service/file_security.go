@@ -21,18 +21,18 @@ var allowedAssignmentFiles = map[string]map[string]bool{
 
 func ValidateUploadSpec(filename string, size int64, mimeType string) error {
 	if filename == "" || size <= 0 {
-		return errors.New("file khong hop le")
+		return errors.New("File không hợp lệ")
 	}
 	if size > MaxAssignmentFileSize {
-		return errors.New("file vuot qua gioi han 20 MB")
+		return errors.New("File vượt quá giới hạn 20 MB")
 	}
 	ext := strings.ToLower(filepath.Ext(filepath.Base(filename)))
 	allowedMimes, ok := allowedAssignmentFiles[ext]
 	if !ok {
-		return errors.New("dinh dang file khong duoc ho tro")
+		return errors.New("Định dạng file không được hỗ trợ")
 	}
 	if mimeType != "" && !allowedMimes[strings.ToLower(mimeType)] {
-		return errors.New("loai noi dung file khong khop dinh dang")
+		return errors.New("Loại nội dung file không khớp định dạng")
 	}
 	return nil
 }

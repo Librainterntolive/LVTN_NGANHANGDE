@@ -47,7 +47,7 @@ func (ctl *SourceController) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "source.created", "source", source.ID, "Khai bao nguon tai lieu: "+source.Title)
+	ctl.audit.Log(getUserID(c), "source.created", "source", source.ID, "Khai báo nguồn tài liệu: "+source.Title)
 	c.JSON(http.StatusCreated, source)
 }
 
@@ -62,6 +62,6 @@ func (ctl *SourceController) Review(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "source.reviewed", "source", source.ID, "Cap nhat trang thai nguon thanh "+source.VerificationStatus+": "+source.Title)
+	ctl.audit.Log(getUserID(c), "source.reviewed", "source", source.ID, "Cập nhật trạng thái nguồn thành "+source.VerificationStatus+": "+source.Title)
 	c.JSON(http.StatusOK, source)
 }

@@ -66,7 +66,7 @@ func (ctl *AuthController) VerifyOTP(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Email da xac minh"})
+	c.JSON(http.StatusOK, gin.H{"message": "Email đã xác minh"})
 }
 func (ctl *AuthController) ResendOTP(c *gin.Context) {
 	var in dto.ResendOTPInput
@@ -78,7 +78,7 @@ func (ctl *AuthController) ResendOTP(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Da gui lai OTP"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã gửi lại OTP"})
 }
 func (ctl *AuthController) ForgotPassword(c *gin.Context) {
 	var in dto.ForgotPasswordInput
@@ -90,7 +90,7 @@ func (ctl *AuthController) ForgotPassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusAccepted, gin.H{"message": "Yeu cau da gui Admin duyet"})
+	c.JSON(http.StatusAccepted, gin.H{"message": "Yêu cầu đã gửi Admin duyệt"})
 }
 func (ctl *AuthController) SendPasswordResetOTP(c *gin.Context) {
 	var in dto.ResendOTPInput
@@ -102,7 +102,7 @@ func (ctl *AuthController) SendPasswordResetOTP(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Da gui OTP quen mat khau"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã gửi OTP quên mật khẩu"})
 }
 func (ctl *AuthController) ChangePassword(c *gin.Context) {
 	var in dto.ChangePasswordInput
@@ -114,7 +114,7 @@ func (ctl *AuthController) ChangePassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Da doi mat khau"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã đổi mật khẩu"})
 }
 func (ctl *AuthController) PendingResetRequests(c *gin.Context) {
 	ctl.PendingResetRequestsPaged(c)
@@ -141,6 +141,6 @@ func (ctl *AuthController) ApproveResetRequest(c *gin.Context) {
 		return
 	}
 	requestID, _ := strconv.Atoi(c.Param("id"))
-	ctl.audit.Log(getUserID(c), "password_reset.approved", "password_reset_request", uint(requestID), "Duyet cap mat khau tam qua email")
-	c.JSON(http.StatusOK, gin.H{"message": "Da gui mat khau tam qua Gmail"})
+	ctl.audit.Log(getUserID(c), "password_reset.approved", "password_reset_request", uint(requestID), "Duyệt cấp mật khẩu tạm qua email")
+	c.JSON(http.StatusOK, gin.H{"message": "Đã gửi mật khẩu tạm qua Gmail"})
 }

@@ -14,14 +14,14 @@ func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.GetHeader("Authorization")
 		if header == "" || !strings.HasPrefix(header, "Bearer ") {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Chua dang nhap"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Chưa đăng nhập"})
 			c.Abort()
 			return
 		}
 		tokenStr := strings.TrimPrefix(header, "Bearer ")
 		claims, err := pkg.ParseToken(tokenStr)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token het han hoac khong hop le"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token hết hạn hoặc không hợp lệ"})
 			c.Abort()
 			return
 		}
@@ -58,7 +58,7 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 				return
 			}
 		}
-		c.JSON(http.StatusForbidden, gin.H{"error": "Khong du quyen"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Không đủ quyền"})
 		c.Abort()
 	}
 }

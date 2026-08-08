@@ -7,7 +7,7 @@ import "quiz-backend/internal/dto"
 
 // ErrNotOwner: sửa/xóa thứ do người khác tạo.
 // Controller đổi lỗi này thành HTTP 403.
-var ErrNotOwner = errors.New("day khong phai du lieu ban tao, khong the sua hoac xoa")
+var ErrNotOwner = errors.New("Đây không phải dữ liệu bạn tạo, không thể sửa hoặc xóa")
 
 // canModify: Admin toàn quyền; các vai trò khác chỉ đụng được thứ mình tạo.
 // Dùng chung cho đề thi, câu hỏi và lớp học.

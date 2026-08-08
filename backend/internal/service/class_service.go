@@ -81,7 +81,7 @@ func (s *ClassService) GetPaged(role string, userID uint, limit, offset int) ([]
 func (s *ClassService) GetOne(id string, userID uint, role string) (*entity.Class, error) {
 	class, err := s.repo.FindByID(id)
 	if err != nil {
-		return nil, errors.New("khong tim thay lop")
+		return nil, errors.New("Không tìm thấy lớp")
 	}
 	if role == "Student" {
 		if !s.repo.IsStudentIn(class.ID, userID) {
@@ -191,7 +191,7 @@ func (s *ClassService) Update(id string, in dto.ClassInput, userID uint, role st
 func (s *ClassService) Delete(id string, userID uint, role string) error {
 	class, err := s.repo.FindByID(id)
 	if err != nil {
-		return errors.New("khong tim thay lop")
+		return errors.New("Không tìm thấy lớp")
 	}
 	if !canModify(class.CreatedBy, userID, role) {
 		return ErrNotOwner
@@ -202,7 +202,7 @@ func (s *ClassService) Delete(id string, userID uint, role string) error {
 func (s *ClassService) canManageStudents(classID string, userID uint, role string) (*entity.Class, error) {
 	class, err := s.repo.FindByID(classID)
 	if err != nil {
-		return nil, errors.New("khong tim thay lop")
+		return nil, errors.New("Không tìm thấy lớp")
 	}
 	if !canModify(class.CreatedBy, userID, role) {
 		return nil, ErrNotOwner
@@ -232,10 +232,10 @@ func (s *ClassService) AddStudent(classID string, studentID uint, userID uint, r
 	// chỉ thêm được tài khoản sinh viên vào lớp
 	stu, err := s.userRepo.FindByID(strconv.Itoa(int(studentID)))
 	if err != nil {
-		return errors.New("khong tim thay tai khoan")
+		return errors.New("Không tìm thấy tài khoản")
 	}
 	if stu.Role != "Student" {
-		return errors.New("chi them duoc tai khoan sinh vien vao lop")
+		return errors.New("Chỉ thêm được tài khoản sinh viên vào lớp")
 	}
 	if err := s.repo.AddStudent(class.ID, studentID); err != nil {
 		return err
@@ -257,7 +257,7 @@ func (s *ClassService) RemoveStudent(classID, studentID string, userID uint, rol
 	}
 	student, err := s.userRepo.FindByID(studentID)
 	if err != nil {
-		return errors.New("khong tim thay tai khoan")
+		return errors.New("Không tìm thấy tài khoản")
 	}
 	if err := s.repo.RemoveStudent(classID, studentID); err != nil {
 		return err
@@ -276,7 +276,7 @@ func (s *ClassService) RemoveStudent(classID, studentID string, userID uint, rol
 func (s *ClassService) JoinByCode(code string, studentID uint) (*entity.Class, error) {
 	class, err := s.repo.FindByCode(code)
 	if err != nil {
-		return nil, errors.New("ma lop khong dung")
+		return nil, errors.New("Mã lớp không đúng")
 	}
 	if s.repo.IsStudentIn(class.ID, studentID) {
 		return class, nil // đã ở trong lớp, coi như thành công

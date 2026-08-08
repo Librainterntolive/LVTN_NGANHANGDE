@@ -47,7 +47,7 @@ func parseAssignmentTime(value string) (time.Time, error) {
 			return value, nil
 		}
 	}
-	return time.Time{}, errors.New("thoi gian khong hop le")
+	return time.Time{}, errors.New("Thời gian không hợp lệ")
 }
 
 func (s *AssignmentService) Create(input dto.AssignmentInput, userID uint, role string) (*entity.Assignment, error) {
@@ -65,7 +65,7 @@ func (s *AssignmentService) Create(input dto.AssignmentInput, userID uint, role 
 			return nil, err
 		}
 		if !late.After(dueAt) {
-			return nil, errors.New("han nop muon phai sau han nop")
+			return nil, errors.New("Hạn nộp muộn phải sau hạn nộp")
 		}
 		lateUntil = &late
 	}
@@ -117,7 +117,7 @@ func (s *AssignmentService) List(classID uint, userID uint, role string, limit, 
 func (s *AssignmentService) Update(id, userID uint, role string, input dto.AssignmentInput) (*entity.Assignment, error) {
 	item, err := s.repo.FindByID(id)
 	if err != nil {
-		return nil, errors.New("khong tim thay bai tap")
+		return nil, errors.New("Không tìm thấy bài tập")
 	}
 	if !s.canManage(item.ClassID, userID, role) {
 		return nil, ErrNotOwner
@@ -133,7 +133,7 @@ func (s *AssignmentService) Update(id, userID uint, role string, input dto.Assig
 			return nil, err
 		}
 		if !late.After(dueAt) {
-			return nil, errors.New("han nop muon phai sau han nop")
+			return nil, errors.New("Hạn nộp muộn phải sau hạn nộp")
 		}
 		lateUntil = &late
 	}
@@ -150,7 +150,7 @@ func (s *AssignmentService) Update(id, userID uint, role string, input dto.Assig
 func (s *AssignmentService) Delete(id, userID uint, role string) error {
 	item, err := s.repo.FindByID(id)
 	if err != nil {
-		return errors.New("khong tim thay bai tap")
+		return errors.New("Không tìm thấy bài tập")
 	}
 	if !s.canManage(item.ClassID, userID, role) {
 		return ErrNotOwner
@@ -161,7 +161,7 @@ func (s *AssignmentService) Delete(id, userID uint, role string) error {
 func (s *AssignmentService) ListSubmissions(assignmentID, userID uint, role string) ([]entity.AssignmentSubmission, error) {
 	item, err := s.repo.FindByID(assignmentID)
 	if err != nil {
-		return nil, errors.New("khong tim thay bai tap")
+		return nil, errors.New("Không tìm thấy bài tập")
 	}
 	if !s.canManage(item.ClassID, userID, role) {
 		return nil, ErrNotOwner
@@ -172,7 +172,7 @@ func (s *AssignmentService) ListSubmissions(assignmentID, userID uint, role stri
 func (s *AssignmentService) ListSubmissionsPaged(assignmentID, userID uint, role string, limit, offset int) ([]entity.AssignmentSubmission, int64, error) {
 	item, err := s.repo.FindByID(assignmentID)
 	if err != nil {
-		return nil, 0, errors.New("khong tim thay bai tap")
+		return nil, 0, errors.New("Không tìm thấy bài tập")
 	}
 	if !s.canManage(item.ClassID, userID, role) {
 		return nil, 0, ErrNotOwner
@@ -196,14 +196,14 @@ func (s *AssignmentService) ClassStatsPaged(classID, userID uint, role string, l
 func (s *AssignmentService) Grade(submissionID, userID uint, role string, score float64, feedback string) (*entity.AssignmentSubmission, error) {
 	item, err := s.repo.FindSubmissionByID(submissionID)
 	if err != nil {
-		return nil, errors.New("khong tim thay bai nop")
+		return nil, errors.New("Không tìm thấy bài nộp")
 	}
 	assignment, err := s.repo.FindByID(item.AssignmentID)
 	if err != nil || !s.canManage(assignment.ClassID, userID, role) {
 		return nil, ErrNotOwner
 	}
 	if score > assignment.MaxScore {
-		return nil, errors.New("diem vuot qua diem toi da")
+		return nil, errors.New("Điểm vượt quá điểm tối đa")
 	}
 	now := time.Now()
 	item.Score, item.Feedback, item.GradedAt = &score, feedback, &now
@@ -251,13 +251,13 @@ func (s *AssignmentService) StartUpload(assignmentID, studentID uint, input dto.
 	s.cleanupExpiredUploads()
 	assignment, err := s.repo.FindByID(assignmentID)
 	if err != nil {
-		return nil, errors.New("khong tim thay bai tap")
+		return nil, errors.New("Không tìm thấy bài tập")
 	}
 	if !s.classRepo.IsStudentIn(assignment.ClassID, studentID) {
 		return nil, ErrNotOwner
 	}
 	if SubmissionWindow(time.Now(), assignment.DueAt, valueOrZero(assignment.LateUntil)) == "closed" {
-		return nil, errors.New("bai tap da dong nop")
+		return nil, errors.New("Bài tập đã đóng nộp")
 	}
 	if err := ValidateUploadSpec(input.Filename, input.Size, input.MimeType); err != nil {
 		return nil, err
@@ -267,7 +267,7 @@ func (s *AssignmentService) StartUpload(assignmentID, studentID uint, input dto.
 		return nil, err
 	}
 	if activeSessions >= maxActiveUploadSessions {
-		return nil, errors.New("ban dang co qua nhieu phien nop bai chua hoan tat, hay hoan tat hoac cho phien cu het han")
+		return nil, errors.New("Bạn đang có quá nhiều phiên nộp bài chưa hoàn tất, hãy hoàn tất hoặc chờ phiên cũ hết hạn")
 	}
 	id, err := randomID()
 	if err != nil {
@@ -298,13 +298,13 @@ func (s *AssignmentService) cleanupExpiredUploads() {
 func (s *AssignmentService) SaveChunk(sessionID string, studentID uint, index int, body io.Reader, size int64) (int, error) {
 	session, err := s.repo.FindSession(sessionID)
 	if err != nil || session.StudentID != studentID {
-		return 0, errors.New("phien upload khong hop le")
+		return 0, errors.New("Phiên tải lên không hợp lệ")
 	}
 	if time.Now().After(session.ExpiresAt) {
-		return 0, errors.New("phien upload da het han, hay tao lai")
+		return 0, errors.New("Phiên tải lên đã hết hạn, hãy tạo lại")
 	}
 	if index < 0 || index >= session.TotalChunks || size <= 0 || size > session.ChunkSize {
-		return 0, errors.New("phan file khong hop le")
+		return 0, errors.New("Phần file không hợp lệ")
 	}
 	tmp := filepath.Join(sessionPath(sessionID), strconv.Itoa(index)+".tmp")
 	final := filepath.Join(sessionPath(sessionID), strconv.Itoa(index)+".part")
@@ -316,7 +316,7 @@ func (s *AssignmentService) SaveChunk(sessionID string, studentID uint, index in
 	closeErr := f.Close()
 	if copyErr != nil || closeErr != nil || written != size || written > session.ChunkSize {
 		_ = os.Remove(tmp)
-		return 0, errors.New("khong ghi duoc phan file")
+		return 0, errors.New("Không ghi được phần file")
 	}
 	if err := os.Rename(tmp, final); err != nil {
 		return 0, err
@@ -327,10 +327,10 @@ func (s *AssignmentService) SaveChunk(sessionID string, studentID uint, index in
 func (s *AssignmentService) UploadProgress(sessionID string, studentID uint) (*entity.UploadSession, []int, error) {
 	session, err := s.repo.FindSession(sessionID)
 	if err != nil || session.StudentID != studentID {
-		return nil, nil, errors.New("phien upload khong hop le")
+		return nil, nil, errors.New("Phiên tải lên không hợp lệ")
 	}
 	if time.Now().After(session.ExpiresAt) {
-		return nil, nil, errors.New("phien upload da het han, hay tao lai")
+		return nil, nil, errors.New("Phiên tải lên đã hết hạn, hãy tạo lại")
 	}
 	return session, uploadedChunkIndexes(sessionID), nil
 }
@@ -338,29 +338,29 @@ func (s *AssignmentService) UploadProgress(sessionID string, studentID uint) (*e
 func (s *AssignmentService) CompleteUpload(sessionID string, studentID uint) (*entity.AssignmentSubmission, error) {
 	session, err := s.repo.FindSession(sessionID)
 	if err != nil || session.StudentID != studentID {
-		return nil, errors.New("phien upload khong hop le")
+		return nil, errors.New("Phiên tải lên không hợp lệ")
 	}
 	assignment, err := s.repo.FindByID(session.AssignmentID)
 	if err != nil {
-		return nil, errors.New("khong tim thay bai tap")
+		return nil, errors.New("Không tìm thấy bài tập")
 	}
 	status := SubmissionWindow(time.Now(), assignment.DueAt, valueOrZero(assignment.LateUntil))
 	if status == "closed" {
-		return nil, errors.New("bai tap da dong nop")
+		return nil, errors.New("Bài tập đã đóng nộp")
 	}
 	existing, findErr := s.repo.FindSubmission(session.AssignmentID, studentID)
 	if findErr == nil && existing.Score != nil {
-		return nil, errors.New("bai da duoc cham diem, khong the nop lai")
+		return nil, errors.New("Bài đã được chấm điểm, không thể nộp lại")
 	}
 	if chunkCount(sessionID) != session.TotalChunks {
-		return nil, errors.New("file chua tai len day du, hay thu lai cac phan con thieu")
+		return nil, errors.New("File chưa tải lên đầy đủ, hãy thử lại các phần còn thiếu")
 	}
 	plain, err := mergeChunks(session)
 	if err != nil {
 		return nil, err
 	}
 	if int64(len(plain)) != session.TotalSize {
-		return nil, errors.New("kich thuoc file khong khop")
+		return nil, errors.New("Kích thước file không khớp")
 	}
 	if err := validateFileSignature(session.OriginalName, plain); err != nil {
 		return nil, err
@@ -402,11 +402,11 @@ func (s *AssignmentService) CompleteUpload(sessionID string, studentID uint) (*e
 func (s *AssignmentService) Download(submissionID, userID uint, role string) (*entity.AssignmentSubmission, []byte, error) {
 	item, err := s.repo.FindSubmissionByID(submissionID)
 	if err != nil {
-		return nil, nil, errors.New("khong tim thay bai nop")
+		return nil, nil, errors.New("Không tìm thấy bài nộp")
 	}
 	assignment, err := s.repo.FindByID(item.AssignmentID)
 	if err != nil {
-		return nil, nil, errors.New("khong tim thay bai tap")
+		return nil, nil, errors.New("Không tìm thấy bài tập")
 	}
 	allowed := role == "Admin" || item.StudentID == userID || s.canManage(assignment.ClassID, userID, role)
 	if !allowed {
@@ -414,7 +414,7 @@ func (s *AssignmentService) Download(submissionID, userID uint, role string) (*e
 	}
 	encrypted, err := os.ReadFile(filepath.Join(storagePath(), item.StoredName+".bin"))
 	if err != nil {
-		return nil, nil, errors.New("khong doc duoc file bai nop")
+		return nil, nil, errors.New("Không đọc được file bài nộp")
 	}
 	plain, err := decryptBytes(encrypted)
 	if err != nil {
@@ -464,7 +464,7 @@ func mergeChunks(session *entity.UploadSession) ([]byte, error) {
 	for index := 0; index < session.TotalChunks; index++ {
 		data, err := os.ReadFile(filepath.Join(sessionPath(session.ID), strconv.Itoa(index)+".part"))
 		if err != nil {
-			return nil, errors.New("thieu phan file")
+			return nil, errors.New("Thiếu phần file")
 		}
 		out = append(out, data...)
 	}
@@ -474,7 +474,7 @@ func encryptionKey() ([]byte, error) {
 	value := os.Getenv("FILE_ENCRYPTION_KEY")
 	key, err := base64.StdEncoding.DecodeString(value)
 	if err != nil || len(key) != 32 {
-		return nil, errors.New("FILE_ENCRYPTION_KEY phai la khoa base64 32 byte")
+		return nil, errors.New("FILE_ENCRYPTION_KEY phải là khóa base64 32 byte")
 	}
 	return key, nil
 }
@@ -511,26 +511,26 @@ func decryptBytes(encrypted []byte) ([]byte, error) {
 		return nil, err
 	}
 	if len(encrypted) < gcm.NonceSize() {
-		return nil, errors.New("file ma hoa khong hop le")
+		return nil, errors.New("File mã hóa không hợp lệ")
 	}
 	return gcm.Open(nil, encrypted[:gcm.NonceSize()], encrypted[gcm.NonceSize():], nil)
 }
 func validateFileSignature(filename string, data []byte) error {
 	ext := strings.ToLower(filepath.Ext(filename))
 	if ext == ".pdf" && !strings.HasPrefix(string(data), "%PDF-") {
-		return errors.New("noi dung khong phai PDF hop le")
+		return errors.New("Nội dung không phải PDF hợp lệ")
 	}
 	if ext == ".png" && (len(data) < 8 || string(data[:8]) != "\x89PNG\r\n\x1a\n") {
-		return errors.New("noi dung khong phai PNG hop le")
+		return errors.New("Nội dung không phải PNG hợp lệ")
 	}
 	if (ext == ".jpg" || ext == ".jpeg") && (len(data) < 3 || data[0] != 0xff || data[1] != 0xd8 || data[2] != 0xff) {
-		return errors.New("noi dung khong phai JPEG hop le")
+		return errors.New("Nội dung không phải JPEG hợp lệ")
 	}
 	if (ext == ".zip" || ext == ".docx") && (len(data) < 4 || string(data[:2]) != "PK") {
-		return errors.New("noi dung khong phai ZIP/DOCX hop le")
+		return errors.New("Nội dung không phải ZIP/DOCX hợp lệ")
 	}
 	if ext == ".doc" && (len(data) < 8 || string(data[:8]) != "\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1") {
-		return errors.New("noi dung khong phai DOC hop le")
+		return errors.New("Nội dung không phải DOC hợp lệ")
 	}
 	return nil
 }

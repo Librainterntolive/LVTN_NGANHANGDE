@@ -65,5 +65,5 @@ func (ctl *ChapterController) Delete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa chuong (cau hoi trong chuong tro ve chua phan chuong)"})
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa chương (câu hỏi trong chương trở về chưa phân chương)"})
 }

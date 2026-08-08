@@ -50,7 +50,7 @@ func (ctl *UserController) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "user.created", "user", u.ID, "Tao tai khoan: "+u.Username+" ("+u.Role+")")
+	ctl.audit.Log(getUserID(c), "user.created", "user", u.ID, "Tạo tài khoản: "+u.Username+" ("+u.Role+")")
 	c.JSON(http.StatusCreated, u)
 }
 
@@ -62,23 +62,23 @@ func (ctl *UserController) Update(c *gin.Context) {
 	}
 	u, err := ctl.svc.Update(c.Param("id"), in)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay nguoi dung"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy người dùng"})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "user.updated", "user", u.ID, "Cap nhat tai khoan: "+u.Username+" ("+u.Status+")")
+	ctl.audit.Log(getUserID(c), "user.updated", "user", u.ID, "Cập nhật tài khoản: "+u.Username+" ("+u.Status+")")
 	c.JSON(http.StatusOK, u)
 }
 
 func (ctl *UserController) Delete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if uint(id) == getUserID(c) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "khong the xoa tai khoan dang dang nhap"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Không thể xóa tài khoản đang đăng nhập"})
 		return
 	}
 	if err := ctl.svc.Delete(c.Param("id")); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Khong tim thay nguoi dung"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy người dùng"})
 		return
 	}
-	ctl.audit.Log(getUserID(c), "user.deleted", "user", uint(id), "Xoa tai khoan")
-	c.JSON(http.StatusOK, gin.H{"message": "Da xoa"})
+	ctl.audit.Log(getUserID(c), "user.deleted", "user", uint(id), "Xóa tài khoản")
+	c.JSON(http.StatusOK, gin.H{"message": "Đã xóa"})
 }
