@@ -50,23 +50,30 @@ type SubjectInput struct {
 
 // ===== Question =====
 type AnswerInput struct {
-	Label      string `json:"label"`
-	Content    string `json:"content"`
-	IsCorrect  bool   `json:"is_correct"`
-	OrderIndex int    `json:"order_index"`
+	Label           string `json:"label"`
+	Content         string `json:"content"`
+	ContentOriginal string `json:"content_original"` // đáp án theo ngôn ngữ bản gốc
+	IsCorrect       bool   `json:"is_correct"`
+	OrderIndex      int    `json:"order_index"`
 }
 
 type QuestionInput struct {
-	SubjectID       uint          `json:"subject_id" binding:"required"`
-	ChapterID       *uint         `json:"chapter_id"` // null = chưa phân chương
-	Content         string        `json:"content" binding:"required"`
-	QuestionType    string        `json:"question_type"`
-	Difficulty      string        `json:"difficulty"`
-	Status          string        `json:"status"` // draft / active
-	SourceID        *uint         `json:"source_id"`
-	SourceReference string        `json:"source_reference"`
-	SubmitForReview bool          `json:"submit_for_review"`
-	Answers         []AnswerInput `json:"answers" binding:"required"`
+	SubjectID       uint   `json:"subject_id" binding:"required"`
+	ChapterID       *uint  `json:"chapter_id"` // null = chưa phân chương
+	Content         string `json:"content" binding:"required"`
+	QuestionType    string `json:"question_type"`
+	Difficulty      string `json:"difficulty"`
+	Status          string `json:"status"` // draft / active
+	SourceID        *uint  `json:"source_id"`
+	SourceReference string `json:"source_reference"`
+	SubmitForReview bool   `json:"submit_for_review"`
+	// Song ngữ: giữ nguyên bản để đối chiếu, và ghi rõ bản tiếng Việt là dịch
+	// từ đâu. Xem validateTranslation trong question_service.
+	ContentOriginal   string        `json:"content_original"`
+	OriginalLanguage  string        `json:"original_language"`
+	TranslationStatus string        `json:"translation_status"` // original / translated
+	TranslationRefs   string        `json:"translation_refs"`
+	Answers           []AnswerInput `json:"answers" binding:"required"`
 }
 
 // ===== Source (nguồn tài liệu) =====

@@ -117,6 +117,33 @@ func validateOneCorrect(answers []dto.AnswerInput) error {
 	return nil
 }
 
+// validTranslationStatus: chỉ nhận original/translated, mặc định original.
+func validTranslationStatus(s string) string {
+	if s == "translated" {
+		return "translated"
+	}
+	return "original"
+}
+
+// validateTranslation: câu hỏi khai là bản dịch thì phải chứng minh được dịch
+// từ đâu. Không cho phép khai "translated" rồi để trống nguyên bản hoặc dẫn
+// chứng — đó chính là cách một bản dịch bịa lọt vào ngân hàng đề.
+func validateTranslation(in dto.QuestionInput) error {
+	if validTranslationStatus(in.TranslationStatus) != "translated" {
+		return nil
+	}
+	if strings.TrimSpace(in.ContentOriginal) == "" {
+		return errors.New("Câu hỏi là bản dịch thì phải nhập nguyên bản theo ngôn ngữ tài liệu nguồn")
+	}
+	if strings.TrimSpace(in.OriginalLanguage) == "" {
+		return errors.New("Câu hỏi là bản dịch thì phải chọn ngôn ngữ của bản gốc")
+	}
+	if strings.TrimSpace(in.TranslationRefs) == "" {
+		return errors.New("Câu hỏi là bản dịch thì phải ghi nguồn công nhận cách dịch thuật ngữ")
+	}
+	return nil
+}
+
 // validStatus: chỉ nhận draft/active, mặc định active
 func validStatus(s string) string {
 	if s == "active" {
@@ -150,6 +177,9 @@ func (s *QuestionService) Create(in dto.QuestionInput, createdBy uint) (*entity.
 	if err := s.sourceSvc.RequireValidSource(in.SourceID, in.SourceReference); err != nil {
 		return nil, err
 	}
+	if err := validateTranslation(in); err != nil {
+		return nil, err
+	}
 	if exists, err := s.repo.ContentExists(in.SubjectID, questionContentHash(in.Content), 0); err != nil {
 		return nil, err
 	} else if exists {
@@ -172,6 +202,11 @@ func (s *QuestionService) Create(in dto.QuestionInput, createdBy uint) (*entity.
 		SourceRef:    in.SourceReference,
 		ReviewStatus: reviewStatus,
 		Answers:      toAnswers(in.Answers),
+
+		ContentOriginal:   in.ContentOriginal,
+		OriginalLanguage:  in.OriginalLanguage,
+		TranslationStatus: validTranslationStatus(in.TranslationStatus),
+		TranslationRefs:   in.TranslationRefs,
 	}
 	err := s.repo.Create(question)
 	return question, err
@@ -190,12 +225,15 @@ func (s *QuestionService) Update(id string, in dto.QuestionInput, userID uint, r
 	}
 	// câu đã dùng trong đề thi thì khóa, không cho sửa (bảo toàn đề đã phát hành)
 	if n := s.repo.UsedCount(question.ID); n > 0 {
-		return nil, errors.New("cau hoi da duoc dung trong " + strconv.FormatInt(n, 10) + " de thi, khong the sua - hay Nhan ban de tao ban moi")
+		return nil, errors.New("Câu hỏi đã được dùng trong " + strconv.FormatInt(n, 10) + " đề thi, không thể sửa — hãy Nhân bản để tạo bản mới")
 	}
 	if err := s.validateChapter(in.ChapterID, in.SubjectID); err != nil {
 		return nil, err
 	}
 	if err := s.sourceSvc.RequireValidSource(in.SourceID, in.SourceReference); err != nil {
+		return nil, err
+	}
+	if err := validateTranslation(in); err != nil {
 		return nil, err
 	}
 	if exists, err := s.repo.ContentExists(in.SubjectID, questionContentHash(in.Content), question.ID); err != nil {
@@ -215,6 +253,10 @@ func (s *QuestionService) Update(id string, in dto.QuestionInput, userID uint, r
 	}
 	question.SourceID = in.SourceID
 	question.SourceRef = in.SourceReference
+	question.ContentOriginal = in.ContentOriginal
+	question.OriginalLanguage = in.OriginalLanguage
+	question.TranslationStatus = validTranslationStatus(in.TranslationStatus)
+	question.TranslationRefs = in.TranslationRefs
 	if in.SubmitForReview {
 		question.ReviewStatus = "pending"
 		question.ReviewNote = ""

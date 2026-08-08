@@ -42,10 +42,11 @@ func toAnswers(in []dto.AnswerInput) []entity.Answer {
 			label = string(rune('A' + i))
 		}
 		out = append(out, entity.Answer{
-			Label:      label,
-			Content:    a.Content,
-			IsCorrect:  a.IsCorrect,
-			OrderIndex: i,
+			Label:           label,
+			Content:         a.Content,
+			ContentOriginal: a.ContentOriginal,
+			IsCorrect:       a.IsCorrect,
+			OrderIndex:      i,
 		})
 	}
 	return out

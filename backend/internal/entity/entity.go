@@ -117,38 +117,45 @@ type Source struct {
 
 // QUESTION_MAIN
 type Question struct {
-	ID           uint       `gorm:"primaryKey" json:"id"`
-	SubjectID    uint       `json:"subject_id"`
-	ChapterID    *uint      `json:"chapter_id"` // null = chưa phân chương
-	CreatedBy    uint       `json:"created_by"`
-	Content      string     `gorm:"type:text;not null" json:"content"`
-	ContentHash  string     `gorm:"size:64;column:content_hash" json:"-"`
-	QuestionType string     `gorm:"size:20;default:single" json:"question_type"`
-	Difficulty   string     `gorm:"size:20;default:medium" json:"difficulty"`
-	Status       string     `gorm:"size:20;default:active" json:"status"` // draft (nháp) / active (chính thức)
-	SourceID     *uint      `gorm:"index" json:"source_id"`
-	SourceRef    string     `gorm:"size:500" json:"source_reference"`
-	ReviewStatus string     `gorm:"size:20;default:draft;index" json:"review_status"` // draft/pending/approved/rejected
-	ReviewNote   string     `gorm:"size:500" json:"review_note"`
-	ReviewedBy   *uint      `json:"reviewed_by"`
-	ReviewedAt   *time.Time `json:"reviewed_at"`
-	CreatedAt    time.Time  `json:"created_at"`
-	Answers      []Answer   `gorm:"foreignKey:QuestionID" json:"answers,omitempty"`
-	Source       *Source    `gorm:"foreignKey:SourceID" json:"source,omitempty"`
-	CreatorName  string     `gorm:"-" json:"creator_name"` // tên người soạn (không lưu DB, điền khi đọc)
-	UsedCount    int64      `gorm:"-" json:"used_count"`   // số đề thi đang dùng câu này (không lưu DB)
-	AttemptCount int64      `gorm:"-" json:"attempt_count"`
-	CorrectRate  float64    `gorm:"-" json:"correct_rate"`
+	ID          uint   `gorm:"primaryKey" json:"id"`
+	SubjectID   uint   `json:"subject_id"`
+	ChapterID   *uint  `json:"chapter_id"` // null = chưa phân chương
+	CreatedBy   uint   `json:"created_by"`
+	Content     string `gorm:"type:text;not null" json:"content"` // bản hiển thị cho người học (tiếng Việt)
+	ContentHash string `gorm:"size:64;column:content_hash" json:"-"`
+	// Bản gốc theo ngôn ngữ tài liệu nguồn. Giữ lại để khi bảo vệ đề tài có thể
+	// đối chiếu câu hỏi tiếng Việt với nguyên văn, tránh dịch sai hoặc bịa nội dung.
+	ContentOriginal   string     `gorm:"type:text" json:"content_original"`
+	OriginalLanguage  string     `gorm:"size:10" json:"original_language"`
+	TranslationStatus string     `gorm:"size:20;default:original" json:"translation_status"` // original / translated
+	TranslationRefs   string     `gorm:"size:1000" json:"translation_refs"`                  // nguồn công nhận cách dịch thuật ngữ
+	QuestionType      string     `gorm:"size:20;default:single" json:"question_type"`
+	Difficulty        string     `gorm:"size:20;default:medium" json:"difficulty"`
+	Status            string     `gorm:"size:20;default:active" json:"status"` // draft (nháp) / active (chính thức)
+	SourceID          *uint      `gorm:"index" json:"source_id"`
+	SourceRef         string     `gorm:"size:500" json:"source_reference"`
+	ReviewStatus      string     `gorm:"size:20;default:draft;index" json:"review_status"` // draft/pending/approved/rejected
+	ReviewNote        string     `gorm:"size:500" json:"review_note"`
+	ReviewedBy        *uint      `json:"reviewed_by"`
+	ReviewedAt        *time.Time `json:"reviewed_at"`
+	CreatedAt         time.Time  `json:"created_at"`
+	Answers           []Answer   `gorm:"foreignKey:QuestionID" json:"answers,omitempty"`
+	Source            *Source    `gorm:"foreignKey:SourceID" json:"source,omitempty"`
+	CreatorName       string     `gorm:"-" json:"creator_name"` // tên người soạn (không lưu DB, điền khi đọc)
+	UsedCount         int64      `gorm:"-" json:"used_count"`   // số đề thi đang dùng câu này (không lưu DB)
+	AttemptCount      int64      `gorm:"-" json:"attempt_count"`
+	CorrectRate       float64    `gorm:"-" json:"correct_rate"`
 }
 
 // ANSWERS
 type Answer struct {
-	ID         uint   `gorm:"primaryKey" json:"id"`
-	QuestionID uint   `json:"question_id"`
-	Label      string `gorm:"size:5" json:"label"`
-	Content    string `gorm:"type:text" json:"content"`
-	IsCorrect  bool   `json:"is_correct"`
-	OrderIndex int    `json:"order_index"`
+	ID              uint   `gorm:"primaryKey" json:"id"`
+	QuestionID      uint   `json:"question_id"`
+	Label           string `gorm:"size:5" json:"label"`
+	Content         string `gorm:"type:text" json:"content"`
+	ContentOriginal string `gorm:"type:text" json:"content_original"` // đáp án theo ngôn ngữ bản gốc
+	IsCorrect       bool   `json:"is_correct"`
+	OrderIndex      int    `json:"order_index"`
 }
 
 // EXAMS
