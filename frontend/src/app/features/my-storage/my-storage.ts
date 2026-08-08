@@ -8,12 +8,13 @@ import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { DialogService } from '../../services/dialog.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Icon } from '../../shared/icon';
 
 interface TreeRow { folder: Folder; depth: number; hasChildren: boolean; }
 
 @Component({
   selector: 'app-my-storage',
-  imports: [RouterLink, DecimalPipe, InfiniteScrollDirective],
+  imports: [RouterLink, DecimalPipe, InfiniteScrollDirective, Icon],
   templateUrl: './my-storage.html',
 })
 export class MyStorage implements OnInit {

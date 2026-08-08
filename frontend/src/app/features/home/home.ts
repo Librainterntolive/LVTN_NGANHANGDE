@@ -5,10 +5,11 @@ import { StudentService } from '../../services/student.service';
 import { Exam } from '../../services/exam.service';
 import { ClassService } from '../../services/class.service';
 import { StatsService } from '../../services/stats.service';
+import { Icon } from '../../shared/icon';
 
 interface DashboardMetric { label: string; value: number; note: string; route: string; }
 
-@Component({ selector: 'app-home', imports: [RouterLink], templateUrl: './home.html' })
+@Component({ selector: 'app-home', imports: [RouterLink, Icon], templateUrl: './home.html' })
 export class Home implements OnInit {
   auth = inject(AuthService);
   private student = inject(StudentService);

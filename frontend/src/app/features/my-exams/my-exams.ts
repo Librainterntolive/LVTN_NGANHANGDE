@@ -3,10 +3,11 @@ import { RouterLink } from '@angular/router';
 import { StudentService } from '../../services/student.service';
 import { Exam } from '../../services/exam.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-my-exams',
-  imports: [RouterLink, InfiniteScrollDirective],
+  imports: [RouterLink, InfiniteScrollDirective, Icon],
   templateUrl: './my-exams.html',
 })
 export class MyExams implements OnInit {

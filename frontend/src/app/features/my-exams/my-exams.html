@@ -5,9 +5,9 @@
 <div style="display:flex; flex-wrap:wrap; gap:16px; margin-top:12px;">
   @for (e of exams(); track e.id) {
     <div class="exam-card">
-      <div style="font-size:30px;">📝</div>
+      <div style="font-size:var(--fs-3xl);"><app-icon name="file-text" /></div>
       <h3 style="margin:8px 0 4px; color:var(--accent);">{{ e.title }}</h3>
-      <p style="color:var(--text-2); font-size:13px; flex:1;">
+      <p style="color:var(--text-2); font-size:var(--fs-sm); flex:1;">
         ⏱ {{ e.duration }} phút &nbsp;•&nbsp; Đậu từ {{ e.pass_score }}đ
       </p>
       <a [routerLink]="['/take', e.id]" class="take-btn">Vào thi</a>
@@ -21,14 +21,14 @@
 
 <style>
   .exam-card {
-    background:var(--surface); border-radius:10px; padding:20px; width:240px;
+    background:var(--surface); border-radius:var(--r-md); padding:20px; width:240px;
     display:flex; flex-direction:column;
-    box-shadow:0 2px 8px rgba(0,0,0,.08); transition:transform .15s, box-shadow .15s;
+    box-shadow:var(--shadow); transition:transform .15s, box-shadow .15s;
   }
-  .exam-card:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
+  .exam-card:hover { transform:translateY(-3px); box-shadow:var(--shadow); }
   .take-btn {
     display:inline-block; text-align:center; padding:9px;
-    background:var(--accent); color:#fff; border-radius:6px; text-decoration:none; font-weight:600;
+    background:var(--accent); color:#fff; border-radius:var(--r-sm); text-decoration:none; font-weight:600;
   }
   .take-btn:hover { background:var(--accent-hover); text-decoration:none; }
   .load-more { text-align:center; margin:22px 0; }

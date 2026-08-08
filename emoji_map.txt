@@ -1,0 +1,61 @@
+U+1F5C4U+FE0F    app.html               .storage')">           <span class="ic">
+U+2600U+FE0F     app.html               n class="ic">{{ theme.isDark() ? '🌙' : '
+U+1F468U+200D    classes.html           10px;">         <span class="stat-chip">
+U+1F469U+200D    classes.html            color:var(--text-3); margin:0 0 12px;">
+U+2B07U+FE0F     exams.html             utton>         } @else {           <div>
+U+1F5C2U+FE0F    home.html                    <a routerLink="/my-storage"><span>
+U+270DU+FE0F     my-storage.html        ">{{ s.attempts }}</div><div class="sl">
+U+270FU+FE0F     my-storage.html        k)="rename(row.folder)" title="Đổi tên">
+U+1F3DBU+FE0F    my-storage.html        ">       <h3 style="margin-bottom:8px;">
+U+1F58AU+FE0F    stats.html             ile t-purple">       <span class="s-ic">
+U+26A0U+FE0F     take-exam.html         <div style="font-size:var(--fs-4xl);">
+U+1F50D          app.html               ass="sb-search">       <span class="ic">
+U+1F3E0          app.html               'menu.home')">         <span class="ic">
+U+1F4DA          app.html               u.subjects')">         <span class="ic">
+U+2753           app.html               n.t('menu.questions')"><span class="ic">
+U+1F3EB          app.html               18n.t('menu.classes')"><span class="ic">
+U+1F4DD          app.html               "i18n.t('menu.exams')"><span class="ic">
+U+1F4CA          app.html               "i18n.t('menu.stats')"><span class="ic">
+U+1F464          app.html               "i18n.t('menu.users')"><span class="ic">
+U+1F50E          app.html               18n.t('menu.sources')"><span class="ic">
+U+1F4CB          app.html               tle="Nhật ký thao tác"><span class="ic">
+U+1F553          app.html               18n.t('menu.history')"><span class="ic">
+U+1F319          app.html               <span class="ic">{{ theme.isDark() ? '
+U+2713           app.html               lass="tx">{{ theme.mode() === 'auto' ? '
+U+1F6AA          app.html               u.logout')">           <span class="ic">
+U+2630           app.html                (click)="toggleSidebar()" title="Menu">
+U+2705           app.html                      <span>{{ t.type === 'success' ? '
+U+26D4           app.html               'success' ? '✅' : t.type === 'error' ? '
+U+1F510          audit-manager.html     log.entity_type === 'question' ? '❓' : '
+U+2795           classes.html           nhóm</h2>   <button (click)="openAdd()">
+U+2715           classes.html           "btn-outline" style="padding:4px 10px;">
+U+1F4A1          classes.html           or:var(--text-3); margin:10px 0 0;">
+U+1F393          classes.html           px;">         <span class="stat-chip">👨‍
+U+1F4C4          classes.html           </span>         <span class="stat-chip">
+U+1F5A8          exams.html             ntExam(p.exam.id!)" class="btn-outline">
+U+2B07           exams.html             id!, p.exam.title)" class="btn-outline">
+U+1F500          exams.html             type }}         @if (p.exam.shuffle) { ·
+U+2714           exams.html             }}. {{ a.content }} @if (a.is_correct) {
+U+270B           exams.html             anual'" (click)="setMode('manual')">
+U+1F3B2          exams.html             atrix'" (click)="setMode('matrix')">
+U+1F446          exams.html             nt-size:var(--fs-sm); margin:10px 0 0;">
+U+26A0           exams.html             {{ r.avail < r.count ? '
+U+1F4D6          exams.html             (q.chapter_id)) { <span class="qp-meta">
+U+1F4E5          exams.html                  <b style="font-size:var(--fs-md);">
+U+2728           exams.html              @else {     <button (click)="create()">
+U+1F441          exams.html             <button (click)="showPreview(e.id!)">
+U+2754           home.html                     <a routerLink="/questions"><span>
+U+1F3AF          my-storage.html         number:'1.0-1' }}</div><div class="sl">
+U+1F4D5          my-storage.html        { s.wrong_count }}</div><div class="sl">
+U+1F525          my-storage.html        class="stat-box streak"><div class="sv">
+U+1F501          my-storage.html              <button (click)="startPractice()">
+U+1F389          my-storage.html        "color:var(--text-3); margin:10px 0 0;">
+U+1F4C1          my-storage.html        s:center; margin-bottom:8px;">       <b>
+U+1F4C2          my-storage.html        ="tw-name" (click)="select(row.folder)">
+U+1F5D1          my-storage.html        er)" title="Xóa" style="color:#e53935;">
+U+1F448          my-storage.html                <p style="color:var(--text-3);">
+U+2718           my-storage.html        @else { <span style="color:#e53935;">
+U+1F465          stats.html             -tile t-blue">       <span class="s-ic">
+U+1F4D8          subjects.html          [style.background]="levelColor()"><span>
+U+1F451          users.html             form.role">       <option value="Admin">
+U+1F512          users.html             g</option>       <option value="locked">

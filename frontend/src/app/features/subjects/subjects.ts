@@ -5,10 +5,11 @@ import { SubjectService, Subject } from '../../services/subject.service';
 import { AuthService } from '../../services/auth.service';
 import { DialogService } from '../../services/dialog.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-subjects',
-  imports: [FormsModule, RouterLink, InfiniteScrollDirective],
+  imports: [FormsModule, RouterLink, InfiniteScrollDirective, Icon],
   templateUrl: './subjects.html',
 })
 export class Subjects implements OnInit {

@@ -6,10 +6,11 @@ import { ExamService, Exam } from '../../services/exam.service';
 import { StudentService } from '../../services/student.service';
 import { AuthService } from '../../services/auth.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-subject-detail',
-  imports: [RouterLink, InfiniteScrollDirective],
+  imports: [RouterLink, InfiniteScrollDirective, Icon],
   templateUrl: './subject-detail.html',
 })
 export class SubjectDetail implements OnInit {

@@ -5,10 +5,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { StudentService, TakeExamData, SubmitResult } from '../../services/student.service';
 import { AuthService } from '../../services/auth.service';
 import { LayoutService } from '../../services/layout.service';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-take-exam',
-  imports: [FormsModule, RouterLink, DecimalPipe],
+  imports: [FormsModule, RouterLink, DecimalPipe, Icon],
   templateUrl: './take-exam.html',
 })
 export class TakeExam implements OnInit, OnDestroy {

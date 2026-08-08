@@ -4,10 +4,11 @@ import { ClassService, AppClass } from '../../services/class.service';
 import { RouterLink } from '@angular/router';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
 import { ToastService } from '../../services/toast.service';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-my-classes',
-  imports: [FormsModule, RouterLink, InfiniteScrollDirective],
+  imports: [FormsModule, RouterLink, InfiniteScrollDirective, Icon],
   templateUrl: './my-classes.html',
 })
 export class MyClasses implements OnInit {

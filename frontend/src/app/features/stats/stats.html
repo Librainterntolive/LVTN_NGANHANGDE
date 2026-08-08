@@ -1,51 +1,51 @@
 <h2>{{ i18n.t('stats.title') }}</h2>
 @if (error()) { <p class="stats-error" role="alert">{{ error() }}</p> }
 
-<!-- ===== 4 thẻ tổng quan màu (kiểu CloudCampus) ===== -->
+<!-- ===== Thẻ số liệu tổng quan ===== -->
 @if (overview(); as o) {
   <div class="tile-row">
-    <div class="s-tile t-blue">
-      <span class="s-ic">👥</span>
+    <div class="s-tile">
+      <app-icon name="users" class="s-ic" />
       <div class="s-body">
         <div class="s-num">{{ o.total_users }}</div>
         <div class="s-lb">{{ i18n.t('stats.users') }}</div>
         <div class="s-sub">{{ i18n.t('stats.inSystem') }}</div>
       </div>
     </div>
-    <div class="s-tile t-red">
-      <span class="s-ic">❓</span>
+    <div class="s-tile">
+      <app-icon name="help-circle" class="s-ic" />
       <div class="s-body">
         <div class="s-num">{{ o.total_questions }}</div>
         <div class="s-lb">{{ i18n.t('stats.questions') }}</div>
         <div class="s-sub">{{ i18n.t('stats.inSystem') }}</div>
       </div>
     </div>
-    <div class="s-tile t-teal">
-      <span class="s-ic">✓</span>
+    <div class="s-tile">
+      <app-icon name="check" class="s-ic" />
       <div class="s-body">
         <div class="s-num">{{ o.total_approved_questions }}</div>
         <div class="s-lb">Câu hỏi đã duyệt</div>
         <div class="s-sub">đủ điều kiện sử dụng</div>
       </div>
     </div>
-    <div class="s-tile t-green">
-      <span class="s-ic">📝</span>
+    <div class="s-tile">
+      <app-icon name="file-text" class="s-ic" />
       <div class="s-body">
         <div class="s-num">{{ o.total_exams }}</div>
         <div class="s-lb">{{ i18n.t('stats.exams') }}</div>
         <div class="s-sub">{{ i18n.t('stats.inSystem') }}</div>
       </div>
     </div>
-    <div class="s-tile t-orange">
-      <span class="s-ic">🔎</span>
+    <div class="s-tile">
+      <app-icon name="search" class="s-ic" />
       <div class="s-body">
         <div class="s-num">{{ o.total_verified_sources }}</div>
         <div class="s-lb">Nguồn xác thực</div>
         <div class="s-sub">có thể trích dẫn</div>
       </div>
     </div>
-    <div class="s-tile t-purple">
-      <span class="s-ic">🖊️</span>
+    <div class="s-tile">
+      <app-icon name="pencil" class="s-ic" />
       <div class="s-body">
         <div class="s-num">{{ o.total_submissions }}</div>
         <div class="s-lb">{{ i18n.t('stats.attempts') }}</div>
@@ -59,7 +59,7 @@
 
 <!-- ===== Panel biểu đồ cột: điểm TB theo đề ===== -->
 <div class="panel">
-  <div class="panel-h">📊 {{ i18n.t('stats.chart') }}</div>
+  <div class="panel-h"><app-icon name="bar-chart" /> {{ i18n.t('stats.chart') }}</div>
   <div class="panel-b">
     @if (bars().length) {
       <div class="chart">
@@ -78,7 +78,7 @@
 </div>
 
 <div class="panel class-panel">
-  <div class="panel-h">🏫 Thống kê theo lớp học</div>
+  <div class="panel-h"><app-icon name="building" /> Thống kê theo lớp học</div>
   <div class="panel-b">
     <p class="class-help">Chọn một lớp để xem từng sinh viên, điểm trung bình chỉ tính bài đã nộp và điểm trung bình có tính bài vắng.</p>
     <div class="class-filter"><select [(ngModel)]="selectedClassId" (ngModelChange)="loadClassStats()"><option [ngValue]="0">Chọn lớp học</option>@for (classroom of classes(); track classroom.id) { <option [ngValue]="classroom.id">{{ classroom.name }} · {{ classroom.code }}</option> }</select>@if (classes().length < classTotal()) { <button class="btn-outline" (click)="loadMoreClasses()" [disabled]="classesLoading()">{{ classesLoading() ? 'Đang tải…' : 'Tải thêm lớp' }}</button> } @if (selectedClassId) { <a [routerLink]="['/classes', selectedClassId]" class="open-class">Mở Classroom</a> }</div>
@@ -93,7 +93,7 @@
 
 <!-- ===== Panel bảng chi tiết ===== -->
 <div class="panel">
-  <div class="panel-h">📋 {{ i18n.t('stats.byExam') }}</div>
+  <div class="panel-h"><app-icon name="clipboard" /> {{ i18n.t('stats.byExam') }}</div>
   <div class="panel-b" style="overflow-x:auto;">
     <table style="width:100%; box-shadow:none;">
       <thead>
@@ -113,10 +113,10 @@
             <td>{{ round(s.avg_score) }}</td>
             <td>{{ s.pass_count }}</td>
             <td>
-              <div style="background:var(--surface-2); border-radius:4px; width:160px; height:18px; position:relative;">
+              <div style="background:var(--surface-2); border-radius:var(--r-sm); width:160px; height:18px; position:relative;">
                 <div [style.width.%]="s.pass_rate"
-                     style="background:#4caf50; height:18px; border-radius:4px;"></div>
-                <span style="position:absolute; left:6px; top:0; font-size:12px;">{{ round(s.pass_rate) }}%</span>
+                     style="background:var(--success); height:18px; border-radius:var(--r-sm);"></div>
+                <span style="position:absolute; left:6px; top:0; font-size:var(--fs-xs);">{{ round(s.pass_rate) }}%</span>
               </div>
             </td>
           </tr>
@@ -128,53 +128,52 @@
 </div>
 
 <style>
-  /* ---- thẻ màu tổng quan ---- */
+  /* ---- thẻ số liệu tổng quan ---- */
   .tile-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px; margin-bottom: 20px;
   }
-  .stats-error { margin:0 0 16px; padding:11px 13px; border:1px solid #efc0c5; border-radius:10px; background:#fff1f2; color:#b42318; font-size:14px; }
-  .overview-skeleton div { min-height:106px; border-radius:12px; background:linear-gradient(90deg,var(--surface-2),var(--accent-soft),var(--surface-2)); background-size:200% 100%; animation:shimmer 1.3s infinite; }
+  .stats-error { margin:0 0 16px; padding:11px 13px; border:1px solid var(--danger-soft); border-radius:var(--r-md); background:var(--danger-soft); color:var(--danger); font-size:var(--fs-md); }
+  .overview-skeleton div { min-height:106px; border-radius:var(--r-md); background:linear-gradient(90deg,var(--surface-2),var(--accent-soft),var(--surface-2)); background-size:200% 100%; animation:shimmer 1.3s infinite; }
   @keyframes shimmer { to { background-position:-200% 0; } }
-  .loading-note { margin:10px 0 0; color:var(--text-3); font-size:13px; }
+  .loading-note { margin:10px 0 0; color:var(--text-3); font-size:var(--fs-sm); }
+  /* Thẻ số liệu dùng chung một kiểu, phân biệt bằng nhãn và biểu tượng.
+     Sáu thẻ sáu màu cầu vồng làm màu mất hết ý nghĩa: người đọc tưởng màu
+     mang thông tin (tốt/xấu) trong khi thực ra chỉ để trang trí. */
   .s-tile {
-    display: flex; align-items: center; gap: 14px;
-    border-radius: 12px; padding: 18px 20px; color: #fff;
-    box-shadow: var(--shadow);
-    transition: transform .15s;
+    display: flex; align-items: center; gap: var(--sp-3);
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    padding: var(--sp-4) var(--sp-4); background: var(--surface);
+    box-shadow: var(--shadow-sm);
   }
-  .s-tile:hover { transform: translateY(-3px); }
-  .s-ic { font-size: 34px; opacity: .9; }
-  .s-num { font-size: 30px; font-weight: 800; line-height: 1.1; }
-  .s-lb { font-size: 14px; font-weight: 600; }
-  .s-sub { font-size: 11px; opacity: .8; text-transform: uppercase; letter-spacing: .5px; }
-  .t-blue   { background: linear-gradient(135deg, #42a5f5, #1e88e5); }
-  .t-red    { background: linear-gradient(135deg, #ef5350, #e53935); }
-  .t-teal   { background: linear-gradient(135deg, #26a69a, #00897b); }
-  .t-green  { background: linear-gradient(135deg, #66bb6a, #43a047); }
-  .t-orange { background: linear-gradient(135deg, #ffb74d, #f57c00); }
-  .t-purple { background: linear-gradient(135deg, #ab47bc, #8e24aa); }
+  .s-ic {
+    display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: var(--r-md); background: var(--accent-soft); color: var(--accent);
+  }
+  .s-num { font-size:var(--fs-2xl); font-weight: 700; line-height: 1.15; color: var(--text); }
+  .s-lb { font-size:var(--fs-sm); font-weight: 600; color: var(--text-2); }
+  .s-sub { font-size:var(--fs-2xs); color: var(--text-3); }
 
   /* ---- panel có thanh tiêu đề màu ---- */
   .panel {
-    background: var(--surface); border-radius: 12px; overflow: hidden;
+    background: var(--surface); border-radius:var(--r-md); overflow: hidden;
     box-shadow: var(--shadow); margin-bottom: 20px;
   }
   .panel-h {
     background: var(--accent); color: var(--on-accent);
-    padding: 10px 16px; font-weight: 600; font-size: 14px;
+    padding: 10px 16px; font-weight: 600; font-size:var(--fs-md);
   }
   .panel-b { padding: 16px; }
-  .class-help { margin:0 0 12px; color:var(--text-2); font-size:13px; }
+  .class-help { margin:0 0 12px; color:var(--text-2); font-size:var(--fs-sm); }
   .class-filter { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .class-filter select { min-width:min(100%,360px); flex:1; }
-  .open-class { display:inline-flex; padding:8px 12px; border-radius:8px; background:var(--accent); color:#fff; font-size:14px; font-weight:700; text-decoration:none; }
+  .open-class { display:inline-flex; padding:8px 12px; border-radius:var(--r-sm); background:var(--accent); color:#fff; font-size:var(--fs-md); font-weight:700; text-decoration:none; }
   .open-class:hover { color:#fff; text-decoration:none; background:var(--accent-hover); }
   .class-summary { display:grid; grid-template-columns:repeat(3,minmax(150px,1fr)); gap:10px; margin:16px 0; }
-  .class-summary div { display:grid; gap:3px; padding:12px; border-radius:10px; background:var(--accent-soft); }
-  .class-summary span { font-size:12px; color:var(--text-2); }
-  .class-summary b { font-size:21px; color:var(--accent); }
+  .class-summary div { display:grid; gap:3px; padding:12px; border-radius:var(--r-md); background:var(--accent-soft); }
+  .class-summary span { font-size:var(--fs-xs); color:var(--text-2); }
+  .class-summary b { font-size:var(--fs-xl); color:var(--accent); }
   .class-table { overflow:auto; }
 
   /* ---- biểu đồ cột thuần CSS ---- */
@@ -187,21 +186,21 @@
     min-width: 64px;
   }
   .bar {
-    width: 34px; border-radius: 6px 6px 0 0;
-    background: linear-gradient(180deg, var(--accent-2), var(--accent));
+    width: 34px; border-radius: var(--r-sm) var(--r-sm) 0 0;
+    background: var(--accent);
     animation: grow .5s ease;
   }
   @keyframes grow { from { height: 0 !important; } }
-  .bar-val { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .bar-val { font-size:var(--fs-xs); font-weight: 700; color: var(--accent); margin-bottom: 4px; }
   .bar-lb {
-    font-size: 11px; color: var(--text-3); margin-top: 6px;
+    font-size:var(--fs-2xs); color: var(--text-3); margin-top: 6px;
     max-width: 80px; text-align: center;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
   @media (max-width: 600px) {
-    .s-num { font-size: 24px; }
-    .s-ic { font-size: 26px; }
+    .s-num { font-size:var(--fs-2xl); }
+    
     .class-summary { grid-template-columns:1fr; }
   }
 </style>

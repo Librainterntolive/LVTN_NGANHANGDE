@@ -6,7 +6,7 @@
   </p>
 
   <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-    <a routerLink="/" class="btn-soft-primary">🏠 Về trang chủ</a>
+    <a routerLink="/" class="btn-soft-primary"><app-icon name="home" /> Về trang chủ</a>
     <button (click)="back()" class="btn-outline">← Quay lại trang trước</button>
   </div>
 </div>
@@ -18,11 +18,11 @@
     padding: 32px 24px;
     text-align: center;
     background: var(--surface);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    border-radius:var(--r-md);
+    box-shadow:var(--shadow);
   }
   .nf-code {
-    font-size: 64px;
+    font-size: var(--fs-4xl);
     font-weight: 800;
     line-height: 1;
     color: var(--accent);

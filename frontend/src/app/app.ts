@@ -7,10 +7,11 @@ import { ToastService } from './services/toast.service';
 import { DialogService } from './services/dialog.service';
 import { ThemeService } from './services/theme.service';
 import { I18nService } from './services/i18n.service';
+import { Icon } from './shared/icon';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Icon],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

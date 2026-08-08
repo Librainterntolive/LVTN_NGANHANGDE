@@ -1,16 +1,16 @@
 <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
   <h2 style="margin:0;">Quản lý lớp / nhóm</h2>
-  <button (click)="openAdd()">➕ Tạo lớp</button>
+  <button (click)="openAdd()"><app-icon name="plus" /> Tạo lớp</button>
 </div>
 
 @if (error()) { <p style="color:red">{{ error() }}</p> }
 
 <!-- Form thêm/sửa lớp (ẩn/hiện) -->
 @if (showForm()) {
-  <div style="background:var(--surface); border-radius:10px; padding:16px; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.08); max-width:560px;">
+  <div style="background:var(--surface); border-radius:var(--r-md); padding:16px; margin:14px 0; box-shadow:var(--shadow); max-width:560px;">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h3 style="margin:0;">{{ editingId() ? 'Sửa lớp' : 'Tạo lớp mới' }}</h3>
-      <button (click)="cancel()" class="btn-outline" style="padding:4px 10px;">✕</button>
+      <button (click)="cancel()" class="btn-outline" style="padding:4px 10px;"><app-icon name="x" /></button>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
       <input [(ngModel)]="form.name" placeholder="Tên lớp (VD: KTPM01 - Nhập môn lập trình)" style="flex:1; min-width:200px;" />
@@ -25,8 +25,8 @@
       <button (click)="cancel()" class="btn-outline" style="margin-left:6px;">Hủy</button>
     </div>
     @if (!editingId()) {
-      <p style="font-size:13px; color:var(--text-3); margin:10px 0 0;">
-        💡 Sau khi tạo, chia sẻ <b>mã lớp</b> cho sinh viên để các em tự tham gia.
+      <p style="font-size:var(--fs-sm); color:var(--text-3); margin:10px 0 0;">
+        <app-icon name="lightbulb" /> Sau khi tạo, chia sẻ <b>mã lớp</b> cho sinh viên để các em tự tham gia.
       </p>
     }
   </div>
@@ -37,35 +37,35 @@
   @for (c of classes(); track c.id) {
     <div class="class-card fade-in">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-        <h3 style="margin:0; color:var(--accent); font-size:17px;">🏫 {{ c.name }}</h3>
+        <h3 style="margin:0; color:var(--accent); font-size:var(--fs-lg);"><app-icon name="building" /> {{ c.name }}</h3>
         @if (c.is_public) { <span class="pub-badge">dùng chung</span> }
       </div>
-      <p style="color:var(--text-3); font-size:13px; margin:4px 0 10px;">{{ c.description || 'Không có mô tả' }}</p>
+      <p style="color:var(--text-3); font-size:var(--fs-sm); margin:4px 0 10px;">{{ c.description || 'Không có mô tả' }}</p>
 
       <!-- số liệu nhanh -->
       <div style="display:flex; gap:14px; margin-bottom:10px;">
-        <span class="stat-chip">👨‍🎓 {{ c.student_count ?? 0 }} SV</span>
-        <span class="stat-chip">📄 {{ c.exam_count ?? 0 }} đề</span>
+        <span class="stat-chip"><app-icon name="users" /><app-icon name="graduation-cap" /> {{ c.student_count ?? 0 }} SV</span>
+        <span class="stat-chip"><app-icon name="file" /> {{ c.exam_count ?? 0 }} đề</span>
       </div>
 
       <!-- mã lớp + copy -->
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
-        <span style="font-size:12px; color:var(--text-3);">Mã lớp:</span>
+        <span style="font-size:var(--fs-xs); color:var(--text-3);">Mã lớp:</span>
         <span class="code-badge">{{ c.code }}</span>
-        <button (click)="copyCode(c)" class="btn-outline" style="padding:2px 8px; font-size:12px;" title="Sao chép mã lớp">📋</button>
+        <button (click)="copyCode(c)" class="btn-outline" style="padding:2px 8px; font-size:var(--fs-xs);" title="Sao chép mã lớp"><app-icon name="clipboard" /></button>
       </div>
 
-      <p style="font-size:12px; color:var(--text-3); margin:0 0 12px;">👩‍🏫 GV: {{ c.creator_name || '—' }}</p>
+      <p style="font-size:var(--fs-xs); color:var(--text-3); margin:0 0 12px;"><app-icon name="user-check" /><app-icon name="building" /> GV: {{ c.creator_name || '—' }}</p>
 
       <div style="display:flex; gap:6px;">
         <a [routerLink]="['/classes', c.id]" class="classroom-link" style="flex:2; padding:6px;">Vào Classroom</a>
         <button (click)="edit(c)" class="btn-outline" style="flex:1; padding:6px;">Sửa</button>
-        <button (click)="remove(c.id)" style="flex:1; padding:6px; background:#e53935;">Xóa</button>
+        <button (click)="remove(c.id)" style="flex:1; padding:6px; background:var(--danger);">Xóa</button>
       </div>
     </div>
   } @empty {
     <p style="grid-column:1/-1; text-align:center; color:var(--text-3); padding:30px;">
-      Chưa có lớp nào — bấm <b>➕ Tạo lớp</b> để bắt đầu.
+      Chưa có lớp nào — bấm <b><app-icon name="plus" /> Tạo lớp</b> để bắt đầu.
     </p>
   }
 </div>
@@ -83,21 +83,21 @@
     <div class="cd-box" (click)="$event.stopPropagation()">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px;">
         <div>
-          <h3 style="margin:0;">🏫 {{ c.name }}</h3>
-          <span style="font-size:12px; color:var(--text-3);">Mã lớp:</span>
+          <h3 style="margin:0;"><app-icon name="building" /> {{ c.name }}</h3>
+          <span style="font-size:var(--fs-xs); color:var(--text-3);">Mã lớp:</span>
           <span class="code-badge">{{ c.code }}</span>
-          <button (click)="copyCode(c)" class="btn-outline" style="padding:2px 8px; font-size:12px;">📋</button>
+          <button (click)="copyCode(c)" class="btn-outline" style="padding:2px 8px; font-size:var(--fs-xs);"><app-icon name="clipboard" /></button>
         </div>
-        <button (click)="closeDetail()" class="btn-outline">✕ Đóng</button>
+        <button (click)="closeDetail()" class="btn-outline"><app-icon name="x" /> Đóng</button>
       </div>
 
       <!-- tab -->
       <div style="display:flex; gap:8px; margin:12px 0;">
         <span class="chip" [class.active]="detailTab() === 'students'" (click)="detailTab.set('students')">
-          👨‍🎓 Sinh viên ({{ classStudents().length }})
+          <app-icon name="users" /><app-icon name="graduation-cap" /> Sinh viên ({{ classStudents().length }})
         </span>
         <span class="chip" [class.active]="detailTab() === 'exams'" (click)="detailTab.set('exams')">
-          📄 Đề đã giao ({{ classExamTotal() }})
+          <app-icon name="file" /> Đề đã giao ({{ classExamTotal() }})
         </span>
       </div>
 
@@ -105,7 +105,7 @@
       @if (detailTab() === 'students') {
         <!-- tìm & thêm sinh viên -->
         <div style="position:relative; margin-bottom:12px;">
-          <input [(ngModel)]="studentSearch" (ngModelChange)="searchStudents()" placeholder="🔍 Gõ email, tên hoặc username để thêm sinh viên..." style="width:100%;" />
+          <input [(ngModel)]="studentSearch" (ngModelChange)="searchStudents()" placeholder="Gõ email, tên hoặc username để thêm sinh viên..." style="width:100%;" />
           @if (studentSuggestions().length > 0) {
             <div class="sg-list">
               @for (u of studentSuggestions(); track u.id) {
@@ -116,7 +116,7 @@
               }
             </div>
           } @else if (studentSearch.trim().length >= 2 && matchedStudents().length === 0) {
-            <p style="font-size:12px; color:var(--text-3); margin:6px 0 0;">
+            <p style="font-size:var(--fs-xs); color:var(--text-3); margin:6px 0 0;">
               Không tìm thấy sinh viên đang hoạt động. Sinh viên vẫn có thể tự tham gia bằng mã lớp.
             </p>
           }
@@ -125,8 +125,8 @@
         <!-- danh sách sinh viên -->
         @for (s of classStudents(); track s.id) {
           <div class="stu-row">
-            <span style="flex:1;">👤 {{ s.full_name || s.username }} <small style="color:var(--text-3);">({{ s.username }})</small></span>
-            <button (click)="removeStudent(s)" class="btn-outline" style="padding:3px 10px; color:#e53935;">Xóa khỏi lớp</button>
+            <span style="flex:1;"><app-icon name="user" /> {{ s.full_name || s.username }} <small style="color:var(--text-3);">({{ s.username }})</small></span>
+            <button (click)="removeStudent(s)" class="btn-outline" style="padding:3px 10px; color:var(--danger);">Xóa khỏi lớp</button>
           </div>
         } @empty {
           <p style="color:var(--text-3); text-align:center; padding:14px;">
@@ -140,12 +140,12 @@
       @if (detailTab() === 'exams') {
         @for (e of classExams(); track e.id) {
           <div class="stu-row">
-            <span style="flex:1;">📄 {{ e.title }}</span>
+            <span style="flex:1;"><app-icon name="file" /> {{ e.title }}</span>
             <span class="exam-badge"
                   [class.b-green]="e.status === 'published'"
                   [class.b-gray]="e.status === 'draft'"
                   [class.b-red]="e.status === 'closed'">{{ examStatusLabel(e.status) }}</span>
-            <span style="font-size:12px; color:var(--text-3);">⏱ {{ e.duration }}p</span>
+            <span style="font-size:var(--fs-xs); color:var(--text-3);">⏱ {{ e.duration }}p</span>
           </div>
         } @empty {
           <p style="color:var(--text-3); text-align:center; padding:14px;">
@@ -160,24 +160,24 @@
 
 <style>
   .class-card {
-    background:var(--surface); border-radius:12px; padding:18px;
+    background:var(--surface); border-radius:var(--r-md); padding:18px;
     box-shadow:var(--shadow); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     border:1px solid var(--border); border-top:4px solid var(--accent);
   }
-  .classroom-link { display:inline-flex; align-items:center; justify-content:center; border-radius:8px; color:white; background:linear-gradient(135deg,var(--accent),var(--accent-2)); text-decoration:none; font-size:14px; font-weight:700; }
+  .classroom-link { display:inline-flex; align-items:center; justify-content:center; border-radius:var(--r-sm); color:white; background:var(--accent); text-decoration:none; font-size:var(--fs-md); font-weight:700; }
   .classroom-link:hover { color:white; text-decoration:none; filter:brightness(1.04); }
   .class-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:#aab8ed; }
   .code-badge {
     background:var(--accent-soft); color:var(--accent); border:1px solid #cbd4f4; font-weight:bold; letter-spacing:1px;
-    padding:3px 10px; border-radius:6px; font-family:monospace; font-size:14px;
+    padding:3px 10px; border-radius:var(--r-sm); font-family:monospace; font-size:var(--fs-md);
   }
   .pub-badge {
-    font-size:11px; background:#e8f5e9; color:#2e7d32;
-    padding:2px 8px; border-radius:8px; white-space:nowrap;
+    font-size:var(--fs-2xs); background:var(--success-soft); color:var(--success);
+    padding:2px 8px; border-radius:var(--r-sm); white-space:nowrap;
   }
   .stat-chip {
-    background:var(--surface-2); color:var(--text-2); font-size:12px;
-    padding:3px 10px; border-radius:10px; font-weight:600;
+    background:var(--surface-2); color:var(--text-2); font-size:var(--fs-xs);
+    padding:3px 10px; border-radius:var(--r-md); font-weight:600;
   }
 
   /* modal chi tiết lớp */
@@ -187,32 +187,32 @@
     padding:40px 16px; overflow:auto;
   }
   .cd-box {
-    background:var(--surface); border-radius:12px; padding:20px; width:100%; max-width:620px;
+    background:var(--surface); border-radius:var(--r-md); padding:20px; width:100%; max-width:620px;
     box-shadow:var(--shadow-lg); animation:fadeup .2s ease;
   }
   .stu-row {
     display:flex; align-items:center; gap:10px; padding:8px 4px;
-    border-bottom:1px solid var(--border); font-size:14px;
+    border-bottom:1px solid var(--border); font-size:var(--fs-md);
   }
   .stu-row:last-of-type { border-bottom:none; }
 
   /* gợi ý sinh viên khi gõ tìm */
   .sg-list {
     position:absolute; top:100%; left:0; right:0; z-index:10;
-    background:var(--surface); border:1px solid var(--border); border-radius:8px;
-    box-shadow:0 6px 18px rgba(0,0,0,.15); max-height:260px; overflow-y:auto;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
+    box-shadow:var(--shadow-lg); max-height:260px; overflow-y:auto;
   }
   .sg-row {
     display:flex; justify-content:space-between; align-items:center;
-    padding:8px 12px; cursor:pointer; font-size:14px;
+    padding:8px 12px; cursor:pointer; font-size:var(--fs-md);
   }
   .sg-row:hover { background:var(--accent-soft); }
 
   .exam-badge {
-    display:inline-block; padding:2px 10px; border-radius:10px;
-    font-size:12px; font-weight:600; white-space:nowrap;
+    display:inline-block; padding:2px 10px; border-radius:var(--r-md);
+    font-size:var(--fs-xs); font-weight:600; white-space:nowrap;
   }
-  .b-green { background:#e8f5e9; color:#2e7d32; }
+  .b-green { background:var(--success-soft); color:var(--success); }
   .b-gray  { background:var(--surface-2); color:var(--text-3); }
-  .b-red   { background:#ffebee; color:#c62828; }
+  .b-red   { background:var(--danger-soft); color:var(--danger); }
 </style>

@@ -5,10 +5,11 @@ import { UserService, AppUser, PasswordResetRequest } from '../../services/user.
 import { DialogService } from '../../services/dialog.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
 import { ToastService } from '../../services/toast.service';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-users',
-  imports: [FormsModule, DatePipe, InfiniteScrollDirective],
+  imports: [FormsModule, DatePipe, InfiniteScrollDirective, Icon],
   templateUrl: './users.html',
 })
 export class Users implements OnInit {

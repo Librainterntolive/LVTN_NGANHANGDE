@@ -3,10 +3,11 @@ import { DatePipe } from '@angular/common';
 import { AuditLog, AuditService } from '../../services/audit.service';
 import { ToastService } from '../../services/toast.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-audit-manager',
-  imports: [DatePipe, InfiniteScrollDirective],
+  imports: [DatePipe, InfiniteScrollDirective, Icon],
   templateUrl: './audit-manager.html',
 })
 export class AuditManager implements OnInit {

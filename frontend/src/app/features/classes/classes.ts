@@ -6,10 +6,11 @@ import { DialogService } from '../../services/dialog.service';
 import { ToastService } from '../../services/toast.service';
 import { RouterLink } from '@angular/router';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-classes',
-  imports: [FormsModule, RouterLink, InfiniteScrollDirective],
+  imports: [FormsModule, RouterLink, InfiniteScrollDirective, Icon],
   templateUrl: './classes.html',
 })
 export class Classes implements OnInit, OnDestroy {

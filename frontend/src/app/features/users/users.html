@@ -1,14 +1,14 @@
-<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;"><h2 style="margin:0;">Quản lý người dùng <span style="font-size:14px;color:var(--text-3);">({{ total() }})</span></h2><input [(ngModel)]="keyword" (keyup.enter)="load()" placeholder="Tìm username, họ tên, email..." /></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;"><h2 style="margin:0;">Quản lý người dùng <span style="font-size:var(--fs-md);color:var(--text-3);">({{ total() }})</span></h2><input [(ngModel)]="keyword" (keyup.enter)="load()" placeholder="Tìm username, họ tên, email..." /></div>
 
 @if (error()) { <p style="color:red">{{ error() }}</p> }
 
-<section style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin:0 0 20px;">
+<section style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;margin:0 0 20px;">
   <div style="display:flex;justify-content:space-between;align-items:center;"><h3 style="margin:0;">Yêu cầu cấp lại mật khẩu</h3><button class="btn-outline" (click)="loadResetRequests()">Tải lại</button></div>
   @if (resetRequestsLoading() && !resetRequests().length) { <p style="color:var(--text-3);">Đang tải yêu cầu...</p> } @else { @for (request of resetRequests(); track request.id) { <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);"><span>Tài khoản ID <b>{{ request.user_id }}</b> · {{ request.created_at | date:'dd/MM/yyyy HH:mm' }}</span><button (click)="approveReset(request)">Duyệt và gửi mật khẩu tạm</button></div> } @empty { <p style="color:var(--text-3);">Không có yêu cầu chờ duyệt.</p> } }
   @if (hasMoreResetRequests()) { <div style="text-align:center;margin-top:12px;" appInfiniteScroll (scrolled)="loadResetRequests(false)"><button class="btn-outline" (click)="loadResetRequests(false)" [disabled]="resetRequestsLoading()">{{ resetRequestsLoading() ? 'Đang tải…' : 'Tải thêm yêu cầu' }}</button></div> }
 </section>
 
-<div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:20px; max-width:640px;">
+<div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); padding:16px; margin-bottom:20px; max-width:640px;">
   <h3 style="margin-top:0;">{{ editingId() ? 'Sửa người dùng' : 'Thêm người dùng' }}</h3>
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
     <input [(ngModel)]="form.username" placeholder="Tên đăng nhập" />
@@ -17,13 +17,13 @@
     <input [(ngModel)]="form.password" type="password"
            [placeholder]="editingId() ? 'Mật khẩu (để trống nếu không đổi)' : 'Mật khẩu'" />
     <select [(ngModel)]="form.role">
-      <option value="Admin">👑 Quản trị</option>
-      <option value="Teacher">🎓 Giảng viên</option>
-      <option value="Student">📖 Sinh viên</option>
+      <option value="Admin"><app-icon name="crown" /> Quản trị</option>
+      <option value="Teacher"><app-icon name="graduation-cap" /> Giảng viên</option>
+      <option value="Student"><app-icon name="book-open" /> Sinh viên</option>
     </select>
     <select [(ngModel)]="form.status">
-      <option value="active">✅ Hoạt động</option>
-      <option value="locked">🔒 Tạm khóa</option>
+      <option value="active"><app-icon name="check-circle" /> Hoạt động</option>
+      <option value="locked"><app-icon name="lock" /> Tạm khóa</option>
     </select>
   </div>
   @if (form.status === 'locked') {
@@ -54,9 +54,9 @@
         </td>
         <td>
           @if (u.status === 'locked') {
-            <span class="badge b-locked" [title]="u.lock_reason || ''">🔒 Tạm khóa</span>
+            <span class="badge b-locked" [title]="u.lock_reason || ''"><app-icon name="lock" /> Tạm khóa</span>
             @if (u.lock_reason) {
-              <div style="font-size:11px; color:var(--text-3); margin-top:3px;">{{ u.lock_reason }}</div>
+              <div style="font-size:var(--fs-2xs); color:var(--text-3); margin-top:3px;">{{ u.lock_reason }}</div>
             }
           } @else {
             <span class="badge b-active">● Hoạt động</span>
@@ -66,11 +66,11 @@
           <div class="row-act">
             <button (click)="edit(u)" class="btn-outline">Sửa</button>
             @if (u.status === 'locked') {
-              <button (click)="unlock(u)" style="background:#43a047;">Mở khóa</button>
+              <button (click)="unlock(u)" style="background:var(--success);">Mở khóa</button>
             } @else {
               <button (click)="lock(u)" style="background:#fb8c00;">Khóa</button>
             }
-            <button (click)="remove(u.id)" style="background:#e53935;">Xóa</button>
+            <button (click)="remove(u.id)" style="background:var(--danger);">Xóa</button>
           </div>
         </td>
       </tr>
@@ -82,13 +82,13 @@
 
 <style>
   .badge {
-    display:inline-block; padding:3px 12px; border-radius:12px;
-    font-size:12px; font-weight:600; white-space:nowrap;
+    display:inline-block; padding:3px 12px; border-radius:var(--r-md);
+    font-size:var(--fs-xs); font-weight:600; white-space:nowrap;
   }
-  .b-active  { background:#e8f5e9; color:#2e7d32; }
-  .b-locked  { background:#ffebee; color:#c62828; }
+  .b-active  { background:var(--success-soft); color:var(--success); }
+  .b-locked  { background:var(--danger-soft); color:var(--danger); }
   .r-admin   { background:var(--accent-soft); color:var(--accent); }
-  .r-teacher { background:#e3f2fd; color:#1565c0; }
+  .r-teacher { background:var(--accent-soft); color:var(--accent); }
   .r-student { background:#f3e5f5; color:#7b1fa2; }
 
   .row-act { display:flex; gap:8px; flex-wrap:wrap; }

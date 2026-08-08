@@ -8,10 +8,11 @@ import { ChapterService, Chapter } from '../../services/chapter.service';
 import { ToastService } from '../../services/toast.service';
 import { DialogService } from '../../services/dialog.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-exams',
-  imports: [FormsModule, InfiniteScrollDirective],
+  imports: [FormsModule, InfiniteScrollDirective, Icon],
   templateUrl: './exams.html',
 })
 export class Exams implements OnInit {

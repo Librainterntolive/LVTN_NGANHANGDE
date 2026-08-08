@@ -7,10 +7,11 @@ import { I18nService } from '../../services/i18n.service';
 import { ClassService, AppClass } from '../../services/class.service';
 import { AssignmentService, ClassSubmissionStat, ClassSubmissionSummary } from '../../services/assignment.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-stats',
-  imports: [FormsModule, RouterLink, DecimalPipe, InfiniteScrollDirective],
+  imports: [FormsModule, RouterLink, DecimalPipe, InfiniteScrollDirective, Icon],
   templateUrl: './stats.html',
 })
 export class Stats implements OnInit {
