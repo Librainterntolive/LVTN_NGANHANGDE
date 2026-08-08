@@ -99,8 +99,18 @@ export class Questions implements OnInit {
     return {
       subject_id: 0, chapter_id: null, content: '', question_type: 'single',
 		 difficulty: 'medium', status: 'draft', review_status: 'draft', source_id: null, source_reference: '',
+      content_original: '', original_language: '', translation_status: 'original', translation_refs: '',
       answers: [{ content: '', is_correct: true }, { content: '', is_correct: false }],
     };
+  }
+
+  // tên tiếng Việt của ngôn ngữ bản gốc, dùng cho nhãn "Xem nguyên bản"
+  languageName(code: string): string {
+    const names: Record<string, string> = {
+      en: 'tiếng Anh', fr: 'tiếng Pháp', zh: 'tiếng Trung',
+      ja: 'tiếng Nhật', ru: 'tiếng Nga', vi: 'tiếng Việt',
+    };
+    return names[code] ?? code;
   }
 
   ownerParam(): string {
@@ -388,7 +398,11 @@ export class Questions implements OnInit {
       content: q.content, question_type: q.question_type ?? 'single',
       difficulty: q.difficulty ?? 'medium', status: 'draft', // bản sao bắt đầu ở trạng thái nháp
 		 source_id: q.source_id ?? null, source_reference: q.source_reference ?? '', review_status: 'draft',
-      answers: q.answers.map((a) => ({ content: a.content, is_correct: a.is_correct })),
+      content_original: q.content_original ?? '',
+      original_language: q.original_language ?? '',
+      translation_status: q.translation_status ?? 'original',
+      translation_refs: q.translation_refs ?? '',
+      answers: q.answers.map((a) => ({ content: a.content, content_original: a.content_original ?? '', is_correct: a.is_correct })),
     };
     this.correctIndex = this.form.answers.findIndex((a) => a.is_correct);
     if (this.correctIndex < 0) this.correctIndex = 0;
@@ -437,7 +451,11 @@ export class Questions implements OnInit {
       source_id: q.source_id ?? null,
       source_reference: q.source_reference ?? '',
       review_status: q.review_status ?? 'draft',
-      answers: q.answers.map((a) => ({ content: a.content, is_correct: a.is_correct })),
+      content_original: q.content_original ?? '',
+      original_language: q.original_language ?? '',
+      translation_status: q.translation_status ?? 'original',
+      translation_refs: q.translation_refs ?? '',
+      answers: q.answers.map((a) => ({ content: a.content, content_original: a.content_original ?? '', is_correct: a.is_correct })),
     };
     this.correctIndex = this.form.answers.findIndex((a) => a.is_correct);
     if (this.correctIndex < 0) this.correctIndex = 0;

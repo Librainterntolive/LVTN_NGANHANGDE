@@ -8,6 +8,7 @@ export interface Answer {
   id?: number;
   label?: string;
   content: string;
+  content_original?: string; // đáp án theo ngôn ngữ bản gốc
   is_correct: boolean;
   order_index?: number;
 }
@@ -16,7 +17,11 @@ export interface Question {
   id?: number;
   subject_id: number;
   chapter_id?: number | null; // null = chưa phân chương
-  content: string;
+  content: string;                    // bản hiển thị cho người học (tiếng Việt)
+  content_original?: string;          // nguyên bản theo ngôn ngữ tài liệu nguồn
+  original_language?: string;         // mã ngôn ngữ bản gốc, ví dụ 'en'
+  translation_status?: 'original' | 'translated';
+  translation_refs?: string;          // nguồn công nhận cách dịch thuật ngữ
 	 source_id?: number | null;
 	 source_reference?: string;
 	 review_status?: 'draft' | 'pending' | 'approved' | 'rejected';
