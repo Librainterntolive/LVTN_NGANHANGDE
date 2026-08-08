@@ -58,8 +58,13 @@
             @if (u.lock_reason) {
               <div style="font-size:var(--fs-2xs); color:var(--text-3); margin-top:3px;">{{ u.lock_reason }}</div>
             }
-          } @else {
+          } @else if (u.status === 'active') {
             <span class="badge b-active">● Hoạt động</span>
+          } @else {
+            <!-- Tài khoản chưa xác minh email thì KHÔNG đăng nhập được.
+                 Trước đây mọi trạng thái khác 'locked' đều hiện là Hoạt động,
+                 khiến quản trị viên tưởng tài khoản dùng được. -->
+            <span class="badge b-pending" title="Tài khoản chưa xác minh email nên chưa đăng nhập được">● Chờ xác minh</span>
           }
         </td>
         <td>
@@ -87,6 +92,7 @@
   }
   .b-active  { background:var(--success-soft); color:var(--success); }
   .b-locked  { background:var(--danger-soft); color:var(--danger); }
+  .b-pending { background:var(--warning-soft); color:var(--warning); }
   .r-admin   { background:var(--accent-soft); color:var(--accent); }
   .r-teacher { background:var(--accent-soft); color:var(--accent); }
   .r-student { background:#f3e5f5; color:#7b1fa2; }
