@@ -410,7 +410,7 @@ export class Exams implements OnInit {
       },
       error: (e) => {
         popup.close();
-        this.toast.error(e?.error?.error ?? 'Khong tao duoc ban in de thi.');
+        this.toast.error(e?.error?.error ?? 'Không tạo được bản in đề thi.');
       },
     });
   }
@@ -428,7 +428,7 @@ export class Exams implements OnInit {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
         this.toast.success('Da tai ban in. Mo file HTML de in hoac luu PDF.');
       },
-      error: (e) => this.toast.error(e?.error?.error ?? 'Khong tai duoc ban in de thi.'),
+      error: (e) => this.toast.error(e?.error?.error ?? 'Không tải được bản in đề thi.'),
     });
   }
 

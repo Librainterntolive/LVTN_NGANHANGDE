@@ -116,7 +116,7 @@ export class Questions implements OnInit {
 		this.sourceLoading.set(true);
 		this.sourceService.getPaged(this.sourcePage, 12).subscribe({
 			next: (res) => { this.sources.update(items => [...items, ...(res.items ?? [])]); this.sourceTotal.set(res.total ?? 0); this.sourcePage++; this.sourceLoading.set(false); },
-			error: () => { this.error.set('Khong tai duoc danh sach nguon tai lieu.'); this.sourceLoading.set(false); },
+			error: () => { this.error.set('Không tải được danh sách nguồn tài liệu.'); this.sourceLoading.set(false); },
 		});
 	 }
 	 hasMoreSources() { return this.sources().length < this.sourceTotal(); }
@@ -137,7 +137,7 @@ export class Questions implements OnInit {
 				this.toast.success('Đã gửi nguồn tài liệu để xác thực.');
 			},
 			error: (e) => {
-				const message = e?.error?.error ?? 'Khong them duoc nguon tai lieu';
+				const message = e?.error?.error ?? 'Không thêm được nguồn tài liệu.';
 				this.error.set(message);
 				this.toast.error(message);
 			},
@@ -152,7 +152,7 @@ export class Questions implements OnInit {
 				this.toast.success(status === 'verified' ? 'Đã xác thực nguồn tài liệu.' : 'Đã từ chối nguồn tài liệu.');
 			},
 			error: error => {
-				const message = error?.error?.error ?? 'Khong cap nhat duoc nguon';
+				const message = error?.error?.error ?? 'Không cập nhật được nguồn tài liệu.';
 				this.error.set(message);
 				this.toast.error(message);
 			},
@@ -220,14 +220,14 @@ export class Questions implements OnInit {
 	 approve(q: Question) {
 		this.qService.review(q.id!, 'approved').subscribe({
 			next: () => { this.toast.success('Đã duyệt câu hỏi.'); this.reload(); },
-			error: (e) => { const message = e?.error?.error ?? 'Khong duyet duoc cau hoi'; this.error.set(message); this.toast.error(message); },
+			error: (e) => { const message = e?.error?.error ?? 'Không duyệt được câu hỏi.'; this.error.set(message); this.toast.error(message); },
 		});
 	 }
 
 	 reject(q: Question) {
 		this.qService.review(q.id!, 'rejected').subscribe({
 			next: () => { this.toast.success('Đã từ chối câu hỏi.'); this.reload(); },
-			error: (e) => { const message = e?.error?.error ?? 'Khong tu choi duoc cau hoi'; this.error.set(message); this.toast.error(message); },
+			error: (e) => { const message = e?.error?.error ?? 'Không từ chối được câu hỏi.'; this.error.set(message); this.toast.error(message); },
 		});
 	 }
 
