@@ -1,6 +1,6 @@
-# Sơ đồ thiết kế — Hệ thống thi trắc nghiệm trực tuyến
+# Sơ đồ thiết kế — Website quản lý ngân hàng đề thi đại học
 
-> Giai đoạn 1: CHỈ trắc nghiệm (chưa có AI). DB: MySQL.
+> Phạm vi luận văn: quản lý ngân hàng đề thi cho học phần đại học, tổ chức thi/lớp học và bài tập. AI là hướng mở rộng sau luận văn. DB: MySQL.
 > Các bảng AI (`QUESTION_TEMP`, `AI_LOGS`) sẽ thêm ở giai đoạn 2.
 >
 > Cách chỉnh sửa: copy đoạn code mermaid dán vào https://mermaid.live để xem/sửa trực quan.
@@ -44,11 +44,17 @@ flowchart TD
 
     E --> E1[Thống kê điểm theo đề/môn]
     E --> E2[Thống kê tỉ lệ đậu/rớt]
+
+    B --> B4[Quản lý nguồn trích dẫn và duyệt câu hỏi]
+    A --> A5[Xác minh email OTP và khôi phục mật khẩu]
+    A4 --> A41[Classroom: giao bài, nộp bài, chấm điểm]
 ```
 
 ---
 
 ## 2. Sơ đồ thực thể quan hệ (ERD) — MySQL
+
+> Sơ đồ dưới đây là bản khái niệm ban đầu. Khi đưa vào chương thiết kế cơ sở dữ liệu, dùng **Mục 10 trong `SO-DO-UML.md`** vì tên bảng và trường đã được cập nhật theo database triển khai thực tế.
 
 ```mermaid
 erDiagram
@@ -244,3 +250,9 @@ flowchart LR
 - Hỗ trợ **khách (không đăng nhập)**: `SUBMISSIONS.user_id` cho phép NULL + thêm `guest_name`.
 - **Lưu ý:** giới hạn "khách chỉ làm 20 câu" và "hiện quảng cáo" là **logic ở code** (kiểm tra khi gọi API), không cần cột trong DB.
 
+## 5. Phạm vi chốt để bảo vệ luận văn
+
+- Đối tượng sử dụng chính là **giảng viên và sinh viên đại học**, không đưa các quy trình biểu mẫu riêng của cấp phổ thông vào phần yêu cầu nghiệp vụ.
+- Câu hỏi trong kho cần có **nguồn/tài liệu tham khảo** và trạng thái duyệt; không tự phát sinh dữ liệu câu hỏi không có nguồn.
+- Bài tập hỗ trợ nộp tệp tối đa 20 MB, kiểm tra phần mở rộng/MIME/chữ ký tệp và lưu mã hóa AES-256-GCM.
+- Hướng nâng cấp: ma trận đề theo chuẩn đầu ra học phần, xuất DOCX/PDF có mẫu trường, phân tích chất lượng câu hỏi và AI gợi ý (không phải chức năng bắt buộc hiện tại).

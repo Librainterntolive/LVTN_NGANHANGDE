@@ -1,0 +1,112 @@
+<mxfile host="Electron" agent="Codex">
+  <diagram id="erd-current" name="ERD cap nhat">
+    <mxGraphModel dx="1553" dy="917" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=20;fontStyle=1;align=center" value="SƠ ĐỒ QUAN NIỆM DỮ LIỆU – PHIÊN BẢN CẬP NHẬT" vertex="1">
+          <mxGeometry height="40" width="560" x="520" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="u" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="USERS&#xa;id PK&#xa;username, email&#xa;password_hash, full_name&#xa;role, status, lock_reason" vertex="1">
+          <mxGeometry height="130" width="210" x="40" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="s" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="SUBJECTS&#xa;id PK&#xa;name, level, description&#xa;hidden, created_at" vertex="1">
+          <mxGeometry height="120" width="210" x="310" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="ch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="CHAPTERS&#xa;id PK&#xa;subject_id FK&#xa;name, order_index" vertex="1">
+          <mxGeometry height="110" width="190" x="580" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="src" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="SOURCES&#xa;id PK&#xa;title, publisher, url&#xa;license_note, verification_status" vertex="1">
+          <mxGeometry height="120" width="220" x="830" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="q" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="QUESTIONS&#xa;id PK&#xa;subject_id, chapter_id FK&#xa;created_by, source_id FK&#xa;content, difficulty, review_status" vertex="1">
+          <mxGeometry height="130" width="230" x="1080" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="a" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ANSWERS&#xa;id PK&#xa;question_id FK&#xa;label, content, is_correct" vertex="1">
+          <mxGeometry height="110" width="190" x="1350" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="e" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="EXAMS&#xa;id PK&#xa;subject_id, created_by FK&#xa;title, duration, pass_score&#xa;shuffle, shuffle_answers&#xa;access_type, status" vertex="1">
+          <mxGeometry height="145" width="240" x="350" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="eq" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="EXAM_QUESTIONS&#xa;exam_id PK/FK&#xa;question_id PK/FK&#xa;order_index, points" vertex="1">
+          <mxGeometry height="115" width="210" x="590" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="cl" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="CLASSES&#xa;id PK&#xa;created_by FK, code&#xa;name, is_public" vertex="1">
+          <mxGeometry height="115" width="180" x="40" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="CLASS_STUDENTS&#xa;class_id PK/FK&#xa;student_id PK/FK&#xa;joined_at" vertex="1">
+          <mxGeometry height="105" width="190" x="40" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="ec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="EXAM_CLASSES&#xa;exam_id PK/FK&#xa;class_id PK/FK" vertex="1">
+          <mxGeometry height="90" width="180" x="280" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="sub" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="SUBMISSIONS&#xa;id PK&#xa;user_id FK nullable&#xa;guest_name, exam_id FK&#xa;total_score, status, is_passed" vertex="1">
+          <mxGeometry height="125" width="220" x="560" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="sd" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="SUBMISSION_DETAILS&#xa;id PK&#xa;submission_id, question_id FK&#xa;selected_answer_id FK&#xa;is_correct" vertex="1">
+          <mxGeometry height="120" width="230" x="850" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="fo" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="FOLDERS&#xa;id PK&#xa;user_id FK, parent_id&#xa;name, created_at" vertex="1">
+          <mxGeometry height="105" width="190" x="1160" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="fe" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="FOLDER_EXAMS&#xa;id PK&#xa;user_id, folder_id FK&#xa;exam_id FK, note" vertex="1">
+          <mxGeometry height="110" width="210" x="1160" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="pa" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="PRACTICE_ANSWERS&#xa;id PK&#xa;user_id, question_id FK&#xa;is_correct, created_at" vertex="1">
+          <mxGeometry height="105" width="210" x="1160" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" edge="1" parent="1" source="s" target="ch" value="chứa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" edge="1" parent="1" source="ch" target="q" value="phân loại">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" edge="1" parent="1" source="u" target="q" value="soạn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r4" edge="1" parent="1" source="q" target="a" value="có đáp án">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r5" edge="1" parent="1" source="src" target="q" value="nguồn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r6" edge="1" parent="1" source="u" target="e" value="tạo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r7" edge="1" parent="1" source="e" target="eq" value="bao gồm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r8" edge="1" parent="1" source="q" target="eq" value="liên kết">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r9" edge="1" parent="1" source="u" target="cl" value="quản lý">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r10" edge="1" parent="1" source="cl" target="cs" value="tham gia">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r11" edge="1" parent="1" source="e" target="ec" value="giao đề">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r12" edge="1" parent="1" source="u" target="sub" value="nộp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r13" edge="1" parent="1" source="e" target="sub" value="có lượt làm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r14" edge="1" parent="1" source="sub" target="sd" value="chi tiết">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r15" edge="1" parent="1" source="u" target="fo" value="lưu cá nhân">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r16" edge="1" parent="1" source="fo" target="fe" value="chứa đề">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r17" edge="1" parent="1" source="q" target="pa" value="luyện lại">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
