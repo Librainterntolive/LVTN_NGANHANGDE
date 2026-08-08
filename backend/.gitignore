@@ -7,3 +7,8 @@
 # Ban dump toan bo CSDL: chua hat mat khau va email that cua nguoi dung.
 # Cau truc bang da co day du trong database/migrations nen khong can dua len repo.
 /database/quiz_db.sql
+
+# Tep bai nop cua sinh vien (da ma hoa). Day la du lieu ca nhan cua nguoi hoc,
+# tuyet doi khong dua len repo du repo dang de rieng tu.
+/data/
+

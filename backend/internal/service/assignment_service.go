@@ -166,7 +166,26 @@ func (s *AssignmentService) ListSubmissions(assignmentID, userID uint, role stri
 	if !s.canManage(item.ClassID, userID, role) {
 		return nil, ErrNotOwner
 	}
-	return s.repo.ListSubmissions(assignmentID)
+	list, err := s.repo.ListSubmissions(assignmentID)
+	if err != nil {
+		return nil, err
+	}
+	s.fillStudentNames(list)
+	return list, nil
+}
+
+// fillStudentNames điền tên và tên đăng nhập của sinh viên vào từng bài nộp.
+// Hai trường này không lưu trong bảng bài nộp; nếu để trống thì màn hình chấm
+// bài chỉ hiện "Sinh viên #23" và giảng viên không biết đang chấm bài của ai.
+func (s *AssignmentService) fillStudentNames(list []entity.AssignmentSubmission) {
+	for i := range list {
+		student, err := s.userRepo.FindByID(strconv.FormatUint(uint64(list[i].StudentID), 10))
+		if err != nil {
+			continue
+		}
+		list[i].StudentName = student.FullName
+		list[i].StudentUsername = student.Username
+	}
 }
 
 func (s *AssignmentService) ListSubmissionsPaged(assignmentID, userID uint, role string, limit, offset int) ([]entity.AssignmentSubmission, int64, error) {
@@ -177,7 +196,12 @@ func (s *AssignmentService) ListSubmissionsPaged(assignmentID, userID uint, role
 	if !s.canManage(item.ClassID, userID, role) {
 		return nil, 0, ErrNotOwner
 	}
-	return s.repo.ListSubmissionsPaged(assignmentID, limit, offset)
+	list, total, err := s.repo.ListSubmissionsPaged(assignmentID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	s.fillStudentNames(list)
+	return list, total, nil
 }
 func (s *AssignmentService) ClassStats(classID, userID uint, role string) ([]repository.ClassSubmissionStat, error) {
 	if !s.canManage(classID, userID, role) {
