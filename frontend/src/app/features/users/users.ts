@@ -97,6 +97,6 @@ export class Users implements OnInit {
 
   // ----- hiển thị role / status -----
   roleLabel(r: string): string {
-    return r === 'Admin' ? '👑 Quản trị' : r === 'Teacher' ? '🎓 Giảng viên' : '📖 Sinh viên';
+    return r === 'Admin' ? 'Quản trị' : r === 'Teacher' ? 'Giảng viên' : 'Sinh viên';
   }
 }

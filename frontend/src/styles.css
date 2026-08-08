@@ -481,10 +481,29 @@ a:hover { text-decoration: underline; }
   font-size:var(--fs-md);
   margin: 0 0 14px;
 }
-.auth-error { background: var(--danger-soft); color: var(--danger); border: 1px solid var(--danger-soft); }
-.auth-ok { background: var(--success-soft); color: var(--success); border: 1px solid #c8e6c9; }
-html[data-theme="dark"] .auth-error { background: #4a1c1c; color: #ff8a80; border-color: #6d2a2a; }
-html[data-theme="dark"] .auth-ok { background: #1b3b23; color: #a5d6a7; border-color: #2e5c3a; }
+/* Viền lấy màu đậm, không lấy cùng màu nền — nếu không thì viền vô hình.
+   Không cần khối override riêng cho chế độ tối: các biến này đã tự đổi. */
+.auth-error { background: var(--danger-soft); color: var(--danger); border: 1px solid var(--danger); }
+.auth-ok { background: var(--success-soft); color: var(--success); border: 1px solid var(--success); }
+
+/* Mã ngôn ngữ thay cho emoji cờ: emoji cờ hiện thành lá cờ trên macOS nhưng
+   chỉ ra hai chữ cái trên Windows, nên mỗi máy nhìn một kiểu. */
+.lang-code {
+  font-size: var(--fs-2xs);
+  font-weight: 800;
+  letter-spacing: .04em;
+  color: var(--text-3);
+}
+
+/* Hai liên kết dưới form đăng nhập: trước đây không có quy tắc nào nên dính sát nhau */
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin: var(--sp-4) 0 0;
+  font-size: var(--fs-sm);
+}
 
 .auth-hint {
   margin: 14px 0 0;

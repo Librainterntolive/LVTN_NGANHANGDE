@@ -64,7 +64,7 @@
     <!-- Đáy sidebar: ngôn ngữ + chế độ tối + đăng xuất -->
     <div class="sb-bottom">
       <button class="side-link as-btn" (click)="i18n.toggle()" [title]="i18n.t('menu.lang')">
-        <span class="ic">{{ i18n.lang() === 'vi' ? '🇻🇳' : '🇬🇧' }}</span>
+        <span class="ic lang-code">{{ i18n.lang() === 'vi' ? 'VI' : 'EN' }}</span>
         <span class="tx">{{ i18n.t('menu.lang') }}</span>
       </button>
       <div class="side-link theme-row" [title]="i18n.t('menu.dark')">
