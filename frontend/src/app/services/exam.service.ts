@@ -52,8 +52,10 @@ export class ExamService {
   preview(id: number): Observable<{ exam: Exam; questions: any[] }> {
     return this.http.get<{ exam: Exam; questions: any[] }>(`${this.url}/${id}/preview`);
   }
-  printPaper(id: number): Observable<Blob> {
-    return this.http.get(`${this.url}/${id}/print`, { responseType: 'blob' });
+  // variants: số mã đề cần in. answerKey: true để lấy bảng đáp án cho giảng viên.
+  printPaper(id: number, variants = 1, answerKey = false): Observable<Blob> {
+    const params = `variants=${variants}${answerKey ? '&key=1' : ''}`;
+    return this.http.get(`${this.url}/${id}/print?${params}`, { responseType: 'blob' });
   }
   create(data: any): Observable<Exam> {
     return this.http.post<Exam>(this.url, data);

@@ -4,9 +4,15 @@
     <div class="pv-box" (click)="$event.stopPropagation()">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:12px;">
         <h2 style="margin:0;"><app-icon name="file" /> {{ p.exam.title }}</h2>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+        <div class="print-bar">
+          <label class="variant-pick">Số mã đề
+            <select [(ngModel)]="variantCount">
+              @for (n of variantOptions; track n) { <option [ngValue]="n">{{ n }}</option> }
+            </select>
+          </label>
           <button (click)="printExam(p.exam.id!)" class="btn-outline"><app-icon name="printer" /> In / Lưu PDF</button>
           <button (click)="downloadPrintPaper(p.exam.id!, p.exam.title)" class="btn-outline"><app-icon name="download" /> Tải bản in</button>
+          <button (click)="downloadAnswerKey(p.exam.id!, p.exam.title)" class="btn-outline"><app-icon name="lock" /> Bảng đáp án</button>
           <button (click)="closePreview()" class="btn-outline"><app-icon name="x" /> Đóng</button>
         </div>
       </div>
@@ -382,6 +388,9 @@
     border-bottom:1px solid var(--border); cursor:pointer; font-size:var(--fs-md);
     transition:background .1s;
   }
+  .print-bar { display:flex; gap:var(--sp-2); flex-wrap:wrap; align-items:center; justify-content:flex-end; }
+  .variant-pick { display:flex; align-items:center; gap:var(--sp-2); font-size:var(--fs-sm); color:var(--text-2); margin-right:auto; }
+  .variant-pick select { width:auto; padding:6px 8px; }
   .qp-empty { display:grid; gap:var(--sp-2); padding:var(--sp-5) var(--sp-4); text-align:center; color:var(--text-3); }
   .qp-empty b { color:var(--text); font-size:var(--fs-md); }
   .qp-empty p { margin:0; font-size:var(--fs-sm); line-height:1.6; }

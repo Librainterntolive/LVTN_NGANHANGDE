@@ -395,6 +395,10 @@ export class Exams implements OnInit {
   }
   closePreview() { this.preview.set(null); }
 
+  // Số mã đề muốn in. Mỗi mã có thứ tự câu và đáp án riêng để chống nhìn bài.
+  variantCount = 1;
+  readonly variantOptions = [1, 2, 3, 4, 6, 8];
+
   printExam(id: number) {
     const popup = window.open('', '_blank');
     if (!popup) {
@@ -402,8 +406,8 @@ export class Exams implements OnInit {
       return;
     }
     popup.opener = null;
-    popup.document.title = 'Dang tao ban in...';
-    this.examService.printPaper(id).subscribe({
+    popup.document.title = 'Đang tạo bản in…';
+    this.examService.printPaper(id, this.variantCount).subscribe({
       next: (paper) => {
         const url = URL.createObjectURL(paper);
         popup.location.replace(url);
@@ -418,20 +422,36 @@ export class Exams implements OnInit {
   }
 
   downloadPrintPaper(id: number, title: string) {
-    this.examService.printPaper(id).subscribe({
+    this.examService.printPaper(id, this.variantCount).subscribe({
       next: (paper) => {
-        const url = URL.createObjectURL(paper);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${this.printFileName(title)}.html`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        this.toast.success('Đã tải bản in. Mở tệp HTML rồi bấm In để lưu thành PDF.');
+        this.saveBlob(paper, `${this.printFileName(title)}-${this.variantCount}made.html`);
+        this.toast.success(`Đã tải ${this.variantCount} mã đề. Mở tệp rồi bấm In để lưu thành PDF.`);
       },
       error: (e) => this.toast.error(e?.error?.error ?? 'Không tải được bản in đề thi.'),
     });
+  }
+
+  // Bảng đáp án là tài liệu riêng cho giảng viên, không nằm trong tờ đề phát
+  // cho sinh viên — nên phải tải bằng một thao tác riêng, có chủ đích.
+  downloadAnswerKey(id: number, title: string) {
+    this.examService.printPaper(id, this.variantCount, true).subscribe({
+      next: (paper) => {
+        this.saveBlob(paper, `${this.printFileName(title)}-dapan.html`);
+        this.toast.success('Đã tải bảng đáp án. Tài liệu này chỉ dành cho giảng viên.');
+      },
+      error: (e) => this.toast.error(e?.error?.error ?? 'Không tải được bảng đáp án.'),
+    });
+  }
+
+  private saveBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   private printFileName(title: string) {

@@ -6,19 +6,36 @@ import (
 	"testing"
 
 	"quiz-backend/internal/entity"
+	"quiz-backend/internal/service"
 )
 
-// renderPaper dung ban in tu mot de thi mau.
+// renderPaper dung ban in mot ma de tu bo cau hoi cho truoc.
 func renderPaper(t *testing.T, questions []entity.Question) string {
+	t.Helper()
+	key := make([]string, 0, len(questions))
+	for _, q := range questions {
+		dung := ""
+		for _, a := range q.Answers {
+			if a.IsCorrect {
+				dung = a.Label
+			}
+		}
+		key = append(key, dung)
+	}
+	return renderPapers(t, []service.ExamVariant{{Code: "132", Questions: questions, AnswerKey: key}})
+}
+
+// renderPapers dung ban in nhieu ma de.
+func renderPapers(t *testing.T, variants []service.ExamVariant) string {
 	t.Helper()
 	var out bytes.Buffer
 	data := struct {
 		Exam      entity.Exam
-		Questions []entity.Question
+		Variants  []service.ExamVariant
 		PrintedAt string
 	}{
 		Exam:      entity.Exam{ID: 12, Title: "Đề kiểm tra Mạng máy tính", Duration: 45},
-		Questions: questions,
+		Variants:  variants,
 		PrintedAt: "10/08/2026",
 	}
 	if err := printExamTemplate.Execute(&out, data); err != nil {

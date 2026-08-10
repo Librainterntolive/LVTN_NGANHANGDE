@@ -2,12 +2,12 @@ package controller
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"quiz-backend/internal/dto"
 	"quiz-backend/internal/service"
@@ -15,15 +15,36 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Mau in de thi. Moi ma de la mot to giay rieng, ngat trang giua cac ma.
+// Bang dap an chi duoc dung khi giang vien yeu cau ro (tham so key=1) va nam o
+// tep rieng — tuyet doi khong in kem to de phat cho sinh vien.
 var printExamTemplate = template.Must(template.New("exam-paper").Funcs(template.FuncMap{
 	"add": func(left, right int) int { return left + right },
 }).Parse(`<!doctype html>
 <html lang="vi"><head><meta charset="utf-8"><title>{{.Exam.Title}}</title>
-<style>@page{size:A4;margin:18mm}body{font-family:"Times New Roman",serif;color:#111;font-size:13pt;line-height:1.45}.center{text-align:center}.meta{display:flex;justify-content:space-between;margin:18px 0}.student{margin:20px 0 26px}.question{break-inside:avoid;margin:0 0 18px}.options{margin:6px 0 0 20px}.option{margin:3px 0}@media print{.no-print{display:none}}</style>
-</head><body><div class="center"><strong>TRƯỜNG / KHOA: ................................................</strong><h2>ĐỀ KIỂM TRA HỌC PHẦN</h2><h3>{{.Exam.Title}}</h3><p>Thời gian làm bài: {{.Exam.Duration}} phút &nbsp; | &nbsp; Không sử dụng tài liệu (trừ khi giảng viên cho phép)</p></div>
-<div class="meta"><span>Mã đề: {{.Exam.ID}}</span><span>Ngày in: {{.PrintedAt}}</span></div><div class="student">Họ và tên: ...............................................................................<br>Lớp / Mã sinh viên: ....................................................................</div>
-{{range $index, $question := .Questions}}<section class="question"><strong>Câu {{add $index 1}}. {{$question.Content}}</strong><div class="options">{{range $question.Answers}}<div class="option">{{.Label}}. {{.Content}}</div>{{end}}</div></section>{{end}}
-<p class="center"><em>--- HẾT ---</em></p><button class="no-print" onclick="window.print()">In đề</button></body></html>`))
+<style>@page{size:A4;margin:18mm}body{font-family:"Times New Roman",serif;color:#111;font-size:13pt;line-height:1.45}.center{text-align:center}.meta{display:flex;justify-content:space-between;margin:18px 0}.student{margin:20px 0 26px}.question{break-inside:avoid;margin:0 0 18px}.options{margin:6px 0 0 20px}.option{margin:3px 0}.paper{break-after:page}.paper:last-of-type{break-after:auto}.keyrow{font-family:"Courier New",monospace;font-size:12pt;margin:4px 0}.keybox{border:1px solid #111;padding:10px 14px;margin:10px 0}@media print{.no-print{display:none}}</style>
+</head><body>
+{{range $vi, $variant := .Variants}}<div class="paper">
+<div class="center"><strong>TRƯỜNG / KHOA: ................................................</strong><h2>ĐỀ KIỂM TRA HỌC PHẦN</h2><h3>{{$.Exam.Title}}</h3><p>Thời gian làm bài: {{$.Exam.Duration}} phút &nbsp; | &nbsp; Không sử dụng tài liệu (trừ khi giảng viên cho phép)</p></div>
+<div class="meta"><span>Mã đề: {{$variant.Code}}</span><span>Ngày in: {{$.PrintedAt}}</span></div><div class="student">Họ và tên: ...............................................................................<br>Lớp / Mã sinh viên: ....................................................................</div>
+{{range $index, $question := $variant.Questions}}<section class="question"><strong>Câu {{add $index 1}}. {{$question.Content}}</strong><div class="options">{{range $question.Answers}}<div class="option">{{.Label}}. {{.Content}}</div>{{end}}</div></section>{{end}}
+<p class="center"><em>--- HẾT ---</em></p>
+</div>{{end}}
+<button class="no-print" onclick="window.print()">In đề</button></body></html>`))
+
+// Mau bang dap an, dung rieng cho giang vien cham bai.
+var printAnswerKeyTemplate = template.Must(template.New("answer-key").Funcs(template.FuncMap{
+	"add": func(left, right int) int { return left + right },
+}).Parse(`<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><title>Đáp án — {{.Exam.Title}}</title>
+<style>@page{size:A4;margin:18mm}body{font-family:"Times New Roman",serif;color:#111;font-size:13pt;line-height:1.45}.center{text-align:center}.keybox{border:1px solid #111;padding:10px 14px;margin:14px 0;break-inside:avoid}.keyrow{font-family:"Courier New",monospace;font-size:12pt;margin:4px 0;word-spacing:6px}.warn{border:2px solid #111;padding:8px 12px;margin:12px 0;font-weight:bold}@media print{.no-print{display:none}}</style>
+</head><body>
+<div class="center"><h2>BẢNG ĐÁP ÁN</h2><h3>{{.Exam.Title}}</h3><p>Ngày in: {{.PrintedAt}}</p></div>
+<p class="warn">TÀI LIỆU DÀNH RIÊNG CHO GIẢNG VIÊN — KHÔNG PHÁT CHO SINH VIÊN</p>
+{{range $variant := .Variants}}<div class="keybox"><strong>Mã đề {{$variant.Code}}</strong>
+{{range $i, $ans := $variant.AnswerKey}}<span class="keyrow">{{add $i 1}}.{{$ans}}</span>{{end}}
+</div>{{end}}
+<button class="no-print" onclick="window.print()">In bảng đáp án</button></body></html>`))
 
 type ExamController struct {
 	svc       *service.ExamService
@@ -250,27 +271,36 @@ func (ctl *ExamController) Preview(c *gin.Context) {
 // Print renders a clean A4 student paper. The browser print dialog can print directly
 // or save as PDF, avoiding platform-specific PDF font dependencies.
 func (ctl *ExamController) Print(c *gin.Context) {
-	exam, questions, err := ctl.svc.Preview(c.Param("id"), getUserID(c), getRole(c))
+	// variants: so ma de can in (mac dinh 1). key=1: xuat bang dap an rieng.
+	variants, _ := strconv.Atoi(c.DefaultQuery("variants", "1"))
+	wantKey := c.Query("key") == "1"
+
+	exam, papers, err := ctl.svc.PrintVariants(c.Param("id"), getUserID(c), getRole(c), variants)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy đề thi"})
-		return
-	}
-	if getRole(c) != "Admin" && exam.CreatedBy != getUserID(c) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Không có quyền in đề thi này"})
+		if err == service.ErrNotOwner {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Không có quyền in đề thi này"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	var output bytes.Buffer
 	data := struct {
 		Exam      interface{}
-		Questions interface{}
+		Variants  interface{}
 		PrintedAt string
 	}{
 		Exam:      exam,
-		Questions: questions,
-		PrintedAt: fmt.Sprintf("%s", exam.CreatedAt.Format("02/01/2006")),
+		Variants:  papers,
+		PrintedAt: time.Now().Format("02/01/2006"),
 	}
-	if err := printExamTemplate.Execute(&output, data); err != nil {
+
+	tpl := printExamTemplate
+	if wantKey {
+		tpl = printAnswerKeyTemplate
+	}
+	if err := tpl.Execute(&output, data); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không tạo được bản in"})
 		return
 	}
