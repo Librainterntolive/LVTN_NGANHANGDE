@@ -52,35 +52,34 @@
 
 /* ---------- Bảng màu: SÁNG ---------- */
 :root, :root[data-theme="light"] {
-  /* Bảng màu: teal đậm làm chủ đạo, cam đất và vàng làm màu trạng thái.
-     Nguồn: #264D59 · #43978D · #F9E07F · #F9AD6A · #D46C4E
+  /* Bảng màu: sage — kem, xanh rêu nhạt, mực rêu đậm.
+     Nguồn: #FEF5ED · #D3E4CD · #ADC2A9 · #99A799
 
-     Ba màu sáng trong bảng gốc (vàng, cam, đỏ đất) chỉ đạt tương phản 1.3–3.5
-     trên nền trắng nên KHÔNG dùng làm màu chữ được. Chúng giữ vai trò màu nền;
-     phần chữ dùng sắc độ đậm hơn cùng tông, đã dò để đạt chuẩn WCAG AA. */
+     Bốn màu gốc đều SÁNG (độ sáng 0.37–0.93) nên tự chúng không đủ làm giao
+     diện: màu đậm nhất đặt lên màu sáng nhất chỉ đạt tương phản 2.34, và các
+     màu kề nhau chỉ chênh 1.24–1.42 nên nhìn như một màu. Chúng giữ vai trò
+     NỀN; phần chữ và nút dùng sắc độ đậm dò ra từ chính họ màu đó. */
 
-  /* Nền dịu mắt: tránh trắng tinh #ffffff trên diện rộng vì độ sáng tối đa
-     gây chói khi nhìn lâu. Thẻ dùng trắng ngà, nền trang ngả teal rất nhạt. */
-  --bg: #eaefee;            /* nền trang */
-  --surface: #fbfcfc;       /* nền thẻ/khối */
-  --surface-2: #e2ebe9;     /* nền phụ, hover, ô nhập */
-  --border: #c9d8d5;
+  --bg: #EDE8DF;            /* nền trang, kem trầm hơn thẻ một bậc */
+  --surface: #FEF5ED;       /* nền thẻ/khối — màu kem trong bảng gốc */
+  --surface-2: #D3E4CD;     /* nền phụ, hover, ô nhập — xanh nhạt trong bảng gốc */
+  --border: #ADC2A9;        /* viền — xanh rêu trong bảng gốc */
 
-  --text: #1b3038;          /* chữ chính, ngả tông teal cho hợp bảng màu */
-  --text-2: #45606a;        /* chữ phụ */
-  --text-3: #556c74;        /* chữ mờ, chú thích */
+  --text: #293029;          /* mực rêu đậm, tương phản 12.59 trên nền kem */
+  --text-2: #3e483e;        /* chữ phụ */
+  --text-3: #576557;        /* chữ mờ, chú thích */
 
-  --accent: #264D59;        /* teal đậm — màu duy nhất trong bảng đủ tương phản làm chữ và nền nút */
-  --accent-hover: #1f404a;
-  --accent-soft: #dfebe9;   /* nền nhạt cho chip/badge */
+  --accent: #4a564a;        /* rêu đậm — chữ trắng trên nút đạt 7.72 */
+  --accent-hover: #3a443a;
+  --accent-soft: #D3E4CD;
   --on-accent: #ffffff;
 
-  --success: #32726a;       /* từ #43978D, làm đậm để đạt 4.57 trên nền trắng */
-  --success-soft: #e3efed;
-  --warning: #a55006;       /* từ #F9AD6A, làm đậm để đạt 4.55 */
-  --warning-soft: #fdf3e2;
-  --danger: #ae472a;        /* từ #D46C4E, làm đậm để đạt 4.54 */
-  --danger-soft: #fbeae4;
+  --success: #4e674e;       /* rêu, phân biệt với accent bằng sắc xanh hơn */
+  --success-soft: #dfeddc;
+  --warning: #9a4b06;       /* cam đất — tông ấm hợp với sage */
+  --warning-soft: #f8ead9;
+  --danger: #a34328;        /* đỏ đất nung */
+  --danger-soft: #f6e3dc;
 
   /* Nền đậm cho dải tiêu đề trang (hero). Phải là token riêng, KHÔNG dùng
      --accent: ở chế độ tối --accent là màu sáng, đặt chữ trắng lên sẽ chỉ
@@ -92,33 +91,32 @@
 
 /* ---------- Bảng màu: TỐI ---------- */
 :root[data-theme="dark"] {
-  /* Chế độ tối lấy chính #264D59 làm nền, và dùng các màu sáng của bảng gốc
-     (#43978D, #F9AD6A, #F9E07F) làm màu chữ — đúng vai trò của chúng: sáng
-     trên nền tối thì tương phản cao, ngược lại thì không. */
-  --bg: #12262d;
-  --surface: #1a3540;
-  --surface-2: #23444f;
-  --border: #355b66;
+  /* Chế độ tối đảo vai trò: nền là mực rêu đậm, còn #ADC2A9 và #D3E4CD của
+     bảng gốc lên làm màu chữ — sáng trên nền tối mới cho tương phản cao. */
+  --bg: #1a201a;
+  --surface: #242c24;
+  --surface-2: #313a31;
+  --border: #475446;
 
-  --text: #eaf3f1;
-  --text-2: #b9d0cc;
-  --text-3: #98b2ae;
+  --text: #e9efe7;
+  --text-2: #c3d0c1;
+  --text-3: #a2b1a0;
 
-  --accent: #7fc7bc;        /* #43978D làm sáng lên để đọc được trên nền tối */
-  --accent-hover: #a3dcd3;
-  --accent-soft: #234a52;
-  --on-accent: #12262d;
+  --accent: #ADC2A9;        /* dùng đúng màu xanh rêu của bảng gốc */
+  --accent-hover: #c6d7c2;
+  --accent-soft: #2f3a2f;
+  --on-accent: #1a201a;
 
-  --success: #6fc2b6;
-  --success-soft: #1b4038;
-  --warning: #F9AD6A;       /* dùng đúng màu cam của bảng gốc */
-  --warning-soft: #46301a;
-  --danger: #eb987e;
-  --danger-soft: #46241c;
+  --success: #a9c6a5;
+  --success-soft: #22301f;
+  --warning: #F9AD6A;
+  --warning-soft: #3a2a17;
+  --danger: #e6a08a;
+  --danger-soft: #38221b;
 
-  --hero-bg: #1c3a45;
-  --hero-fg: #eaf3f1;
-  --hero-fg-2: rgba(234, 243, 241, .78);
+  --hero-bg: #2b342b;
+  --hero-fg: #e9efe7;
+  --hero-fg-2: rgba(233, 239, 231, .78);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
   --shadow:    0 2px 8px rgba(0, 0, 0, .35);

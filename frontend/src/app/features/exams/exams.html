@@ -205,7 +205,13 @@
               @if (pickerChapterName(q.chapter_id)) { <span class="qp-meta"><app-icon name="book-open" /> {{ pickerChapterName(q.chapter_id) }}</span> }
             </label>
           } @empty {
-            @if (!pickerLoading()) { <p style="padding:10px; margin:0; color:var(--text-3);">Không có câu hỏi phù hợp.</p> }
+            @if (!pickerLoading()) {
+              <div class="qp-empty">
+                <b>Không có câu hỏi nào dùng được cho học phần này</b>
+                <p>Chỉ câu hỏi ở trạng thái <b>Chính thức</b> và <b>Đã duyệt</b> mới được đưa vào đề thi. Nếu vừa lọc theo chương hoặc độ khó, hãy thử bỏ bớt bộ lọc.</p>
+                <a routerLink="/questions">Sang Ngân hàng câu hỏi để soạn hoặc duyệt câu →</a>
+              </div>
+            }
           }
           @if (pickerLoading()) { <div class="loader" style="margin:10px auto;"></div> }
           @if (pickerHasMore() && !pickerLoading()) {
@@ -376,6 +382,10 @@
     border-bottom:1px solid var(--border); cursor:pointer; font-size:var(--fs-md);
     transition:background .1s;
   }
+  .qp-empty { display:grid; gap:var(--sp-2); padding:var(--sp-5) var(--sp-4); text-align:center; color:var(--text-3); }
+  .qp-empty b { color:var(--text); font-size:var(--fs-md); }
+  .qp-empty p { margin:0; font-size:var(--fs-sm); line-height:1.6; }
+  .qp-empty a { font-size:var(--fs-sm); font-weight:600; }
   .qp-row:hover { background:var(--accent-soft); }
   .qp-row.on { background:var(--accent-soft); }
   .qp-row:last-child { border-bottom:none; }

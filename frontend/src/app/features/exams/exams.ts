@@ -9,10 +9,11 @@ import { ToastService } from '../../services/toast.service';
 import { DialogService } from '../../services/dialog.service';
 import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
 import { Icon } from '../../shared/icon';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-exams',
-  imports: [FormsModule, InfiniteScrollDirective, Icon],
+  imports: [FormsModule, InfiniteScrollDirective, Icon, RouterLink],
   templateUrl: './exams.html',
 })
 export class Exams implements OnInit {

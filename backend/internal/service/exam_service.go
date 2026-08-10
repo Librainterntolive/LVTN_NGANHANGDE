@@ -184,8 +184,8 @@ func (s *ExamService) Generate(in dto.GenerateExamInput, createdBy uint, role st
 			return nil, 0, err
 		}
 		if len(ids) < rule.Count {
-			return nil, 0, errors.New("dong " + strconv.Itoa(i+1) + " cua ma tran: chi con " +
-				strconv.Itoa(len(ids)) + " cau kha dung trong ngan hang (can " + strconv.Itoa(rule.Count) + ")")
+			return nil, 0, errors.New("Dòng " + strconv.Itoa(i+1) + " của ma trận: chỉ còn " +
+				strconv.Itoa(len(ids)) + " câu khả dụng trong ngân hàng (cần " + strconv.Itoa(rule.Count) + ")")
 		}
 		qids = append(qids, ids...)
 	}

@@ -136,7 +136,10 @@ func (ctl *ExamController) Build(c *gin.Context) {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		// Các lỗi còn lại là vi phạm quy tắc nghiệp vụ do dữ liệu người dùng gửi
+		// lên (câu hỏi chưa duyệt, lớp không có quyền giao...), không phải sự cố
+		// máy chủ. Trả 500 sẽ khiến người dùng tưởng hệ thống hỏng.
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	ctl.audit.Log(getUserID(c), "exam.built", "exam", exam.ID, "Tạo đề thi từ kho câu hỏi: "+exam.Title)
