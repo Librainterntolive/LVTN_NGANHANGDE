@@ -398,7 +398,7 @@ export class Exams implements OnInit {
   printExam(id: number) {
     const popup = window.open('', '_blank');
     if (!popup) {
-      this.toast.error('Trinh duyet dang chan cua so in. Hay cho phep pop-up va thu lai.');
+      this.toast.error('Trình duyệt đang chặn cửa sổ in. Hãy cho phép cửa sổ bật lên rồi thử lại.');
       return;
     }
     popup.opener = null;
@@ -428,7 +428,7 @@ export class Exams implements OnInit {
         link.click();
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
-        this.toast.success('Da tai ban in. Mo file HTML de in hoac luu PDF.');
+        this.toast.success('Đã tải bản in. Mở tệp HTML rồi bấm In để lưu thành PDF.');
       },
       error: (e) => this.toast.error(e?.error?.error ?? 'Không tải được bản in đề thi.'),
     });
