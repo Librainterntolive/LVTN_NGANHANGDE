@@ -202,6 +202,8 @@ email đó trong phần Settings của GitHub.
 **Kiến trúc CSS.** 16 tệp giao diện vẫn nhúng thẻ `<style>` trực tiếp. Angular
 không cô lập loại style này nên chúng rò ra phạm vi toàn cục. Hiện chưa gây lỗi
 hiển thị nào vì khung ứng dụng dùng tên lớp riêng, nhưng là rủi ro bảo trì.
+Hai thành phần dùng chung mới (`paginator`, `searchable-select`) đã dùng `styles:`
+của Angular nên style của chúng được cô lập đúng cách.
 
 ---
 
@@ -356,3 +358,118 @@ là 1000 byte, mà utf8mb4 tốn 4 byte một ký tự.
 
 Kiểm chứng: `scripts/verify-real-data.ps1` báo **ĐẠT** toàn bộ; `gofmt`,
 `go build`, `go vet` sạch; toàn bộ kiểm thử backend đạt.
+
+
+---
+
+## 9. Đợt làm việc thứ tư — phân trang và ô chọn có tìm kiếm
+
+### Vì sao phải đổi
+
+Trước đợt này, 13 màn hình danh sách dùng cuộn-vô-tận: mỗi lần cuộn tải thêm 12
+mục. Cách đó không tới được dòng ở giữa của danh sách dài, và không quay lại
+đúng chỗ vừa xem được.
+
+Nặng hơn là các ô chọn. Ô *Học phần* chỉ nạp 12 học phần đầu kèm nút *Tải thêm
+môn*, nên học phần thứ 13 trở đi đơn giản là **không có trong ô chọn** cho tới
+khi người dùng bấm tải thêm — với hàng nghìn bản ghi thì không dùng được.
+
+### Hai thành phần dùng chung
+
+`shared/paginator.ts` — thanh « Trước | 1 2 3 … | Sau », kèm ô chọn 5/10/20/50
+dòng mỗi trang (mặc định 10) và dòng đếm *"1–10 trên 27"*. Dãy số trang rút gọn
+khi nhiều hơn 7 trang: luôn giữ trang đầu, trang cuối và lân cận trang hiện tại.
+
+`shared/searchable-select.ts` — ô chọn có gõ để tìm. Gõ tới đâu hỏi máy chủ tới
+đó, chờ 250ms để không bắn request theo từng phím; đi lại bằng phím mũi tên,
+Enter chọn, Escape đóng; có thuộc tính ARIA `combobox`/`listbox` và nút xóa lựa
+chọn. Số lượng bản ghi không còn ảnh hưởng tới thao tác chọn.
+
+### Đã thay ở đâu
+
+Phân trang số trang (17 danh sách trên 13 màn hình): Học phần, Câu hỏi, Đề thi,
+Người dùng (kèm danh sách yêu cầu cấp lại mật khẩu), Nguồn tài liệu, Nhật ký hệ
+thống, Lớp học (lớp, sinh viên, đề đã giao), Chi tiết lớp (bảng tin, bài tập,
+bài nộp, sinh viên, điểm), Lớp của tôi, Đề của tôi, Bài nộp của tôi, Góc học tập
+(đề đã lưu, ngân hàng đề, sổ tay câu sai), Thống kê (theo đề, theo lớp), Chi
+tiết học phần (đề thi, câu hỏi), và bảng chọn câu hỏi khi soạn đề.
+
+Ô chọn có tìm kiếm: học phần (Câu hỏi — cả form và bộ lọc, Đề thi, Góc học tập),
+nguồn tài liệu (Câu hỏi), lớp học (Thống kê), đề thi để lấy thêm câu (Đề thi).
+Các ô chọn danh sách tĩnh như độ khó, vai trò, trạng thái vẫn giữ `<select>`
+thường vì không có gì để tìm.
+
+Directive `infinite-scroll.directive.ts` đã xóa vì không còn nơi nào dùng.
+
+### Ba lỗi thật phát hiện khi làm
+
+**Máy chủ âm thầm bỏ qua số dòng mỗi trang.** 20 chỗ trong controller đang chặn
+`limit` ở mức 15: chọn 20 hoặc 50 dòng thì máy chủ lặng lẽ trả về 12. Đã nâng
+trần lên 100.
+
+**Ô "Mỗi trang" hiện sai số.** Ô chọn hiển thị 5 trong khi trang đang lấy 10
+dòng. Nguyên nhân: `[value]` gán cho thẻ `<select>` chạy trước khi các `<option>`
+kịp dựng, nên trình duyệt rơi về giá trị đầu danh sách. Đã chuyển sang đánh dấu
+`[selected]` trên từng option. Lỗi này chỉ lộ ra khi mở trình duyệt xem thật.
+
+**Danh sách lớp chưa tìm được theo từ khóa.** `/classes/paged` và
+`/classes/assignable/paged` chưa nhận tham số `keyword`, nên ô chọn lớp có tìm
+kiếm không hoạt động được. Đã bổ sung từ repository lên tới controller.
+
+### Ghi chú kỹ thuật
+
+Bảng Đề thi chỉ có `subject_id` chứ không kèm tên học phần. Trước đây tên lấy từ
+danh sách học phần đã nạp sẵn — chính là thứ vừa bỏ đi. Nay tên được tra một lần
+theo id rồi nhớ lại trong bộ nhớ màn hình, nên không phải tải cả danh mục học
+phần chỉ để hiện một cái tên.
+
+Tệp `frontend/src/environments/environment.ts` đã bỏ khỏi theo dõi git và thêm
+vào `.gitignore`, kèm `environment.example.ts` làm mẫu — mỗi máy và mỗi lần
+triển khai trỏ về một địa chỉ API khác nhau.
+
+### Lỗi làm trắng bốn màn hình — build xanh vẫn không chạy được
+
+Sau khi thay xong, các màn hình Đề thi, Thống kê, Góc học tập và Ngân hàng câu
+hỏi **không hiển thị gì**; đăng nhập xong cũng đứng lại ở trang đăng nhập, vì
+sau khi đăng nhập router đưa thẳng vào `/exams` mà màn hình đó ném lỗi.
+
+Nguyên nhân: component ô chọn có một input đặt tên `valueOf`. Angular gom
+input/output của directive vào một object thường, mà `valueOf` là hàm có sẵn
+trên `Object.prototype`, nên khi tra bảng binding Angular nhận về hàm kế thừa
+thay vì mảng và ném `TypeError: bindings[publicName].push is not a function`
+ngay lúc dựng màn hình. Đã đổi tên input thành `idOf`.
+
+Đáng nói là `ng build` **báo thành công** với lỗi này — nó chỉ lộ ra lúc chạy.
+Vì vậy đã thêm `shared/man-hinh-dung-duoc.spec.ts`: dựng thật 14 màn hình có
+dùng phân trang hoặc ô chọn, chỉ cần dựng được là đạt. Bài kiểm thử này tái hiện
+đúng lỗi trên, nên lần sau loại lỗi đó không lọt được nữa.
+
+### Kiểm chứng
+
+- `gofmt`, `go build`, `go vet` sạch; 46 bài kiểm thử backend đạt
+- Angular build sạch; 22 bài kiểm thử frontend đạt (8 bài cũ + 14 màn hình dựng thật)
+- Chạy thật trên trình duyệt màn hình Học phần: hiển thị đúng 10 dòng, chuyển
+  sang trang 2 đổi đúng nội dung (11–20 trên 27), đổi sang 5 dòng/trang thì
+  quay về trang 1 và tách thành 6 trang. Mỗi lần đổi trang chỉ gọi API một lần
+  với đúng `page` và `limit`, không có lỗi nào trong console.
+- **Chưa chạy thật** phần ô chọn có tìm kiếm trên trình duyệt vì các màn hình đó
+  cần đăng nhập; mới kiểm ở mức dựng được bằng bài kiểm thử.
+
+### Dọn dẹp sau khi chạy thử
+
+**Ô chọn học phần hiện dấu hỏi.** Khi chưa chọn gì, ô chọn hiện `?` thay vì dòng
+gợi ý, do hàm tra tên học phần trả về `?` cho id bằng 0. Đã sửa ở hai chỗ: form
+tạo đề thi và bộ lọc ngân hàng đề trong Góc học tập.
+
+**Gỡ bản dump cũ khỏi mã nguồn.** `backend/database/quiz_db.sql` là bản chụp
+ngày 05/08, đã lỗi thời (chưa có 135 câu hỏi bổ sung) và chứa chuỗi băm mật khẩu
+cùng email thật. Tệp không được git theo dõi nên xóa an toàn. Bản sao lưu nay
+nằm ở `backend/backups/` — thư mục đã có trong `.gitignore`; bản mới nhất đã
+kiểm đủ 245 câu hỏi, 980 đáp án, 32 nguồn, 65 học phần, 7 tài khoản.
+
+**Viết lại `database/README_khoi_phuc.md`.** Tài liệu cũ trỏ tới tệp vừa xóa, số
+liệu còn của giai đoạn dữ liệu thử nghiệm (1.399 câu hỏi, 68 đề), và **ghi thẳng
+mật khẩu quản trị `admin/admin123` trong tệp được git theo dõi**. Bản mới hướng
+dẫn xuất/khôi phục từ `backend/backups/`, cách dựng lại từ đầu bằng thư mục
+`migrations/`, và bỏ hẳn tài khoản mẫu kèm mật khẩu — muốn có quản trị viên thì
+đăng ký rồi nâng quyền bằng một câu lệnh SQL.

@@ -2,13 +2,13 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClassService, AppClass } from '../../services/class.service';
 import { RouterLink } from '@angular/router';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 import { ToastService } from '../../services/toast.service';
 import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-my-classes',
-  imports: [FormsModule, RouterLink, InfiniteScrollDirective, Icon],
+  imports: [FormsModule, RouterLink, Paginator, Icon],
   templateUrl: './my-classes.html',
 })
 export class MyClasses implements OnInit {
@@ -18,6 +18,7 @@ export class MyClasses implements OnInit {
   classes = signal<AppClass[]>([]);
   total = signal(0);
   page = signal(1);
+  limit = signal(10);
   loading = signal(false);
   code = '';
   message = signal<string>('');
@@ -27,23 +28,22 @@ export class MyClasses implements OnInit {
 
   ngOnInit() { this.load(); }
 
-  load(reset = true) {
+  load() {
     if (this.loading()) return;
-    const page = reset ? 1 : this.page() + 1;
-    if (reset) this.listError.set('');
+    this.listError.set('');
     this.loading.set(true);
-    this.service.getMyClassesPaged(page).subscribe({
+    this.service.getMyClassesPaged(this.page(), this.limit()).subscribe({
       next: (result) => {
-        this.classes.set(reset ? (result.items ?? []) : [...this.classes(), ...(result.items ?? [])]);
+        this.classes.set(result.items ?? []);
         this.total.set(result.total ?? 0);
-        this.page.set(page);
         this.loading.set(false);
       },
       error: () => { this.loading.set(false); this.listError.set('Không tải được danh sách lớp học. Vui lòng thử lại.'); },
     });
   }
 
-  hasMore() { return this.classes().length < this.total(); }
+  goToPage(page: number) { this.page.set(page); this.load(); }
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.load(); }
 
   join() {
     if (this.joining()) return;
@@ -51,7 +51,7 @@ export class MyClasses implements OnInit {
     if (!this.code.trim()) { this.error.set('Nhập mã lớp'); return; }
     this.joining.set(true);
     this.service.joinByCode(this.code.trim().toUpperCase()).subscribe({
-      next: () => { this.joining.set(false); this.message.set('Tham gia lớp thành công!'); this.toast.success('Đã tham gia lớp học.'); this.code = ''; this.load(true); },
+      next: () => { this.joining.set(false); this.message.set('Tham gia lớp thành công!'); this.toast.success('Đã tham gia lớp học.'); this.code = ''; this.page.set(1); this.load(); },
       error: (e) => { this.joining.set(false); const message = e?.error?.error ?? 'Mã lớp không đúng'; this.error.set(message); this.toast.error(message); },
     });
   }

@@ -26,12 +26,16 @@ func (r *ClassRepository) FindByCreator(createdBy uint) ([]entity.Class, error) 
 	err := r.db.Where("created_by = ?", createdBy).Order("id desc").Find(&classes).Error
 	return classes, err
 }
-func (r *ClassRepository) FindPaged(createdBy uint, all bool, limit, offset int) ([]entity.Class, int64, error) {
+func (r *ClassRepository) FindPaged(createdBy uint, all bool, keyword string, limit, offset int) ([]entity.Class, int64, error) {
 	var rows []entity.Class
 	var total int64
 	query := r.db.Model(&entity.Class{})
 	if !all {
 		query = query.Where("created_by = ?", createdBy)
+	}
+	if keyword != "" {
+		like := "%" + keyword + "%"
+		query = query.Where("name LIKE ? OR code LIKE ?", like, like)
 	}
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -48,10 +52,14 @@ func (r *ClassRepository) FindAssignable(userID uint) ([]entity.Class, error) {
 	return classes, err
 }
 
-func (r *ClassRepository) FindAssignablePaged(userID uint, limit, offset int) ([]entity.Class, int64, error) {
+func (r *ClassRepository) FindAssignablePaged(userID uint, keyword string, limit, offset int) ([]entity.Class, int64, error) {
 	var classes []entity.Class
 	var total int64
 	query := r.db.Model(&entity.Class{}).Where("created_by = ? OR is_public = ?", userID, true)
+	if keyword != "" {
+		like := "%" + keyword + "%"
+		query = query.Where("name LIKE ? OR code LIKE ?", like, like)
+	}
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}

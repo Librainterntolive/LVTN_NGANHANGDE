@@ -5,12 +5,12 @@ import { AppUser } from '../../services/user.service';
 import { DialogService } from '../../services/dialog.service';
 import { ToastService } from '../../services/toast.service';
 import { RouterLink } from '@angular/router';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-classes',
-  imports: [FormsModule, RouterLink, InfiniteScrollDirective, Icon],
+  imports: [FormsModule, RouterLink, Paginator, Icon],
   templateUrl: './classes.html',
 })
 export class Classes implements OnInit, OnDestroy {
@@ -23,7 +23,8 @@ export class Classes implements OnInit, OnDestroy {
   error = signal<string>('');
   total = signal<number>(0);
   loading = signal<boolean>(false);
-  private page = 1;
+  page = signal(1);
+  limit = signal(10);
 
   // form tạo/sửa (ẩn/hiện)
   showForm = signal<boolean>(false);
@@ -35,11 +36,13 @@ export class Classes implements OnInit, OnDestroy {
   detailTab = signal<'students' | 'exams'>('students');
   classStudents = signal<AppUser[]>([]);
   studentTotal = signal(0);
-  studentPage = 1;
+  studentPage = signal(1);
+  studentLimit = signal(10);
   studentsLoading = signal(false);
   classExams = signal<any[]>([]);
   classExamTotal = signal(0);
-  classExamPage = 1;
+  classExamPage = signal(1);
+  classExamLimit = signal(10);
   classExamsLoading = signal(false);
   studentSearch = '';
   private studentSearchTimer?: ReturnType<typeof setTimeout>;
@@ -52,16 +55,25 @@ export class Classes implements OnInit, OnDestroy {
     if (this.studentSearchTimer) clearTimeout(this.studentSearchTimer);
   }
 
-  load() { this.page = 1; this.classes.set([]); this.total.set(0); this.loadMore(); }
-
-  loadMore() {
-    if (this.loading() || (this.total() > 0 && this.classes().length >= this.total())) return;
+  load() {
+    if (this.loading()) return;
     this.loading.set(true);
-    this.service.getPaged(this.page, 12).subscribe({
-      next: (data) => { this.classes.update((rows) => [...rows, ...(data.items ?? [])]); this.total.set(data.total); this.page++; this.loading.set(false); },
-      error: () => { this.error.set('Không tải được lớp.'); this.loading.set(false); },
+    this.service.getPaged(this.page(), this.limit()).subscribe({
+      next: (data) => {
+        this.classes.set(data.items ?? []);
+        this.total.set(data.total ?? 0);
+        this.loading.set(false);
+        // Xóa lớp có thể làm trang hiện tại vượt quá trang cuối.
+        const lastPage = Math.max(1, Math.ceil(this.total() / this.limit()));
+        if (this.page() > lastPage) this.goToPage(lastPage);
+      },
+      error: () => { this.loading.set(false); this.error.set('Không tải được danh sách lớp học.'); },
     });
   }
+
+  goToPage(page: number) { this.page.set(page); this.load(); }
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.load(); }
+
 
   // ----- form tạo/sửa -----
   openAdd() {
@@ -127,6 +139,8 @@ export class Classes implements OnInit, OnDestroy {
     this.detailTab.set('students');
     this.studentSearch = '';
     this.matchedStudents.set([]);
+    this.studentPage.set(1);
+    this.classExamPage.set(1);
     this.loadStudents(c.id!);
     this.loadClassExams(c.id!);
   }
@@ -138,35 +152,55 @@ export class Classes implements OnInit, OnDestroy {
     this.classExamTotal.set(0);
   }
 
-  loadStudents(classId: number, reset = true) {
+  loadStudents(classId: number) {
     if (this.studentsLoading()) return;
-    const page = reset ? 1 : this.studentPage + 1;
     this.studentsLoading.set(true);
-    this.service.getStudentsPaged(classId, page).subscribe({
-      next: data => { this.classStudents.set(reset ? (data.items ?? []) : [...this.classStudents(), ...(data.items ?? [])]); this.studentTotal.set(data.total ?? 0); this.studentPage = page; this.studentsLoading.set(false); },
+    this.service.getStudentsPaged(classId, this.studentPage(), this.studentLimit()).subscribe({
+      next: data => {
+        this.classStudents.set(data.items ?? []);
+        this.studentTotal.set(data.total ?? 0);
+        this.studentsLoading.set(false);
+      },
       error: () => this.studentsLoading.set(false),
     });
   }
 
-  hasMoreStudents() { return this.classStudents().length < this.studentTotal(); }
+  goToStudentPage(page: number) {
+    this.studentPage.set(page);
+    this.loadStudents(this.selectedClass()!.id!);
+  }
 
-  loadClassExams(classId: number, reset = true) {
+  setStudentLimit(limit: number) {
+    this.studentLimit.set(limit);
+    this.studentPage.set(1);
+    this.loadStudents(this.selectedClass()!.id!);
+  }
+
+
+  loadClassExams(classId: number) {
     if (this.classExamsLoading()) return;
-    const page = reset ? 1 : this.classExamPage + 1;
-    if (reset) { this.classExams.set([]); this.classExamTotal.set(0); }
     this.classExamsLoading.set(true);
-    this.service.getExamsPaged(classId, page, 12).subscribe({
+    this.service.getExamsPaged(classId, this.classExamPage(), this.classExamLimit()).subscribe({
       next: (data) => {
-        this.classExams.set(reset ? (data.items ?? []) : [...this.classExams(), ...(data.items ?? [])]);
+        this.classExams.set(data.items ?? []);
         this.classExamTotal.set(data.total ?? 0);
-        this.classExamPage = page;
         this.classExamsLoading.set(false);
       },
       error: () => this.classExamsLoading.set(false),
     });
   }
 
-  hasMoreClassExams() { return this.classExams().length < this.classExamTotal(); }
+  goToClassExamPage(page: number) {
+    this.classExamPage.set(page);
+    this.loadClassExams(this.selectedClass()!.id!);
+  }
+
+  setClassExamLimit(limit: number) {
+    this.classExamLimit.set(limit);
+    this.classExamPage.set(1);
+    this.loadClassExams(this.selectedClass()!.id!);
+  }
+
 
   searchStudents() {
     const keyword = this.studentSearch.trim();
@@ -192,7 +226,7 @@ export class Classes implements OnInit, OnDestroy {
         this.toast.success(`Đã thêm ${u.full_name || u.username} vào lớp.`);
         this.studentSearch = '';
         this.matchedStudents.set([]);
-        this.loadStudents(c.id!, true);
+        this.loadStudents(c.id!);
         this.load(); // cập nhật số SV trên card
       },
       error: (e) => this.error.set(e?.error?.error ?? 'Thêm thất bại'),
@@ -206,7 +240,7 @@ export class Classes implements OnInit, OnDestroy {
       if (!ok) return;
       this.service.removeStudent(c.id!, s.id!).subscribe({
         next: () => {
-          this.loadStudents(c.id!, true);
+          this.loadStudents(c.id!);
           this.load();
           this.toast.success(`Đã xóa ${s.full_name || s.username} khỏi lớp.`);
         },

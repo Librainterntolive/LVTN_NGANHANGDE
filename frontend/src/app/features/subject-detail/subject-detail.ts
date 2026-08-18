@@ -5,12 +5,12 @@ import { QuestionService, Question } from '../../services/question.service';
 import { ExamService, Exam } from '../../services/exam.service';
 import { StudentService } from '../../services/student.service';
 import { AuthService } from '../../services/auth.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-subject-detail',
-  imports: [RouterLink, InfiniteScrollDirective, Icon],
+  imports: [RouterLink, Paginator, Icon],
   templateUrl: './subject-detail.html',
 })
 export class SubjectDetail implements OnInit {
@@ -29,14 +29,15 @@ export class SubjectDetail implements OnInit {
   questions = signal<Question[]>([]);
   qTotal = signal<number>(0);
   qLoading = signal<boolean>(false);
-  qHasMore = signal<boolean>(false);
-  private qPage = 1;
+  qPage = signal(1);
+  qLimit = signal(10);
 
   // đề thi của môn
   exams = signal<Exam[]>([]);
   examTotal = signal<number>(0);
   examLoading = signal<boolean>(false);
-  private examPage = 1;
+  examPage = signal(1);
+  examLimit = signal(10);
 
   isStaff(): boolean {
     const r = this.auth.getRole();
@@ -56,43 +57,38 @@ export class SubjectDetail implements OnInit {
     }
   }
 
-  loadExams(reset = true) {
+  loadExams() {
     if (this.examLoading()) return;
-    if (reset) { this.examPage = 1; this.exams.set([]); this.examTotal.set(0); }
     this.examLoading.set(true);
-    if (this.isStaff()) {
-      this.examService.getPaged(this.examPage, 12, undefined, this.subjectId).subscribe({
-        next: result => { this.exams.update(items => [...items, ...(result.items ?? [])]); this.examTotal.set(result.total); this.examLoading.set(false); },
-        error: () => this.examLoading.set(false),
-      });
-    } else {
-      this.studentService.getPublicExamsPaged(this.examPage, 12, this.subjectId).subscribe({
-        next: result => { this.exams.update(items => [...items, ...(result.items ?? [])]); this.examTotal.set(result.total); this.examLoading.set(false); },
-        error: () => this.examLoading.set(false),
-      });
-    }
+    const request = this.isStaff()
+      ? this.examService.getPaged(this.examPage(), this.examLimit(), undefined, this.subjectId)
+      : this.studentService.getPublicExamsPaged(this.examPage(), this.examLimit(), this.subjectId);
+    request.subscribe({
+      next: result => {
+        this.exams.set(result.items ?? []);
+        this.examTotal.set(result.total);
+        this.examLoading.set(false);
+      },
+      error: () => this.examLoading.set(false),
+    });
   }
 
-  hasMoreExams() { return this.exams().length < this.examTotal(); }
-  loadMoreExams() { if (!this.examLoading() && this.hasMoreExams()) { this.examPage++; this.loadExams(false); } }
+  goToExamPage(page: number) { this.examPage.set(page); this.loadExams(); }
+  setExamLimit(limit: number) { this.examLimit.set(limit); this.examPage.set(1); this.loadExams(); }
 
   loadQuestions() {
     if (this.qLoading()) return;
     this.qLoading.set(true);
-    this.qService.getPaged({ subjectId: this.subjectId, page: this.qPage, limit: 12 }).subscribe({
+    this.qService.getPaged({ subjectId: this.subjectId, page: this.qPage(), limit: this.qLimit() }).subscribe({
       next: (res) => {
-        this.questions.update((c) => [...c, ...(res.items ?? [])]);
+        this.questions.set(res.items ?? []);
         this.qTotal.set(res.total);
-        this.qHasMore.set(this.questions().length < res.total);
         this.qLoading.set(false);
       },
       error: () => this.qLoading.set(false),
     });
   }
 
-  loadMoreQuestions() {
-    if (this.qLoading() || !this.qHasMore()) return;
-    this.qPage++;
-    this.loadQuestions();
-  }
+  goToQuestionPage(page: number) { this.qPage.set(page); this.loadQuestions(); }
+  setQuestionLimit(limit: number) { this.qLimit.set(limit); this.qPage.set(1); this.loadQuestions(); }
 }

@@ -42,3 +42,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Cấu hình môi trường: mỗi máy/mỗi lần triển khai một địa chỉ API khác nhau.
+# Chép environment.example.ts thành environment.ts rồi sửa cho đúng máy của bạn.
+/src/environments/environment.ts

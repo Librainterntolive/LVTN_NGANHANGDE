@@ -200,7 +200,7 @@ func (ctl *ExamController) GetPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	rows, total, err := ctl.svc.GetPaged(c.Query("keyword"), c.Query("subject_id"), getUserID(c), getRole(c), limit, (page-1)*limit)
@@ -221,7 +221,7 @@ func (ctl *ExamController) GetPublicPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	rows, total, err := ctl.svc.GetPublicPaged(c.Query("subject_id"), limit, (page-1)*limit)
@@ -243,7 +243,7 @@ func (ctl *ExamController) GetBankPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	items, total, err := ctl.svc.GetBankPaged(c.Query("subject_id"), c.Query("keyword"), limit, (page-1)*limit)

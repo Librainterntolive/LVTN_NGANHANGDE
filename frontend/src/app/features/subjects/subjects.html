@@ -45,10 +45,12 @@
 </div>
 
 @if (loading()) { <div class="loader"></div> }
-@if (hasMore() && !loading()) {
-  <div appInfiniteScroll (scrolled)="loadMore()" class="load-trigger"></div>
-  <div class="load-more"><button type="button" class="btn-outline" (click)="loadMore()">Tải thêm học phần</button></div>
-}
+<app-paginator
+  [total]="total()"
+  [page]="page()"
+  [limit]="limit()"
+  (pageChange)="goToPage($event)"
+  (limitChange)="setLimit($event)" />
 
 <style>
   .subject-page-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:18px; }

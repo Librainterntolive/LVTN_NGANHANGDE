@@ -31,7 +31,12 @@
     @for (post of posts(); track post.id) {
       <article class="post-item"><div class="post-avatar">{{ (post.author_name || 'GV').slice(0, 1) }}</div><div class="post-content"><div><b>{{ post.author_name || ('Giảng viên #' + post.created_by) }}</b><small>{{ post.created_at | date:'dd/MM/yyyy, HH:mm' }}</small></div><p>{{ post.content }}</p></div>@if (!isStudent) { <div class="post-actions"><button class="btn-outline" (click)="openEditPost(post)">Sửa</button><button class="btn-outline post-delete" (click)="removePost(post)">Xóa</button></div> }</article>
     }
-    @if (hasMorePosts()) { <div class="more"><button class="btn-outline" (click)="loadPosts(false)" [disabled]="postsLoading()">{{ postsLoading() ? 'Đang tải…' : 'Tải thêm thông báo' }}</button><div appInfiniteScroll (scrolled)="loadPosts(false)" style="height:1px"></div></div> }
+    <app-paginator
+      [total]="postsTotal()"
+      [page]="postsPage()"
+      [limit]="postsLimit()"
+      (pageChange)="goToPostPage($event)"
+      (limitChange)="setPostLimit($event)" />
   </section>
   <section class="stream-card">
     <div><p class="stream-label">BẢNG TIN LỚP HỌC</p><h2>Thông tin và bài tập mới</h2><p>Giảng viên sử dụng mã lớp <b>{{ classroom()?.code }}</b> để mời sinh viên tham gia. Mọi bài tập mới sẽ hiển thị tại đây.</p></div>
@@ -97,7 +102,12 @@
       <p class="empty">Chưa có bài tập nào trong lớp.</p>
     }
   </section>
-  @if (hasMore()) { <div class="more"><button class="btn-outline" (click)="loadMore()" [disabled]="loading()">{{ loading() ? 'Đang tải…' : 'Tải thêm bài tập' }}</button></div> }
+  <app-paginator
+    [total]="total()"
+    [page]="page()"
+    [limit]="limit()"
+    (pageChange)="goToPage($event)"
+    (limitChange)="setLimit($event)" />
 }
 
 @if (tab()==='people' && !isStudent) {
@@ -108,7 +118,12 @@
       @for (student of classStudents(); track student.id) {
         <article class="member"><div><b>{{ student.full_name || student.username }}</b><span>{{ student.username }} · ID: {{ student.id }}</span></div><button class="danger" (click)="removeStudent(student)">Xóa khỏi lớp</button></article>
       } @empty { <p class="empty">Lớp chưa có sinh viên.</p> }
-      @if (hasMoreStudents()) { <div class="more"><button class="btn-outline" (click)="loadStudents(false)" [disabled]="studentsLoading()">{{ studentsLoading() ? 'Đang tải…' : 'Tải thêm sinh viên' }}</button></div> }
+      <app-paginator
+        [total]="studentTotal()"
+        [page]="studentPage()"
+        [limit]="studentLimit()"
+        (pageChange)="goToStudentPage($event)"
+        (limitChange)="setStudentLimit($event)" />
     </div>
   </section>
 }
@@ -121,7 +136,12 @@
       @for (row of stats(); track row.student_id) { <tr><td>{{ row.full_name || row.username }}</td><td>{{ row.submitted }}</td><td>{{ row.late }}</td><td>{{ row.average_submitted | number:'1.1-2' }}</td><td>{{ row.average_with_missing | number:'1.1-2' }}</td></tr> }
       @empty { <tr><td colspan="5">Chưa có dữ liệu nộp bài.</td></tr> }
     </tbody></table></div>
-    @if (hasMoreStats()) { <div class="more" appInfiniteScroll (scrolled)="loadStats(false)"><button class="btn-outline" (click)="loadStats(false)" [disabled]="statsLoading()">{{ statsLoading() ? 'Đang tải…' : 'Tải thêm sinh viên' }}</button></div> }
+    <app-paginator
+      [total]="statsTotal()"
+      [page]="statsPage()"
+      [limit]="statsLimit()"
+      (pageChange)="goToStatsPage($event)"
+      (limitChange)="setStatsLimit($event)" />
   </section>
 }
 
@@ -131,7 +151,12 @@
     @for (submission of submissions(); track submission.id) {
       <article class="submission"><div class="submission-top"><b>{{ submission.student_name || submission.student_username || ('Sinh viên #' + submission.student_id) }}</b><span [class.late]="submission.status==='late'">{{ submission.status === 'late' ? 'Nộp muộn' : 'Đúng hạn' }}</span></div><p>{{ submission.original_name }} · {{ submission.submitted_at | date:'dd/MM/yyyy HH:mm' }}</p><button class="btn-outline" (click)="download(submission)">Tải tệp bài nộp</button><div class="grading"><input #score type="number" [value]="submission.score ?? ''" placeholder="Điểm"/><input #feedback [value]="submission.feedback ?? ''" placeholder="Nhận xét"/><button (click)="grade(submission, score.value, feedback.value)">Lưu điểm</button></div></article>
     } @empty { <p class="empty">Chưa có bài nộp.</p> }
-    @if (hasMoreSubmissions()) { <div class="more"><button class="btn-outline" (click)="loadSubmissions(false)" [disabled]="submissionsLoading()">{{ submissionsLoading() ? 'Đang tải…' : 'Tải thêm bài nộp' }}</button><div appInfiniteScroll (scrolled)="loadSubmissions(false)" style="height:1px;"></div></div> }
+    <app-paginator
+      [total]="submissionsTotal()"
+      [page]="submissionsPage()"
+      [limit]="submissionsLimit()"
+      (pageChange)="goToSubmissionPage($event)"
+      (limitChange)="setSubmissionLimit($event)" />
   </section></div>
 }
 

@@ -6,13 +6,14 @@ import { SubjectService, Subject } from '../../services/subject.service';
 import { ChapterService, Chapter } from '../../services/chapter.service';
 import { AuthService } from '../../services/auth.service';
 import { DialogService } from '../../services/dialog.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
+import { SearchableSelect } from '../../shared/searchable-select';
 import { SourceService, Source } from '../../services/source.service';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-questions',
-  imports: [FormsModule, InfiniteScrollDirective, DecimalPipe],
+  imports: [FormsModule, Paginator, SearchableSelect, DecimalPipe],
   templateUrl: './questions.html',
 })
 export class Questions implements OnInit {
@@ -55,8 +56,8 @@ export class Questions implements OnInit {
   editChapterName = '';
 
   // phân trang
-  private page = 1;
-  private readonly limit = 12;
+  page = signal(1);
+  limit = signal(10);
   private subjectPage = 1;
   loading = signal<boolean>(false);
   hasMore = signal<boolean>(false);
@@ -73,27 +74,45 @@ export class Questions implements OnInit {
   importResult = signal<ImportResult | null>(null);
 
   ngOnInit() {
-    this.loadSubjects();
     this.loadSources();
   }
 
-  loadSubjects(reset = true) {
-    if (this.subjectLoading()) return;
-    const page = reset ? 1 : this.subjectPage + 1;
-    if (reset) { this.subjects.set([]); this.subjectTotal.set(0); }
-    this.subjectLoading.set(true);
-    this.subjectService.getPaged(page, 12).subscribe({
-      next: result => {
-        this.subjects.set(reset ? (result.items ?? []) : [...this.subjects(), ...(result.items ?? [])]);
-        this.subjectTotal.set(result.total ?? 0);
-        this.subjectPage = page;
-        this.subjectLoading.set(false);
-      },
-      error: () => { this.error.set('Không tải được danh sách môn học.'); this.subjectLoading.set(false); },
-    });
+  // Combobox học phần và nguồn gọi thẳng API theo từ khóa: gõ tới đâu tìm tới đó,
+  // nên số lượng bản ghi không còn ảnh hưởng tới thao tác chọn.
+  fetchSubjects = (keyword: string, page: number, limit: number) =>
+    this.subjectService.getPaged(page, limit, keyword);
+
+  fetchSources = (keyword: string, page: number, limit: number) =>
+    this.sourceService.getPaged(page, limit, keyword);
+
+  // Nguồn chưa xác thực vẫn hiện nhưng ghi rõ trạng thái; backend chặn không cho
+  // dùng nguồn chưa duyệt nên ở đây chỉ cần cho người soạn thấy tình trạng.
+  sourceLabel = (source: Source) => {
+    const status = source.verification_status === 'verified' ? 'Đã xác thực'
+      : source.verification_status === 'rejected' ? 'Từ chối' : 'Chờ xác thực';
+    return `[${status}] ${source.title} — ${source.publisher || source.url}`;
+  };
+
+  // Tên hiển thị khi form đang giữ sẵn một id (ví dụ mở form sửa câu hỏi).
+  subjectName(id?: number | null): string {
+    if (!id) return '';
+    return this.subjectNames()[id] ?? '';
   }
 
-  hasMoreSubjects() { return this.subjects().length < this.subjectTotal(); }
+  sourceTitle(id?: number | null): string {
+    if (!id) return '';
+    return this.sources().find(s => s.id === id)?.title ?? '';
+  }
+
+  private subjectNames = signal<Record<number, string>>({});
+
+  private ensureSubjectName(id?: number | null) {
+    if (!id || this.subjectNames()[id]) return;
+    this.subjectService.getOne(id).subscribe({
+      next: subject => this.subjectNames.update(map => ({ ...map, [id]: subject.name })),
+      error: () => {},
+    });
+  }
 
   emptyForm(): Question {
     return {
@@ -185,11 +204,13 @@ export class Questions implements OnInit {
 
   // gọi khi đổi tab / tìm kiếm / đổi chương -> tải lại từ đầu
   reload() {
-    if (!this.subjectId) { this.items.set([]); this.total.set(0); this.hasMore.set(false); return; }
-    this.page = 1;
-    this.items.set([]);
+    if (!this.subjectId) { this.items.set([]); this.total.set(0); return; }
+    this.page.set(1);
     this.fetch();
   }
+
+  goToPage(page: number) { this.page.set(page); this.fetch(); }
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.fetch(); }
 
   private fetch() {
     if (this.loading()) return;
@@ -200,22 +221,18 @@ export class Questions implements OnInit {
       owner: this.ownerParam() || undefined,
       chapter: ch === 'all' ? undefined : ch,
 		 reviewStatus: this.reviewFilter() || undefined,
-      page: this.page, limit: this.limit,
+      page: this.page(), limit: this.limit(),
     }).subscribe({
       next: (res) => {
-        this.items.update((cur) => [...cur, ...(res.items ?? [])]);
+        this.items.set(res.items ?? []);
         this.total.set(res.total);
-        this.hasMore.set(this.items().length < res.total);
         this.loading.set(false);
+        // Duyệt hoặc xóa câu hỏi có thể làm trang hiện tại vượt quá trang cuối.
+        const lastPage = Math.max(1, Math.ceil(this.total() / this.limit()));
+        if (this.page() > lastPage) this.goToPage(lastPage);
       },
       error: () => { this.error.set('Không tải được câu hỏi.'); this.loading.set(false); },
     });
-  }
-
-  loadMore() {
-    if (this.loading() || !this.hasMore()) return;
-    this.page++;
-    this.fetch();
   }
 
   setOwner(o: 'all' | 'mine' | 'others') { this.owner.set(o); this.reload(); }
@@ -361,8 +378,9 @@ export class Questions implements OnInit {
   // tên các môn vừa nhận câu hỏi (hiện trong thông báo kết quả import)
   importedSubjectNames(): string {
     const ids = this.importResult()?.subject_ids ?? [];
+    ids.forEach(id => this.ensureSubjectName(id));
     const names = ids
-      .map((id) => this.subjects().find((s) => s.id === id)?.name)
+      .map((id) => this.subjectNames()[id])
       .filter((n): n is string => !!n);
     return names.join(', ');
   }
@@ -444,6 +462,7 @@ export class Questions implements OnInit {
     if (this.isUsed(q)) return; // đã dùng trong đề thi -> khóa sửa
     this.editingId.set(q.id!);
     this.showForm.set(true);
+    this.ensureSubjectName(q.subject_id);
     this.form = {
       subject_id: q.subject_id, chapter_id: q.chapter_id ?? null, content: q.content,
       question_type: q.question_type ?? 'single', difficulty: q.difficulty ?? 'medium',
@@ -480,7 +499,4 @@ export class Questions implements OnInit {
     });
   }
 
-  subjectName(id: number): string {
-    return this.subjects().find((s) => s.id === id)?.name ?? '?';
-  }
 }

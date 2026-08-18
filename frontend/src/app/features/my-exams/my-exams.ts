@@ -2,12 +2,12 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { StudentService } from '../../services/student.service';
 import { Exam } from '../../services/exam.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-my-exams',
-  imports: [RouterLink, InfiniteScrollDirective, Icon],
+  imports: [RouterLink, Paginator, Icon],
   templateUrl: './my-exams.html',
 })
 export class MyExams implements OnInit {
@@ -16,25 +16,26 @@ export class MyExams implements OnInit {
   error = signal<string>('');
   total = signal(0);
   page = signal(1);
+  limit = signal(10);
   loading = signal(false);
 
   ngOnInit() {
     this.load();
   }
 
-  load(reset = true) {
+  load() {
     if (this.loading()) return;
-    const page = reset ? 1 : this.page() + 1;
     this.loading.set(true);
-    this.service.getMyExamsPaged(page).subscribe({
+    this.service.getMyExamsPaged(this.page(), this.limit()).subscribe({
       next: (result) => {
-        this.exams.set(reset ? (result.items ?? []) : [...this.exams(), ...(result.items ?? [])]);
+        this.exams.set(result.items ?? []);
         this.total.set(result.total ?? 0);
-        this.page.set(page);
         this.loading.set(false);
       },
       error: () => { this.error.set('Không tải được. Bạn đã đăng nhập chưa?'); this.loading.set(false); },
     });
   }
-  hasMore() { return this.exams().length < this.total(); }
+
+  goToPage(page: number) { this.page.set(page); this.load(); }
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.load(); }
 }

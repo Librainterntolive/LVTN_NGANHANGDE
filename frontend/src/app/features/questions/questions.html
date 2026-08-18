@@ -31,12 +31,17 @@
   <section class="panel form-panel">
     <div class="panel-title"><h3>{{ editingId() ? 'Cập nhật câu hỏi' : 'Soạn câu hỏi mới' }}</h3><button class="btn-outline" (click)="cancelEdit()">Đóng</button></div>
     <div class="form-grid">
-      <label>Môn học<select [(ngModel)]="form.subject_id" (ngModelChange)="onFormSubjectChange()"><option [ngValue]="0">Chọn môn học</option>@if (subjectLoading() && !subjects().length) { <option disabled>Đang tải môn học…</option> } @for (subject of subjects(); track subject.id) { <option [ngValue]="subject.id">{{ subject.name }}</option> }</select></label>
+      <label>Môn học<app-searchable-select
+        [(value)]="form.subject_id"
+        [fetch]="fetchSubjects"
+        [displayLabel]="subjectName(form.subject_id)"
+        placeholder="Gõ tên học phần để tìm…"
+        emptyLabel="Không tìm thấy học phần nào"
+        (valueChange)="onFormSubjectChange()" /></label>
       <label>Chương / chủ đề<select [(ngModel)]="form.chapter_id"><option [ngValue]="null">Chưa phân chương</option>@for (chapter of formChapters(); track chapter.id) { <option [ngValue]="chapter.id">{{ chapter.name }}</option> }</select></label>
       <label>Độ khó<select [(ngModel)]="form.difficulty"><option value="easy">Dễ</option><option value="medium">Trung bình</option><option value="hard">Khó</option></select></label>
       <label>Loại câu<select [(ngModel)]="form.question_type"><option value="single">Một đáp án đúng</option><option value="truefalse">Đúng / Sai</option></select></label>
     </div>
-    @if (hasMoreSubjects()) { <button type="button" class="btn-outline" (click)="loadSubjects(false)" [disabled]="subjectLoading()">{{ subjectLoading() ? 'Đang tải…' : 'Tải thêm môn học' }}</button> }
     <label class="block-label">Nội dung câu hỏi<textarea [(ngModel)]="form.content" rows="3" placeholder="Nhập nội dung câu hỏi"></textarea></label>
     <fieldset><legend>Đáp án — tích tròn đáp án đúng</legend>@for (answer of form.answers; track $index) { <div class="answer-row"><input type="radio" name="correct" [value]="$index" [(ngModel)]="correctIndex"/><b>{{ ['A','B','C','D','E','F'][$index] }}.</b><input [(ngModel)]="answer.content" placeholder="Nội dung đáp án"/><button class="btn-outline" [disabled]="form.answers.length <= 2" (click)="removeAnswerRow($index)">Xóa</button></div> }<button class="btn-outline" (click)="addAnswerRow()">+ Thêm đáp án</button></fieldset>
     <fieldset><legend>Bản gốc và bản dịch</legend>
@@ -52,7 +57,14 @@
       }
     </fieldset>
     <fieldset><legend>Nguồn tài liệu bắt buộc</legend>
-      <div class="form-grid"><label>Nguồn<select [(ngModel)]="form.source_id"><option [ngValue]="null">Chọn nguồn đã khai báo</option>@for (source of sources(); track source.id) { <option [ngValue]="source.id" [disabled]="source.verification_status !== 'verified'">[{{ source.verification_status === 'verified' ? 'Đã xác thực' : source.verification_status === 'rejected' ? 'Từ chối' : 'Chờ xác thực' }}] {{ source.title }} — {{ source.publisher || source.url }}</option> }</select>@if (hasMoreSources()) { <button type="button" class="btn-outline" (click)="loadMoreSources()" [disabled]="sourceLoading()">{{ sourceLoading() ? 'Đang tải…' : 'Tải thêm nguồn' }}</button> }</label><label>Vị trí tham chiếu<input [(ngModel)]="form.source_reference" placeholder="Ví dụ: Chương 2, trang 35 hoặc Điều 4" /></label></div>
+      <div class="form-grid"><label>Nguồn<app-searchable-select
+        [(value)]="form.source_id"
+        [fetch]="fetchSources"
+        [labelOf]="sourceLabel"
+        [clearValue]="null"
+        [displayLabel]="sourceTitle(form.source_id)"
+        placeholder="Gõ tên tài liệu hoặc đơn vị phát hành…"
+        emptyLabel="Không tìm thấy nguồn nào" /></label><label>Vị trí tham chiếu<input [(ngModel)]="form.source_reference" placeholder="Ví dụ: Chương 2, trang 35 hoặc Điều 4" /></label></div>
       <button class="btn-outline" (click)="toggleSourceForm()">+ Khai báo nguồn mới</button>
       @if (showSourceForm()) { <div class="source-form"><label>Tên tài liệu<input [(ngModel)]="sourceForm.title" /></label><label>Đơn vị phát hành<input [(ngModel)]="sourceForm.publisher" /></label><label>URL nguồn gốc<input [(ngModel)]="sourceForm.url" type="url" placeholder="https://..." /></label><label>Năm phát hành<input [(ngModel)]="sourceForm.published_year" /></label><label>Ghi chú bản quyền<input [(ngModel)]="sourceForm.license_note" /></label><button (click)="createSource()">Lưu nguồn</button></div> }
       @if (sourceMessage()) { <p class="source-notice" aria-live="polite">{{ sourceMessage() }}</p> }
@@ -63,8 +75,13 @@
 }
 
 <section class="filters">
-  <label>Môn học<select [(ngModel)]="subjectId" (ngModelChange)="onSubjectChange()"><option [ngValue]="0">Chọn môn để xem câu hỏi</option>@if (subjectLoading() && !subjects().length) { <option disabled>Đang tải môn học…</option> } @for (subject of subjects(); track subject.id) { <option [ngValue]="subject.id">{{ subject.name }}</option> }</select></label>
-  @if (hasMoreSubjects()) { <button class="btn-outline" (click)="loadSubjects(false)" [disabled]="subjectLoading()">{{ subjectLoading() ? 'Đang tải…' : 'Tải thêm môn' }}</button> }
+  <label>Môn học<app-searchable-select
+    [(value)]="subjectId"
+    [fetch]="fetchSubjects"
+    [displayLabel]="subjectName(subjectId)"
+    placeholder="Gõ tên học phần để xem câu hỏi…"
+    emptyLabel="Không tìm thấy học phần nào"
+    (valueChange)="onSubjectChange()" /></label>
   @if (subjectId) { <input [(ngModel)]="keyword" (keyup.enter)="search()" placeholder="Tìm nội dung câu hỏi"/><button (click)="search()">Tìm</button><button class="btn-outline" (click)="clearSearch()">Xóa lọc</button> }
 </section>
 
@@ -90,7 +107,12 @@
     } @empty { @if (!loading()) { <div class="empty inline-empty"><strong>Chưa có câu hỏi phù hợp</strong><span>Thử đổi bộ lọc, tìm kiếm khác hoặc thêm câu hỏi có nguồn tham chiếu.</span><button (click)="openAdd()">+ Thêm câu hỏi</button></div> } }
   </div>
   @if (loading()) { <p class="muted">Đang tải thêm câu hỏi...</p> }
-  @if (hasMore() && !loading()) { <div appInfiniteScroll (scrolled)="loadMore()" class="scroll-sentinel"></div> }
+  <app-paginator
+    [total]="total()"
+    [page]="page()"
+    [limit]="limit()"
+    (pageChange)="goToPage($event)"
+    (limitChange)="setLimit($event)" />
 }
 
 <style>

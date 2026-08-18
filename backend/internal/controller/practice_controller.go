@@ -29,7 +29,7 @@ func (ctl *PracticeController) NotebookPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	items, total, err := ctl.svc.GetNotebookPaged(getUserID(c), limit, (page-1)*limit)

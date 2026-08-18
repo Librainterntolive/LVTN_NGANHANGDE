@@ -43,7 +43,7 @@ func (ctl *AssignmentController) List(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	items, total, err := ctl.svc.List(uint(classID), getUserID(c), getRole(c), limit, (page-1)*limit)
@@ -69,7 +69,7 @@ func (ctl *AssignmentController) ClassStatsPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	items, total, summary, err := ctl.svc.ClassStatsPaged(uint(id), getUserID(c), getRole(c), limit, (page-1)*limit)
@@ -157,7 +157,7 @@ func (ctl *AssignmentController) ListSubmissionsPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	items, total, err := ctl.svc.ListSubmissionsPaged(uint(id), getUserID(c), getRole(c), limit, (page-1)*limit)

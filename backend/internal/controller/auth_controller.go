@@ -125,7 +125,7 @@ func (ctl *AuthController) PendingResetRequestsPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	rows, total, err := ctl.svc.PendingResetRequestsPaged(limit, (page-1)*limit)

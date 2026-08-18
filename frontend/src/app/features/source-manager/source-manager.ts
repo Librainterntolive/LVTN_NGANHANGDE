@@ -3,11 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Source, SourceService } from '../../services/source.service';
 import { ToastService } from '../../services/toast.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 
 @Component({
   selector: 'app-source-manager',
-  imports: [FormsModule, DatePipe, InfiniteScrollDirective],
+  imports: [FormsModule, DatePipe, Paginator],
   templateUrl: './source-manager.html',
 })
 export class SourceManager implements OnInit {
@@ -18,26 +18,28 @@ export class SourceManager implements OnInit {
   total = signal(0);
   loading = signal(false);
   keyword = '';
-  private page = 1;
+  page = signal(1);
+  limit = signal(10);
 
   ngOnInit() { this.load(); }
 
-  load(reset = true) {
+  load() {
     if (this.loading()) return;
-    const page = reset ? 1 : this.page + 1;
     this.loading.set(true);
-    this.sourcesApi.getPaged(page, 12, this.keyword).subscribe({
+    this.sourcesApi.getPaged(this.page(), this.limit(), this.keyword).subscribe({
       next: result => {
-        this.sources.set(reset ? (result.items ?? []) : [...this.sources(), ...(result.items ?? [])]);
+        this.sources.set(result.items ?? []);
         this.total.set(result.total ?? 0);
-        this.page = page;
         this.loading.set(false);
       },
       error: () => { this.loading.set(false); this.toast.error('Không tải được danh sách nguồn.'); },
     });
   }
 
-  hasMore() { return this.sources().length < this.total(); }
+  // Đổi từ khóa thì quay về trang 1, nếu không sẽ rơi vào trang trống.
+  search() { this.page.set(1); this.load(); }
+  goToPage(page: number) { this.page.set(page); this.load(); }
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.load(); }
 
   review(source: Source, status: 'verified' | 'rejected') {
     if (!source.id) return;

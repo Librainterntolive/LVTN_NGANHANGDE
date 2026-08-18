@@ -7,14 +7,15 @@ import { ExamService, Exam } from '../../services/exam.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { DialogService } from '../../services/dialog.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
+import { SearchableSelect } from '../../shared/searchable-select';
 import { Icon } from '../../shared/icon';
 
 interface TreeRow { folder: Folder; depth: number; hasChildren: boolean; }
 
 @Component({
   selector: 'app-my-storage',
-  imports: [RouterLink, DecimalPipe, InfiniteScrollDirective, Icon],
+  imports: [RouterLink, DecimalPipe, Paginator, SearchableSelect, Icon],
   templateUrl: './my-storage.html',
 })
 export class MyStorage implements OnInit {
@@ -30,16 +31,15 @@ export class MyStorage implements OnInit {
   selected = signal<Folder | null>(null);
   folderExams = signal<SavedExam[]>([]);
   folderExamTotal = signal(0);
-  folderExamPage = 1;
+  folderExamPage = signal(1);
+  folderExamLimit = signal(10);
   folderExamLoading = signal(false);
   examBank = signal<Exam[]>([]);
   bankTotal = signal(0);
-  bankPage = 1;
+  bankPage = signal(1);
+  bankLimit = signal(10);
   bankLoading = signal(false);
-  subjects = signal<Subject[]>([]);
-  subjectTotal = signal(0);
-  subjectsLoading = signal(false);
-  subjectPage = 1;
+  bankSubjectName = signal('');
   savedIds = signal<Set<number>>(new Set());
 
   // thống kê góc học tập
@@ -48,7 +48,8 @@ export class MyStorage implements OnInit {
   // sổ tay câu sai
   wrongQuestions = signal<WrongQuestion[]>([]);
   wrongTotal = signal(0);
-  wrongPage = 1;
+  wrongPage = signal(1);
+  wrongLimit = signal(10);
   wrongLoading = signal(false);
   showNotebook = signal<boolean>(false);
 
@@ -68,46 +69,37 @@ export class MyStorage implements OnInit {
   });
 
   ngOnInit() {
-    this.loadSubjects();
     this.loadFolders();
     this.loadBank();
     this.reloadStats();
     this.folderService.getSavedExamIds().subscribe((ids) => this.savedIds.set(new Set(ids ?? [])));
   }
 
-  loadSubjects(reset = true) {
-    if (this.subjectsLoading()) return;
-    const page = reset ? 1 : this.subjectPage + 1;
-    if (reset) { this.subjects.set([]); this.subjectTotal.set(0); }
-    this.subjectsLoading.set(true);
-    this.subjectService.getPaged(page, 12).subscribe({
-      next: result => {
-        this.subjects.set(reset ? (result.items ?? []) : [...this.subjects(), ...(result.items ?? [])]);
-        this.subjectTotal.set(result.total ?? 0);
-        this.subjectPage = page;
-        this.subjectsLoading.set(false);
-      },
-      error: () => this.subjectsLoading.set(false),
-    });
-  }
-
-  hasMoreSubjects() { return this.subjects().length < this.subjectTotal(); }
+  // Combobox học phần gọi thẳng API theo từ khóa, không tải sẵn cả danh mục.
+  fetchSubjects = (keyword: string, page: number, limit: number) =>
+    this.subjectService.getPaged(page, limit, keyword);
 
   reloadStats() {
     this.folderService.getMyStats().subscribe((s) => this.stats.set(s));
-    this.loadWrongQuestions(true);
+    this.wrongPage.set(1);
+    this.loadWrongQuestions();
   }
 
-  loadWrongQuestions(reset = true) {
+  loadWrongQuestions() {
     if (this.wrongLoading()) return;
-    const page = reset ? 1 : this.wrongPage + 1;
     this.wrongLoading.set(true);
-    this.folderService.getWrongQuestionsPaged(page).subscribe({
-      next: result => { this.wrongQuestions.set(reset ? (result.items ?? []) : [...this.wrongQuestions(), ...(result.items ?? [])]); this.wrongTotal.set(result.total ?? 0); this.wrongPage = page; this.wrongLoading.set(false); },
+    this.folderService.getWrongQuestionsPaged(this.wrongPage(), this.wrongLimit()).subscribe({
+      next: result => {
+        this.wrongQuestions.set(result.items ?? []);
+        this.wrongTotal.set(result.total ?? 0);
+        this.wrongLoading.set(false);
+      },
       error: () => this.wrongLoading.set(false),
     });
   }
-  hasMoreWrongQuestions() { return this.wrongQuestions().length < this.wrongTotal(); }
+
+  goToWrongPage(page: number) { this.wrongPage.set(page); this.loadWrongQuestions(); }
+  setWrongLimit(limit: number) { this.wrongLimit.set(limit); this.wrongPage.set(1); this.loadWrongQuestions(); }
 
   loadFolders() {
     this.folderService.getFolders().subscribe((d) => this.folders.set(d ?? []));
@@ -138,21 +130,25 @@ export class MyStorage implements OnInit {
 
   select(f: Folder) {
     this.selected.set(f);
-    this.loadFolderExams(true);
+    this.folderExamPage.set(1); this.loadFolderExams();
   }
 
-  loadFolderExams(reset = true) {
+  loadFolderExams() {
     const folder = this.selected();
     if (!folder || this.folderExamLoading()) return;
-    const page = reset ? 1 : this.folderExamPage + 1;
-    if (reset) { this.folderExams.set([]); this.folderExamTotal.set(0); }
     this.folderExamLoading.set(true);
-    this.folderService.getExamsPaged(folder.id, page).subscribe({
-      next: result => { this.folderExams.set(reset ? (result.items ?? []) : [...this.folderExams(), ...(result.items ?? [])]); this.folderExamTotal.set(result.total ?? 0); this.folderExamPage = page; this.folderExamLoading.set(false); },
+    this.folderService.getExamsPaged(folder.id, this.folderExamPage(), this.folderExamLimit()).subscribe({
+      next: result => {
+        this.folderExams.set(result.items ?? []);
+        this.folderExamTotal.set(result.total ?? 0);
+        this.folderExamLoading.set(false);
+      },
       error: () => this.folderExamLoading.set(false),
     });
   }
-  hasMoreFolderExams() { return this.folderExams().length < this.folderExamTotal(); }
+
+  goToFolderExamPage(page: number) { this.folderExamPage.set(page); this.loadFolderExams(); }
+  setFolderExamLimit(limit: number) { this.folderExamLimit.set(limit); this.folderExamPage.set(1); this.loadFolderExams(); }
 
   // ----- thao tác thư mục -----
   newRoot() {
@@ -193,7 +189,7 @@ export class MyStorage implements OnInit {
     this.folderService.addExam(f.id, examId).subscribe({ next: () => {
       this.toast.success('Đã lưu đề vào thư mục: ' + f.name);
       this.savedIds.update((s) => new Set(s).add(examId));
-      this.loadFolderExams(true);
+      this.folderExamPage.set(1); this.loadFolderExams();
       this.reloadStats();
     }, error: error => this.toast.error(error?.error?.error ?? 'Không thể lưu đề vào thư mục.') });
   }
@@ -201,7 +197,7 @@ export class MyStorage implements OnInit {
     const f = this.selected();
     if (!f) return;
     this.folderService.removeExam(f.id, examId).subscribe({ next: () => {
-      this.loadFolderExams(true);
+      this.folderExamPage.set(1); this.loadFolderExams();
       this.reloadStats();
       this.toast.success('Đã bỏ đề khỏi thư mục.');
     }, error: error => this.toast.error(error?.error?.error ?? 'Không thể bỏ đề khỏi thư mục.') });
@@ -218,7 +214,7 @@ export class MyStorage implements OnInit {
       if (note === null) return;
       this.folderService.setNote(f.id, e.exam_id, note).subscribe({ next: () => {
         this.toast.success('Đã lưu ghi chú');
-        this.loadFolderExams(true);
+        this.folderExamPage.set(1); this.loadFolderExams();
       }, error: error => this.toast.error(error?.error?.error ?? 'Không thể lưu ghi chú.') });
     });
   }
@@ -232,19 +228,25 @@ export class MyStorage implements OnInit {
   }
 
   // ----- lọc ngân hàng đề -----
-  loadBank(reset = true) {
+  loadBank() {
     if (this.bankLoading()) return;
-    const page = reset ? 1 : this.bankPage + 1;
     this.bankLoading.set(true);
-    this.folderService.getExamBankPaged(page, 12, this.bankSubject(), this.bankKeyword()).subscribe({
-      next: result => { this.examBank.set(reset ? (result.items ?? []) : [...this.examBank(), ...(result.items ?? [])]); this.bankTotal.set(result.total ?? 0); this.bankPage = page; this.bankLoading.set(false); },
+    this.folderService.getExamBankPaged(this.bankPage(), this.bankLimit(), this.bankSubject(), this.bankKeyword()).subscribe({
+      next: result => {
+        this.examBank.set(result.items ?? []);
+        this.bankTotal.set(result.total ?? 0);
+        this.bankLoading.set(false);
+        this.ensureSubjectNames(this.examBank().map(e => e.subject_id));
+      },
       error: () => this.bankLoading.set(false),
     });
   }
 
-  searchBank() { this.loadBank(true); }
-  setBankSubject(value: number) { this.bankSubject.set(value); this.loadBank(true); }
-  hasMoreBank() { return this.examBank().length < this.bankTotal(); }
+  // Đổi bộ lọc thì quay về trang 1, nếu không sẽ rơi vào trang trống.
+  searchBank() { this.bankPage.set(1); this.loadBank(); }
+  onBankSubjectChange() { this.bankPage.set(1); this.loadBank(); }
+  goToBankPage(page: number) { this.bankPage.set(page); this.loadBank(); }
+  setBankLimit(limit: number) { this.bankLimit.set(limit); this.bankPage.set(1); this.loadBank(); }
   filteredBank(): Exam[] { return this.examBank(); }
 
   // ===== Sổ tay câu sai =====
@@ -293,8 +295,25 @@ export class MyStorage implements OnInit {
     this.practiceResults.set(null);
   }
 
+  // Danh sách đề chỉ có subject_id nên tên học phần được tra một lần rồi nhớ lại,
+  // tránh tải cả danh mục học phần chỉ để hiện một cái tên.
+  private subjectNames = signal<Record<number, string>>({});
+
   subjectName(id: number): string {
-    return this.subjects().find((s) => s.id === id)?.name ?? '?';
+    // Chưa chọn học phần thì trả chuỗi rỗng để ô chọn hiện dòng gợi ý, không
+    // phải dấu hỏi.
+    if (!id) return '';
+    return this.subjectNames()[id] ?? '…';
+  }
+
+  private ensureSubjectNames(ids: number[]) {
+    const missing = [...new Set(ids)].filter(id => id && !this.subjectNames()[id]);
+    for (const id of missing) {
+      this.subjectService.getOne(id).subscribe({
+        next: subject => this.subjectNames.update(map => ({ ...map, [id]: subject.name })),
+        error: () => this.subjectNames.update(map => ({ ...map, [id]: '?' })),
+      });
+    }
   }
   difficultyLabel(d: string): string {
     return d === 'easy' ? 'Dễ' : d === 'hard' ? 'Khó' : 'TB';

@@ -23,8 +23,10 @@ export class ClassService {
   getAll(): Observable<AppClass[]> {
     return this.http.get<AppClass[]>(this.url);
   }
-  getPaged(page = 1, limit = 12): Observable<{ items: AppClass[]; total: number; page: number; limit: number }> {
-    return this.http.get<{ items: AppClass[]; total: number; page: number; limit: number }>(`${this.url}/paged?page=${page}&limit=${limit}`);
+  getPaged(page = 1, limit = 10, keyword = ''): Observable<{ items: AppClass[]; total: number; page: number; limit: number }> {
+    const query = [`page=${page}`, `limit=${limit}`];
+    if (keyword.trim()) query.push(`keyword=${encodeURIComponent(keyword.trim())}`);
+    return this.http.get<{ items: AppClass[]; total: number; page: number; limit: number }>(`${this.url}/paged?${query.join('&')}`);
   }
   getOne(classId: number): Observable<AppClass> {
     return this.http.get<AppClass>(`${this.url}/${classId}`);
@@ -36,8 +38,10 @@ export class ClassService {
   getAssignable(): Observable<AppClass[]> {
     return this.http.get<AppClass[]>(`${this.url}/assignable`);
   }
-  getAssignablePaged(page = 1, limit = 12): Observable<{ items: AppClass[]; total: number; page: number; limit: number }> {
-    return this.http.get<{ items: AppClass[]; total: number; page: number; limit: number }>(`${this.url}/assignable/paged?page=${page}&limit=${limit}`);
+  getAssignablePaged(page = 1, limit = 10, keyword = ''): Observable<{ items: AppClass[]; total: number; page: number; limit: number }> {
+    const query = [`page=${page}`, `limit=${limit}`];
+    if (keyword.trim()) query.push(`keyword=${encodeURIComponent(keyword.trim())}`);
+    return this.http.get<{ items: AppClass[]; total: number; page: number; limit: number }>(`${this.url}/assignable/paged?${query.join('&')}`);
   }
   create(data: AppClass): Observable<AppClass> {
     return this.http.post<AppClass>(this.url, data);

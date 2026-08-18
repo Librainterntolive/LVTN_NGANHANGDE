@@ -101,7 +101,7 @@ func pagination(c *gin.Context) (int, int) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	return page, limit

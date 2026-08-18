@@ -3,13 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { UserService, AppUser, PasswordResetRequest } from '../../services/user.service';
 import { DialogService } from '../../services/dialog.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 import { ToastService } from '../../services/toast.service';
 import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-users',
-  imports: [FormsModule, DatePipe, InfiniteScrollDirective, Icon],
+  imports: [FormsModule, DatePipe, Paginator, Icon],
   templateUrl: './users.html',
 })
 export class Users implements OnInit {
@@ -21,13 +21,15 @@ export class Users implements OnInit {
   total = signal<number>(0);
   loading = signal<boolean>(false);
   keyword = '';
-  private page = 1;
+  page = signal(1);
+  limit = signal(10);
   error = signal<string>('');
   editingId = signal<number | null>(null);
   form: AppUser = this.empty();
   resetRequests = signal<PasswordResetRequest[]>([]);
   resetRequestTotal = signal(0);
-  resetRequestPage = 1;
+  resetRequestPage = signal(1);
+  resetRequestLimit = signal(5);
   resetRequestsLoading = signal(false);
 
   ngOnInit() { this.load(); this.loadResetRequests(); }
@@ -36,18 +38,41 @@ export class Users implements OnInit {
     return { username: '', email: '', password: '', full_name: '', role: 'Student', status: 'active' };
   }
 
-  load(reset = true) {
+  load() {
     if (this.loading()) return;
-    if (reset) { this.page = 1; this.users.set([]); this.total.set(0); }
     this.loading.set(true);
-    this.service.getPaged(this.page, 12, this.keyword.trim()).subscribe({
-      next: (data) => { this.users.update(rows => [...rows, ...(data.items ?? [])]); this.total.set(data.total); this.page++; this.loading.set(false); },
+    this.service.getPaged(this.page(), this.limit(), this.keyword.trim()).subscribe({
+      next: (data) => {
+        this.users.set(data.items ?? []);
+        this.total.set(data.total);
+        this.loading.set(false);
+        // Xóa tài khoản có thể làm trang hiện tại vượt quá trang cuối.
+        const lastPage = Math.max(1, Math.ceil(this.total() / this.limit()));
+        if (this.page() > lastPage) this.goToPage(lastPage);
+      },
       error: () => { this.error.set('Không tải được (cần quyền Admin).'); this.loading.set(false); },
     });
   }
-  loadMore() { if (!this.loading() && this.users().length < this.total()) this.load(false); }
-  loadResetRequests(reset = true) { if (this.resetRequestsLoading()) return; const page = reset ? 1 : this.resetRequestPage + 1; if (reset) { this.resetRequests.set([]); this.resetRequestTotal.set(0); } this.resetRequestsLoading.set(true); this.service.getPasswordResetRequestsPaged(page).subscribe({next: result=>{this.resetRequests.set(reset ? (result.items ?? []) : [...this.resetRequests(), ...(result.items ?? [])]);this.resetRequestTotal.set(result.total ?? 0);this.resetRequestPage = page;this.resetRequestsLoading.set(false);},error:()=>this.resetRequestsLoading.set(false)}); }
-  hasMoreResetRequests() { return this.resetRequests().length < this.resetRequestTotal(); }
+  // Đổi từ khóa thì quay về trang 1, nếu không sẽ rơi vào trang trống.
+  search() { this.page.set(1); this.load(); }
+  goToPage(page: number) { this.page.set(page); this.load(); }
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.load(); }
+  loadResetRequests() {
+    if (this.resetRequestsLoading()) return;
+    this.resetRequestsLoading.set(true);
+    this.service.getPasswordResetRequestsPaged(this.resetRequestPage(), this.resetRequestLimit()).subscribe({
+      next: result => {
+        this.resetRequests.set(result.items ?? []);
+        this.resetRequestTotal.set(result.total ?? 0);
+        this.resetRequestsLoading.set(false);
+        const lastPage = Math.max(1, Math.ceil(this.resetRequestTotal() / this.resetRequestLimit()));
+        if (this.resetRequestPage() > lastPage) this.goToResetPage(lastPage);
+      },
+      error: () => this.resetRequestsLoading.set(false),
+    });
+  }
+  goToResetPage(page: number) { this.resetRequestPage.set(page); this.loadResetRequests(); }
+  setResetLimit(limit: number) { this.resetRequestLimit.set(limit); this.resetRequestPage.set(1); this.loadResetRequests(); }
   approveReset(request: PasswordResetRequest) { this.dialog.confirm('Duyệt cấp lại mật khẩu', `Duyệt yêu cầu của tài khoản ID ${request.user_id}? Mật khẩu tạm sẽ gửi qua Gmail.`).then(ok=>{if(!ok)return;this.service.approvePasswordReset(request.id).subscribe({next:()=>{this.loadResetRequests();this.toast.success('Đã duyệt yêu cầu. Mật khẩu tạm được gửi qua Gmail.');},error:e=>this.error.set(e?.error?.error??'Không duyệt được yêu cầu')})}); }
 
   save() {

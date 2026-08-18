@@ -2,12 +2,12 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { AuditLog, AuditService } from '../../services/audit.service';
 import { ToastService } from '../../services/toast.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-audit-manager',
-  imports: [DatePipe, InfiniteScrollDirective, Icon],
+  imports: [DatePipe, Paginator, Icon],
   templateUrl: './audit-manager.html',
 })
 export class AuditManager implements OnInit {
@@ -18,31 +18,33 @@ export class AuditManager implements OnInit {
   total = signal(0);
   loading = signal(false);
   action = signal('');
-  private page = 1;
+  page = signal(1);
+  limit = signal(10);
 
   ngOnInit() { this.load(); }
 
-  load(reset = true) {
+  load() {
     if (this.loading()) return;
-    const page = reset ? 1 : this.page + 1;
     this.loading.set(true);
-    this.auditApi.getPaged(page, 12, this.action()).subscribe({
+    this.auditApi.getPaged(this.page(), this.limit(), this.action()).subscribe({
       next: result => {
-        this.logs.set(reset ? (result.items ?? []) : [...this.logs(), ...(result.items ?? [])]);
+        this.logs.set(result.items ?? []);
         this.total.set(result.total ?? 0);
-        this.page = page;
         this.loading.set(false);
       },
       error: () => { this.loading.set(false); this.toast.error('Không thể tải nhật ký hệ thống.'); },
     });
   }
 
+  // Đổi bộ lọc thì quay về trang 1, nếu không sẽ rơi vào trang trống.
   setAction(action: string) {
     this.action.set(action);
+    this.page.set(1);
     this.load();
   }
 
-  hasMore() { return this.logs().length < this.total(); }
+  goToPage(page: number) { this.page.set(page); this.load(); }
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.load(); }
 
   actionLabel(action: string) {
     const labels: Record<string, string> = {

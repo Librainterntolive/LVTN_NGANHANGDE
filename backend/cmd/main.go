@@ -27,8 +27,8 @@ func main() {
 	if os.Getenv("GIN_MODE") != "debug" {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	
-	allowedOrigin :=  os.Getenv("ALLOWED_ORIGIN")
+
+	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
 	if allowedOrigin == "" {
 		allowedOrigin = "http://localhost:4200"
 	}
@@ -40,10 +40,10 @@ func main() {
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
-	
+
 	// Khai báo route (controller -> service -> repository)
 	router.Setup(r, config.DB)
-	
+
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		port = "8081"

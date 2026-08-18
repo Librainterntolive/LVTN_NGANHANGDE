@@ -1,41 +1,77 @@
 # Khôi phục cơ sở dữ liệu
 
-`quiz_db.sql` là bản sao đầy đủ **cấu trúc + dữ liệu** của hệ thống, xuất ngày
-05/08/2026. Đây là dữ liệu thật đang chạy, không phải dữ liệu giả.
+Thư mục này **không chứa bản sao dữ liệu**. Bản sao được xuất vào
+`backend/backups/` — thư mục đó nằm trong `.gitignore` vì bản dump chứa chuỗi
+băm mật khẩu và địa chỉ email thật của người dùng.
 
-## Nội dung
+Cấu trúc bảng dựng lại được từ `database/migrations/`, nên repo không cần mang
+theo dữ liệu.
+
+## Xuất một bản sao mới
+
+```bash
+powershell -File backend/scripts/backup-quiz-db.ps1
+```
+
+Script ghi tệp `quiz_db-<ngày>-<giờ>.sql` vào `backend/backups/`.
+
+## Khôi phục từ một bản sao
+
+```bash
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS quiz_db CHARACTER SET utf8mb4;"
+mysql -u root --default-character-set=utf8mb4 quiz_db < backups/quiz_db-<ngày>-<giờ>.sql
+```
+
+Bắt buộc có `--default-character-set=utf8mb4`, nếu không tiếng Việt sẽ lỗi phông.
+
+## Dựng mới từ đầu, không có bản sao
+
+Chạy lần lượt các tệp trong `database/migrations/` theo thứ tự tên (tên tệp bắt
+đầu bằng ngày nên xếp theo bảng chữ cái là đúng thứ tự):
+
+```bash
+for f in database/migrations/*.sql; do
+  mysql -u root --default-character-set=utf8mb4 quiz_db < "$f"
+done
+```
+
+Các tệp migration đều chạy lại được nhiều lần mà không nhân đôi dữ liệu: câu hỏi
+chặn trùng bằng `content_hash`, nguồn chặn trùng bằng khóa duy nhất trên `url`.
+
+Sau đó tạo tài khoản quản trị đầu tiên bằng màn hình đăng ký rồi nâng quyền
+trực tiếp trong CSDL:
+
+```sql
+UPDATE users SET role = 'Admin', status = 'active' WHERE username = '<tên đăng nhập>';
+```
+
+Không đặt sẵn tài khoản mẫu kèm mật khẩu trong repo.
+
+## Dữ liệu hiện có
+
+Cập nhật 19/08/2026:
 
 | Bảng | Số bản ghi |
 |---|---|
-| subjects (môn học) | 65 — trong đó 27 môn Đại học đang hiện, 36 môn phổ thông tạm ẩn |
-| questions (câu hỏi) | 1.399 |
-| answers (đáp án) | 5.592 |
-| exams (đề thi) | 68 |
-| exam_questions | 1.538 |
+| subjects (học phần) | 65 — 27 học phần Đại học đang hiện, còn lại là môn phổ thông tạm ẩn |
+| questions (câu hỏi) | 245 — đều đã duyệt và có nguồn đã xác thực |
+| answers (đáp án) | 980 |
+| sources (nguồn) | 32 |
+| exams (đề thi) | 8 |
+| classes (lớp học) | 5 |
 | users (tài khoản) | 7 |
 
-## Cách khôi phục
+Muốn hiện lại các môn phổ thông đang ẩn:
 
-```bash
-mysql -u root -e "CREATE DATABASE quiz_db CHARACTER SET utf8mb4;"
-mysql -u root --default-character-set=utf8mb4 quiz_db < quiz_db.sql
+```sql
+UPDATE subjects SET hidden = 0 WHERE level LIKE 'Khối%';
 ```
 
-Sau đó chạy backend bằng `.\run.ps1` là dùng được ngay.
-
-## Lưu ý
-
-- Phải có `--default-character-set=utf8mb4` khi khôi phục, nếu không tiếng Việt
-  sẽ bị lỗi phông.
-- Tệp có sẵn 7 tài khoản mẫu, mật khẩu đã mã hóa bằng bcrypt. Tài khoản quản
-  trị: `admin` / `admin123`.
-- Muốn hiện lại các môn phổ thông đã ẩn:
-  `UPDATE subjects SET hidden = 0 WHERE level LIKE 'Khối%';`
-
-## Xuất lại bản mới
+## Kiểm tra sau khi khôi phục
 
 ```bash
-mysqldump -u root --default-character-set=utf8mb4 --add-drop-table \
-  --complete-insert --single-transaction --skip-extended-insert \
-  quiz_db > quiz_db.sql
+powershell -File backend/scripts/verify-real-data.ps1
 ```
+
+Script chỉ đọc, không sửa dữ liệu. Nó kiểm tra không có câu hỏi thiếu nguồn,
+không có câu sai số đáp án đúng, và không có đề công khai chứa câu chưa duyệt.

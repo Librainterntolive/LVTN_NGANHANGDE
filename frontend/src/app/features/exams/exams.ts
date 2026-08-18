@@ -7,13 +7,14 @@ import { QuestionService, Question } from '../../services/question.service';
 import { ChapterService, Chapter } from '../../services/chapter.service';
 import { ToastService } from '../../services/toast.service';
 import { DialogService } from '../../services/dialog.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
+import { SearchableSelect } from '../../shared/searchable-select';
 import { Icon } from '../../shared/icon';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-exams',
-  imports: [FormsModule, InfiniteScrollDirective, Icon, RouterLink],
+  imports: [FormsModule, Paginator, SearchableSelect, Icon, RouterLink],
   templateUrl: './exams.html',
 })
 export class Exams implements OnInit {
@@ -26,13 +27,11 @@ export class Exams implements OnInit {
   private dialog = inject(DialogService);
 
   exams = signal<Exam[]>([]);
-  subjects = signal<Subject[]>([]);
-  subjectTotal = signal(0);
-  subjectsLoading = signal(false);
-  subjectPage = 1;
   classes = signal<AppClass[]>([]);
   classTotal = signal(0);
-  classPage = 1;
+  classPage = signal(1);
+  classLimit = signal(10);
+  classKeyword = '';
   classesLoading = signal(false);
   error = signal<string>('');
   message = signal<string>('');
@@ -62,7 +61,8 @@ export class Exams implements OnInit {
   pickerChapter: 'all' | 'none' | number = 'all';
   pickerDifficulty = '';
   pickerKeyword = '';
-  private pickerPage = 1;
+  pickerPage = signal(1);
+  pickerLimit = signal(10);
   pickedIds = new Set<number>();      // id câu hỏi đã tick
   pickedPreview = new Map<number, string>(); // id -> nội dung (hiện danh sách đã chọn)
 
@@ -78,24 +78,28 @@ export class Exams implements OnInit {
   keyword = '';
 
   ngOnInit() {
-    this.loadSubjects();
     // chỉ lấy lớp của mình + lớp dùng chung
     this.loadAssignableClasses();
     this.load();
   }
 
-  loadAssignableClasses(reset = true) {
+  loadAssignableClasses() {
     if (this.classesLoading()) return;
-    const page = reset ? 1 : this.classPage + 1;
-    if (reset) { this.classes.set([]); this.classTotal.set(0); }
     this.classesLoading.set(true);
-    this.classService.getAssignablePaged(page).subscribe({
-      next: result => { this.classes.set(reset ? (result.items ?? []) : [...this.classes(), ...(result.items ?? [])]); this.classTotal.set(result.total ?? 0); this.classPage = page; this.classesLoading.set(false); },
+    this.classService.getAssignablePaged(this.classPage(), this.classLimit(), this.classKeyword).subscribe({
+      next: result => {
+        this.classes.set(result.items ?? []);
+        this.classTotal.set(result.total ?? 0);
+        this.classesLoading.set(false);
+      },
       error: () => { this.error.set('Không tải được danh sách lớp học.'); this.classesLoading.set(false); },
     });
   }
 
-  hasMoreAssignableClasses() { return this.classes().length < this.classTotal(); }
+  // Đổi từ khóa thì quay về trang 1, nếu không sẽ rơi vào trang trống.
+  searchClasses() { this.classPage.set(1); this.loadAssignableClasses(); }
+  goToClassPage(page: number) { this.classPage.set(page); this.loadAssignableClasses(); }
+  setClassLimit(limit: number) { this.classLimit.set(limit); this.classPage.set(1); this.loadAssignableClasses(); }
 
   empty(): Exam {
     return {
@@ -105,52 +109,68 @@ export class Exams implements OnInit {
     };
   }
 
-  subjectsForLevel() {
-    if (!this.pickLevel) return this.subjects();
-    return this.subjects().filter((s) => s.level === this.pickLevel);
+  // Combobox học phần gọi thẳng API theo từ khóa, không tải sẵn cả danh mục.
+  fetchSubjects = (keyword: string, page: number, limit: number) =>
+    this.subjectService.getPaged(page, limit, keyword, this.pickLevel);
+
+  // Combobox "lấy thêm từ đề có sẵn" cũng tìm trên máy chủ, không chỉ trong
+  // trang đề đang hiển thị.
+  fetchExams = (keyword: string, page: number, limit: number) =>
+    this.examService.getPaged(page, limit, keyword || undefined);
+
+  examLabel = (exam: Exam) => exam.title;
+
+  // Bảng đề chỉ có subject_id nên tên học phần được tra một lần rồi nhớ lại,
+  // tránh tải cả danh mục học phần chỉ để hiện một cái tên.
+  private subjectNames = signal<Record<number, string>>({});
+
+  subjectName(id: number): string {
+    // Chưa chọn học phần thì trả chuỗi rỗng để ô chọn hiện dòng gợi ý, không
+    // phải dấu hỏi.
+    if (!id) return '';
+    return this.subjectNames()[id] ?? '…';
   }
 
-  loadSubjects(reset = true) {
-    if (this.subjectsLoading()) return;
-    const page = reset ? 1 : this.subjectPage + 1;
-    if (reset) { this.subjects.set([]); this.subjectTotal.set(0); }
-    this.subjectsLoading.set(true);
-    this.subjectService.getPaged(page, 12).subscribe({
-      next: result => {
-        this.subjects.set(reset ? (result.items ?? []) : [...this.subjects(), ...(result.items ?? [])]);
-        this.subjectTotal.set(result.total ?? 0);
-        this.subjectPage = page;
-        this.subjectsLoading.set(false);
-      },
-      error: () => { this.error.set('Không tải được danh sách môn học.'); this.subjectsLoading.set(false); },
-    });
+  private ensureSubjectNames(ids: number[]) {
+    const missing = [...new Set(ids)].filter(id => id && !this.subjectNames()[id]);
+    for (const id of missing) {
+      this.subjectService.getOne(id).subscribe({
+        next: subject => this.subjectNames.update(map => ({ ...map, [id]: subject.name })),
+        error: () => this.subjectNames.update(map => ({ ...map, [id]: '?' })),
+      });
+    }
   }
-
-  hasMoreSubjects() { return this.subjects().length < this.subjectTotal(); }
 
   examTotal = signal<number>(0);
-  private examPage = 1;
+  examPage = signal(1);
+  examLimit = signal(10);
   examLoading = signal<boolean>(false);
 
   load() {
-    this.examPage = 1; this.exams.set([]); this.examTotal.set(0); this.loadMoreRows();
+    if (this.examLoading()) return;
+    this.examLoading.set(true);
+    this.examService.getPaged(this.examPage(), this.examLimit(), this.keyword || undefined).subscribe({
+      next: (data) => {
+        this.exams.set(data.items ?? []);
+        this.examTotal.set(data.total);
+        this.examLoading.set(false);
+        this.ensureSubjectNames(this.exams().map(e => e.subject_id));
+        // Xóa đề có thể làm trang hiện tại vượt quá trang cuối.
+        const lastPage = Math.max(1, Math.ceil(this.examTotal() / this.examLimit()));
+        if (this.examPage() > lastPage) this.goToExamPage(lastPage);
+      },
+      error: () => { this.error.set('Không tải được đề thi.'); this.examLoading.set(false); },
+    });
   }
-  search() { this.load(); }
-  clearSearch() { this.keyword = ''; this.load(); }
+
+  // Đổi từ khóa thì quay về trang 1, nếu không sẽ rơi vào trang trống.
+  search() { this.examPage.set(1); this.load(); }
+  clearSearch() { this.keyword = ''; this.examPage.set(1); this.load(); }
+  goToExamPage(page: number) { this.examPage.set(page); this.load(); }
+  setExamLimit(limit: number) { this.examLimit.set(limit); this.examPage.set(1); this.load(); }
 
   displayedExams(): Exam[] {
     return this.exams();
-  }
-  hasMoreRows(): boolean {
-    return this.exams().length < this.examTotal();
-  }
-  loadMoreRows() {
-    if (this.examLoading() || (this.examTotal() > 0 && !this.hasMoreRows())) return;
-    this.examLoading.set(true);
-    this.examService.getPaged(this.examPage, 12, this.keyword || undefined).subscribe({
-      next: (data) => { this.exams.update((rows) => [...rows, ...(data.items ?? [])]); this.examTotal.set(data.total); this.examPage++; this.examLoading.set(false); },
-      error: () => { this.error.set('Không tải được đề thi.'); this.examLoading.set(false); },
-    });
   }
 
   // badge màu cho trạng thái / truy cập
@@ -236,8 +256,7 @@ export class Exams implements OnInit {
 
   reloadPicker() {
     if (!this.form.subject_id) { this.error.set('Chọn môn học trước khi chọn câu hỏi'); return; }
-    this.pickerPage = 1;
-    this.pickerItems.set([]);
+    this.pickerPage.set(1);
     this.fetchPicker();
   }
 
@@ -249,10 +268,10 @@ export class Exams implements OnInit {
       chapter: this.pickerChapter === 'all' ? undefined : this.pickerChapter,
       difficulty: this.pickerDifficulty || undefined,
       status: 'active', // câu nháp không được vào đề
-      page: this.pickerPage, limit: 10,
+      page: this.pickerPage(), limit: this.pickerLimit(),
     }).subscribe({
       next: (res) => {
-        this.pickerItems.update((cur) => [...cur, ...(res.items ?? [])]);
+        this.pickerItems.set(res.items ?? []);
         this.pickerTotal.set(res.total);
         this.pickerLoading.set(false);
       },
@@ -260,12 +279,9 @@ export class Exams implements OnInit {
     });
   }
 
-  pickerHasMore(): boolean { return this.pickerItems().length < this.pickerTotal(); }
-  loadMorePicker() {
-    if (this.pickerLoading() || !this.pickerHasMore()) return;
-    this.pickerPage++;
-    this.fetchPicker();
-  }
+  // Câu đã tick vẫn được giữ khi sang trang khác, nhờ pickedIds/pickedPreview.
+  goToPickerPage(page: number) { this.pickerPage.set(page); this.fetchPicker(); }
+  setPickerLimit(limit: number) { this.pickerLimit.set(limit); this.pickerPage.set(1); this.fetchPicker(); }
 
   // ===== Ma trận đề =====
   setMode(m: 'manual' | 'matrix') { this.createMode.set(m); if (m === 'matrix') this.refreshAllAvail(); }
@@ -543,7 +559,4 @@ export class Exams implements OnInit {
     });
   }
 
-  subjectName(id: number): string {
-    return this.subjects().find((s) => s.id === id)?.name ?? '?';
-  }
 }

@@ -1,11 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { StudentService, SubmissionRow } from '../../services/student.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 
 @Component({
   selector: 'app-my-submissions',
-  imports: [DecimalPipe, InfiniteScrollDirective],
+  imports: [DecimalPipe, Paginator],
   templateUrl: './my-submissions.html',
 })
 export class MySubmissions implements OnInit {
@@ -13,20 +13,26 @@ export class MySubmissions implements OnInit {
   rows = signal<SubmissionRow[]>([]);
   total = signal(0);
   page = signal(1);
+  limit = signal(10);
   loading = signal(false);
 
   ngOnInit() {
     this.load();
   }
 
-  load(reset = true) {
+  load() {
     if (this.loading()) return;
-    const page = reset ? 1 : this.page() + 1;
     this.loading.set(true);
-    this.service.getMySubmissionsPaged(page).subscribe({
-      next: result => { this.rows.set(reset ? (result.items ?? []) : [...this.rows(), ...(result.items ?? [])]); this.total.set(result.total ?? 0); this.page.set(page); this.loading.set(false); },
+    this.service.getMySubmissionsPaged(this.page(), this.limit()).subscribe({
+      next: result => {
+        this.rows.set(result.items ?? []);
+        this.total.set(result.total ?? 0);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }
-  hasMore() { return this.rows().length < this.total(); }
+
+  goToPage(page: number) { this.page.set(page); this.load(); }
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.load(); }
 }

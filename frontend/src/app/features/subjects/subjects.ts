@@ -4,12 +4,12 @@ import { RouterLink } from '@angular/router';
 import { SubjectService, Subject } from '../../services/subject.service';
 import { AuthService } from '../../services/auth.service';
 import { DialogService } from '../../services/dialog.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
 import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-subjects',
-  imports: [FormsModule, RouterLink, InfiniteScrollDirective, Icon],
+  imports: [FormsModule, RouterLink, Paginator, Icon],
   templateUrl: './subjects.html',
 })
 export class Subjects implements OnInit {
@@ -22,7 +22,8 @@ export class Subjects implements OnInit {
   loading = signal(false);
   error = signal('');
   keyword = '';
-  private page = 1;
+  page = signal(1);
+  limit = signal(10);
 
   form: Subject = this.empty();
   editingId = signal<number | null>(null);
@@ -37,20 +38,18 @@ export class Subjects implements OnInit {
 
   ngOnInit() { this.load(); }
 
-  load(reset = true) {
+  load() {
     if (this.loading()) return;
-    if (reset) {
-      this.page = 1;
-      this.subjects.set([]);
-      this.total.set(0);
-    }
     this.loading.set(true);
     this.error.set('');
-    this.service.getPaged(this.page, 12, this.keyword).subscribe({
+    this.service.getPaged(this.page(), this.limit(), this.keyword).subscribe({
       next: (result) => {
-        this.subjects.update(items => [...items, ...(result.items ?? [])]);
+        this.subjects.set(result.items ?? []);
         this.total.set(result.total ?? 0);
         this.loading.set(false);
+        // Xóa bớt dữ liệu có thể làm trang hiện tại vượt quá trang cuối.
+        const lastPage = Math.max(1, Math.ceil(this.total() / this.limit()));
+        if (this.page() > lastPage) this.goToPage(lastPage);
       },
       error: () => {
         this.error.set('Không gọi được API. Hãy kiểm tra Backend đang chạy.');
@@ -59,13 +58,12 @@ export class Subjects implements OnInit {
     });
   }
 
-  search() { this.load(true); }
-  hasMore() { return this.subjects().length < this.total(); }
-  loadMore() {
-    if (this.loading() || !this.hasMore()) return;
-    this.page++;
-    this.load(false);
-  }
+  // Đổi bộ lọc thì quay về trang 1, nếu không sẽ rơi vào trang trống.
+  search() { this.page.set(1); this.load(); }
+
+  goToPage(page: number) { this.page.set(page); this.load(); }
+
+  setLimit(limit: number) { this.limit.set(limit); this.page.set(1); this.load(); }
 
   // Lấy từ bảng màu chung để đổi theo theme sáng/tối, không đặt mã màu cứng.
   levelColor(): string { return 'var(--hero-bg)'; }

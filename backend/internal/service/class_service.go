@@ -69,8 +69,8 @@ func (s *ClassService) GetAll(role string, userID uint) ([]entity.Class, error) 
 	s.fillInfo(classes)
 	return classes, nil
 }
-func (s *ClassService) GetPaged(role string, userID uint, limit, offset int) ([]entity.Class, int64, error) {
-	rows, total, err := s.repo.FindPaged(userID, role == "Admin", limit, offset)
+func (s *ClassService) GetPaged(role string, userID uint, keyword string, limit, offset int) ([]entity.Class, int64, error) {
+	rows, total, err := s.repo.FindPaged(userID, role == "Admin", keyword, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -156,16 +156,16 @@ func (s *ClassService) GetAssignable(role string, userID uint) ([]entity.Class, 
 	return classes, nil
 }
 
-func (s *ClassService) GetAssignablePaged(role string, userID uint, limit, offset int) ([]entity.Class, int64, error) {
+func (s *ClassService) GetAssignablePaged(role string, userID uint, keyword string, limit, offset int) ([]entity.Class, int64, error) {
 	if role == "Admin" {
-		rows, total, err := s.repo.FindPaged(userID, true, limit, offset)
+		rows, total, err := s.repo.FindPaged(userID, true, keyword, limit, offset)
 		if err != nil {
 			return nil, 0, err
 		}
 		s.fillInfo(rows)
 		return rows, total, nil
 	}
-	rows, total, err := s.repo.FindAssignablePaged(userID, limit, offset)
+	rows, total, err := s.repo.FindAssignablePaged(userID, keyword, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}

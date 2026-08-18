@@ -1,17 +1,17 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { StatsService, Overview, ExamStat } from '../../services/stats.service';
 import { I18nService } from '../../services/i18n.service';
 import { ClassService, AppClass } from '../../services/class.service';
 import { AssignmentService, ClassSubmissionStat, ClassSubmissionSummary } from '../../services/assignment.service';
-import { InfiniteScrollDirective } from '../../shared/infinite-scroll.directive';
+import { Paginator } from '../../shared/paginator';
+import { SearchableSelect } from '../../shared/searchable-select';
 import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-stats',
-  imports: [FormsModule, RouterLink, DecimalPipe, InfiniteScrollDirective, Icon],
+  imports: [FormsModule, DecimalPipe, Paginator, SearchableSelect, Icon],
   templateUrl: './stats.html',
 })
 export class Stats implements OnInit {
@@ -25,16 +25,15 @@ export class Stats implements OnInit {
   error = signal('');
   examStats = signal<ExamStat[]>([]);
   examStatsTotal = signal(0);
-  examStatsPage = 1;
+  examStatsPage = signal(1);
+  examStatsLimit = signal(10);
   examStatsLoading = signal(false);
-  classes = signal<AppClass[]>([]);
-  classTotal = signal(0);
-  classPage = 1;
-  classesLoading = signal(false);
+  selectedClassName = signal('');
   classStats = signal<ClassSubmissionStat[]>([]);
   classStatsTotal = signal(0);
   classStatsSummary = signal<ClassSubmissionSummary | null>(null);
-  classStatsPage = 1;
+  classStatsPage = signal(1);
+  classStatsLimit = signal(10);
   classStatsLoading = signal(false);
   selectedClassId = 0;
 
@@ -42,7 +41,6 @@ export class Stats implements OnInit {
     this.overviewLoading.set(true);
     this.service.getOverview().subscribe({ next: data => { this.overview.set(data); this.overviewLoading.set(false); }, error: () => { this.overviewLoading.set(false); this.showError('Không tải được số liệu tổng quan.'); } });
     this.loadExamStats();
-    this.loadMoreClasses();
   }
 
   round(n: number): number {
@@ -59,45 +57,50 @@ export class Stats implements OnInit {
     return Math.max(4, (s.avg_score / 10) * 150);
   }
 
-  loadExamStats(reset = true) {
+  loadExamStats() {
     if (this.examStatsLoading()) return;
-    const page = reset ? 1 : this.examStatsPage + 1;
-    if (reset) { this.examStats.set([]); this.examStatsTotal.set(0); }
     this.examStatsLoading.set(true);
-    this.service.getExamStatsPaged(page).subscribe({
-      next: data => { this.examStats.set(reset ? (data.items ?? []) : [...this.examStats(), ...(data.items ?? [])]); this.examStatsTotal.set(data.total ?? 0); this.examStatsPage = page; this.examStatsLoading.set(false); },
+    this.service.getExamStatsPaged(this.examStatsPage(), this.examStatsLimit()).subscribe({
+      next: data => {
+        this.examStats.set(data.items ?? []);
+        this.examStatsTotal.set(data.total ?? 0);
+        this.examStatsLoading.set(false);
+      },
       error: () => { this.examStatsLoading.set(false); this.showError('Không tải được thống kê theo đề thi.'); },
     });
   }
 
-  hasMoreExamStats() { return this.examStats().length < this.examStatsTotal(); }
+  goToExamStatsPage(page: number) { this.examStatsPage.set(page); this.loadExamStats(); }
+  setExamStatsLimit(limit: number) { this.examStatsLimit.set(limit); this.examStatsPage.set(1); this.loadExamStats(); }
 
-  loadMoreClasses() {
-    if (this.classesLoading() || (this.classTotal() > 0 && this.classes().length >= this.classTotal())) return;
-    this.classesLoading.set(true);
-    this.classesApi.getPaged(this.classPage, 12).subscribe({
-      next: (data) => {
-        this.classes.update(items => [...items, ...(data.items ?? [])]);
-        this.classTotal.set(data.total ?? 0);
-        this.classPage++;
-        this.classesLoading.set(false);
-      },
-      error: () => { this.classesLoading.set(false); this.showError('Không tải được danh sách lớp học.'); },
-    });
+  // Combobox lop hoc goi thang API theo tu khoa nen khong phu thuoc so luong lop.
+  fetchClasses = (keyword: string, page: number, limit: number) =>
+    this.classesApi.getPaged(page, limit, keyword);
+
+  onClassChange() {
+    this.classStatsPage.set(1);
+    this.classStats.set([]);
+    this.classStatsTotal.set(0);
+    this.classStatsSummary.set(null);
+    this.loadClassStats();
   }
 
-  loadClassStats(reset = true) {
+  loadClassStats() {
     if (!this.selectedClassId || this.classStatsLoading()) return;
-    const page = reset ? 1 : this.classStatsPage + 1;
-    if (reset) { this.classStats.set([]); this.classStatsTotal.set(0); this.classStatsSummary.set(null); }
     this.classStatsLoading.set(true);
-    this.assignmentsApi.classStatsPaged(this.selectedClassId, page).subscribe({
-      next: result => { this.classStats.set(reset ? (result.items ?? []) : [...this.classStats(), ...(result.items ?? [])]); this.classStatsTotal.set(result.total ?? 0); this.classStatsSummary.set(result.summary ?? null); this.classStatsPage = page; this.classStatsLoading.set(false); },
+    this.assignmentsApi.classStatsPaged(this.selectedClassId, this.classStatsPage(), this.classStatsLimit()).subscribe({
+      next: result => {
+        this.classStats.set(result.items ?? []);
+        this.classStatsTotal.set(result.total ?? 0);
+        this.classStatsSummary.set(result.summary ?? null);
+        this.classStatsLoading.set(false);
+      },
       error: () => { this.classStatsLoading.set(false); this.showError('Không tải được thống kê lớp học.'); },
     });
   }
 
-  hasMoreClassStats() { return this.classStats().length < this.classStatsTotal(); }
+  goToClassStatsPage(page: number) { this.classStatsPage.set(page); this.loadClassStats(); }
+  setClassStatsLimit(limit: number) { this.classStatsLimit.set(limit); this.classStatsPage.set(1); this.loadClassStats(); }
 
   private showError(message: string) {
     this.error.set(message);

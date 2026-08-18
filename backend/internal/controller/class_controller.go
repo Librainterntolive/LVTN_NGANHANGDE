@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"quiz-backend/internal/dto"
 	"quiz-backend/internal/service"
@@ -28,10 +29,10 @@ func (ctl *ClassController) GetPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
-	rows, total, err := ctl.svc.GetPaged(getRole(c), getUserID(c), limit, (page-1)*limit)
+	rows, total, err := ctl.svc.GetPaged(getRole(c), getUserID(c), strings.TrimSpace(c.Query("keyword")), limit, (page-1)*limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -63,10 +64,10 @@ func (ctl *ClassController) AssignablePaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
-	items, total, err := ctl.svc.GetAssignablePaged(getRole(c), getUserID(c), limit, (page-1)*limit)
+	items, total, err := ctl.svc.GetAssignablePaged(getRole(c), getUserID(c), strings.TrimSpace(c.Query("keyword")), limit, (page-1)*limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -109,7 +110,7 @@ func (ctl *ClassController) MyClassesPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	items, total, err := ctl.svc.GetMyClassesPaged(getUserID(c), limit, (page-1)*limit)
@@ -183,7 +184,7 @@ func (ctl *ClassController) GetStudentsPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	items, total, err := ctl.svc.GetStudentsPaged(c.Param("id"), getUserID(c), getRole(c), limit, (page-1)*limit)
@@ -209,7 +210,7 @@ func (ctl *ClassController) GetExamsPaged(c *gin.Context) {
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 15 {
+	if limit < 1 || limit > 100 {
 		limit = 12
 	}
 	items, total, err := ctl.svc.GetExamsPaged(c.Param("id"), getUserID(c), getRole(c), limit, (page-1)*limit)
