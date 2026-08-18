@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="QuizBank">
+  <title>QuizBank — Ngân hàng đề thi</title>
+  <!-- Nen bo tron mau reu, dung mau chu dao cua he thong -->
+  <rect width="64" height="64" rx="14" fill="#4a564a"/>
+  <!-- To de thi -->
+  <path d="M20 14h16.5L46 23.5V50a2.5 2.5 0 0 1-2.5 2.5h-23A2.5 2.5 0 0 1 18 50V16.5A2.5 2.5 0 0 1 20.5 14z"
+        fill="#FEF5ED"/>
+  <!-- Goc gap cua to giay -->
+  <path d="M36.5 14L46 23.5h-7a2.5 2.5 0 0 1-2.5-2.5z" fill="#ADC2A9"/>
+  <!-- Ba dong cau hoi -->
+  <g fill="#4a564a" opacity=".55">
+    <rect x="24" y="29" width="16" height="2.6" rx="1.3"/>
+    <rect x="24" y="35" width="16" height="2.6" rx="1.3"/>
+  </g>
+  <!-- Dau kiem duyet -->
+  <circle cx="41" cy="44" r="9.5" fill="#4a564a"/>
+  <circle cx="41" cy="44" r="9.5" fill="none" stroke="#FEF5ED" stroke-width="2"/>
+  <path d="M36.6 44.2l3 3 5.8-6" fill="none" stroke="#FEF5ED" stroke-width="2.6"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

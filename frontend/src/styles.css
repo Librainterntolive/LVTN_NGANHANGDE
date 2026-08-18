@@ -6,7 +6,7 @@
    hình: giá trị rời rạc (9px, 11px, 13px, 17px...) là thứ làm
    giao diện trông chắp vá.
 
-   Bảng màu: teal đậm chủ đạo, cam đất và vàng làm màu trạng thái.
+   Bảng màu: sage — kem, xanh rêu nhạt, mực rêu đậm.
    Sáng/tối đổi qua thuộc tính data-theme trên thẻ <html>.
    ===================================================== */
 * { box-sizing: border-box; }
@@ -84,7 +84,7 @@
   /* Nền đậm cho dải tiêu đề trang (hero). Phải là token riêng, KHÔNG dùng
      --accent: ở chế độ tối --accent là màu sáng, đặt chữ trắng lên sẽ chỉ
      đạt tương phản 2.26 — dưới ngưỡng WCAG AA là 4.5. */
-  --hero-bg: #264D59;
+  --hero-bg: #3d493d;
   --hero-fg: #ffffff;
   --hero-fg-2: rgba(255, 255, 255, .82);
 }
@@ -180,11 +180,11 @@ h3 { color: var(--text); }
 .sb-head { display: flex; align-items: center; gap: 8px; padding: 2px 4px 14px; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; overflow: hidden; flex: 1; }
 .brand:hover { text-decoration: none; }
+/* Logo dùng ảnh SVG, tự mang nền và bo góc riêng nên không đặt nền ở đây —
+   nếu đặt, nền vuông sẽ lòi ra bốn góc bo tròn của logo. */
 .brand-badge {
-  width: 40px; height: 40px; border-radius:var(--r-md); flex-shrink: 0;
-  background: var(--accent); color: #fff;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size:var(--fs-md);
+  width: 40px; height: 40px; flex-shrink: 0;
+  display: block; object-fit: contain;
 }
 .brand-tx { display: flex; flex-direction: column; line-height: 1.15; }
 .brand-tx b { color: var(--text); font-size:var(--fs-lg); }
