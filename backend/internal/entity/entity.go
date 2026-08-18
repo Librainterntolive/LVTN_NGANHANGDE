@@ -111,7 +111,7 @@ type Source struct {
 	ID                 uint       `gorm:"primaryKey" json:"id"`
 	Title              string     `gorm:"size:255;not null" json:"title"`
 	Publisher          string     `gorm:"size:255" json:"publisher"`
-	URL                string     `gorm:"size:191;uniqueIndex;not null" json:"url"`
+	URL                string     `gorm:"size:250;uniqueIndex;not null" json:"url"`
 	PublishedYear      string     `gorm:"size:20" json:"published_year"`
 	LicenseNote        string     `gorm:"size:500" json:"license_note"`
 	VerificationStatus string     `gorm:"size:20;default:pending" json:"verification_status"`

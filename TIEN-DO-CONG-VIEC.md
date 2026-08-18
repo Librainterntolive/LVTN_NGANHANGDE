@@ -180,7 +180,19 @@ và chỉ ghi chi tiết vào log.
 1 bài nộp chưa chấm. Muốn màn hình Thống kê có số liệu thì cần chấm bài này và
 bổ sung thêm sinh viên thật.
 
-**28 trong 29 học phần chưa có câu hỏi.** Chỉ *Tin học đại cương* có 20 câu.
+**13 trong 29 học phần chưa có câu hỏi.** Đã phủ 16 học phần. Còn trống:
+Triết học Mác - Lênin, Toán cao cấp, Pháp luật đại cương, Giáo dục quốc phòng
+và an ninh, Tiếng Anh, Kỹ năng mềm, Kinh tế vi mô, Kinh tế vĩ mô, Nguyên lý kế
+toán, Marketing căn bản, Quản trị học và hai học phần cũ *Cơ sở dữ liệu*,
+*Lập trình Web*.
+
+**Bảng dùng lẫn hai engine.** 11 bảng là InnoDB (do GORM tạo), 12 bảng là MyISAM
+(do các tệp SQL tạo, thừa hưởng mặc định của WAMP): `sources`, `assignments`,
+`assignment_submissions`, `audit_logs`, `email_otps`, `password_reset_requests`,
+`chapters`, `class_posts`, `folders`, `folder_exams`, `practice_answers`,
+`upload_sessions`. MyISAM không có giao dịch, nên `START TRANSACTION ... COMMIT`
+trong các tệp seed thực chất không bảo vệ được gì cho những bảng này; cũng không
+có khoá ngoại. Nên chuyển sang InnoDB, nhưng đó là thay đổi diện rộng nên chưa làm.
 
 **Commit có thể chưa gắn vào hồ sơ GitHub.** Git đang ký bằng
 `truongvominhtu@gmail.com`. Nếu địa chỉ này chưa được thêm vào tài khoản
@@ -282,3 +294,65 @@ sang Automatic, hoặc mở WAMP từ khay hệ thống trước khi làm việc
 | Bài kiểm thử backend | 46 |
 | Emoji làm biểu tượng | 0 |
 | Cỡ chữ và bo góc đặt tùy ý | 0 |
+
+---
+
+## 8. Đợt làm việc thứ ba
+
+### Thêm 135 câu hỏi cho 9 học phần
+
+Trước khi soạn, mỗi nguồn ứng viên đều được **tải thử thật** để không lặp lại
+tình huống `cppreference.com` bị chặn ở đợt trước. Kết quả rà nguồn:
+`thuvienphapluat.vn` trả 403; `vbpl.vn` và `congbao.chinhphu.vn` chỉ đăng phần
+mô tả văn bản, toàn văn nằm trong tệp PDF; giáo trình lý luận chính trị do Bộ
+Giáo dục và Đào tạo ban hành không có bản trực tuyến đọc được.
+
+Chỉ dùng những nguồn đọc được toàn văn:
+
+| Học phần | Số câu | Nguồn |
+|---|---|---|
+| Cấu trúc dữ liệu và giải thuật | 15 | Python 3 Documentation; Java SE 21 API Specification (Oracle) |
+| Xác suất thống kê | 15 | NIST/SEMATECH e-Handbook of Statistical Methods |
+| Đại số tuyến tính | 15 | NIST Digital Library of Mathematical Functions; LAPACK Users' Guide |
+| Giải tích | 15 | NIST Digital Library of Mathematical Functions §1.4, §1.5 |
+| Vật lý đại cương | 15 | NIST (đơn vị SI, 7 hằng số định nghĩa, tiền tố); BIPM |
+| Chủ nghĩa xã hội khoa học | 15 | Cương lĩnh 2011 (Đại hội XI) |
+| Kinh tế chính trị Mác - Lênin | 15 | Cương lĩnh 2011, mục III.1 về kinh tế |
+| Tư tưởng Hồ Chí Minh | 15 | Di chúc Chủ tịch Hồ Chí Minh (bản 1969); Điều lệ Đảng; Cương lĩnh 2011 |
+| Lịch sử Đảng Cộng sản Việt Nam | 15 | Điều lệ Đảng (Đại hội XI); Cương lĩnh 2011 phần I |
+
+Ba văn kiện trong nước được tải về và đọc **toàn văn** trước khi soạn, không dựa
+vào bài bình luận hay bản tóm tắt: Cương lĩnh 2011 (32.000 ký tự), Điều lệ Đảng
+do Đại hội XI thông qua ngày 19/01/2011 (44.000 ký tự), và Di chúc công bố năm
+1969.
+
+Câu hỏi được sinh bằng script nên khuôn SQL đồng nhất; vị trí đáp án đúng được
+xoay vòng thay vì dồn hết vào phương án A. Phân bố đáp án đúng của 135 câu mới:
+A 21, B 22, C 27, D 27 câu.
+
+### Lỗi phát hiện khi chạy thật: URL nguồn bị cắt âm thầm
+
+Cột `sources.url` khai báo `VARCHAR(191)`. URL của Cương lĩnh 2011 trên
+`tulieuvankien.dangcongsan.vn` dài 194 ký tự. MySQL đang chạy ở chế độ không
+nghiêm ngặt (`sql_mode` rỗng) nên **không báo lỗi mà cắt bớt** phần đuôi. Hệ quả
+dây chuyền: câu lệnh tra id nguồn theo URL đầy đủ trả về `NULL`, kéo theo 30 câu
+hỏi không được chèn — và toàn bộ quá trình vẫn báo chạy thành công.
+
+Đã nới cột lên `VARCHAR(250)` và sửa thẻ GORM trong `entity.go` cho khớp. Không
+nới được lên 512 vì bảng `sources` đang dùng engine MyISAM, giới hạn độ dài khoá
+là 1000 byte, mà utf8mb4 tốn 4 byte một ký tự.
+
+### Số liệu sau đợt ba
+
+| Chỉ số | Giá trị |
+|---|---|
+| Câu hỏi / đáp án | 245 / 980 |
+| Nguồn đã xác thực | 32 |
+| Học phần có câu hỏi | 16 / 29 |
+| Đề thi | 8 |
+| Bài kiểm thử backend | 46 (toàn bộ đạt) |
+| Câu thiếu nguồn / thiếu vị trí tham chiếu | 0 / 0 |
+| Câu sai số đáp án đúng / không đủ 4 phương án | 0 / 0 |
+
+Kiểm chứng: `scripts/verify-real-data.ps1` báo **ĐẠT** toàn bộ; `gofmt`,
+`go build`, `go vet` sạch; toàn bộ kiểm thử backend đạt.
