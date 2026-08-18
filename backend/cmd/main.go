@@ -27,19 +27,23 @@ func main() {
 	if os.Getenv("GIN_MODE") != "debug" {
 		gin.SetMode(gin.ReleaseMode)
 	}
-
+	
+	allowedOrigin :=  os.Getenv("ALLOWED_ORIGIN")
+	if allowedOrigin == "" {
+		allowedOrigin = "http://localhost:4200"
+	}
 	// Gin
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:4200", "http://127.0.0.1:4200", "http://[::1]:4200"},
+		AllowOrigins:     []string{allowedOrigin},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
-
+	
 	// Khai báo route (controller -> service -> repository)
 	router.Setup(r, config.DB)
-
+	
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		port = "8081"
