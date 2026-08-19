@@ -25,7 +25,7 @@ RUN go mod tidy
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GIN_MODE=debug go build \
     -ldflags="-w -s" \
-    -o server ./main.go
+    -o server ./cmd
 
 # ==========================================
 # Stage 2: Runtime Image (Minimal & Secure)
