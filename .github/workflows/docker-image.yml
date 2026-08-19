@@ -193,7 +193,6 @@ jobs:
             # 4. Chạy container mới với mapping Host Port -> Container Port
             docker run -d \
               --name "$CONTAINER_NAME" \
-              --restart=always \
               -p "${HOST_PORT}:${SERVER_PORT}" \
               --env-file "$ENV_FILE_PATH" \
               "$DOCKER_IMAGE"
