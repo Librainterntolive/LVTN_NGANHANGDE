@@ -204,7 +204,7 @@ jobs:
             mkdir -p "$DATA_DIR"
             APP_UID="$(docker run --rm --entrypoint id "$DOCKER_IMAGE" -u)"
             APP_GID="$(docker run --rm --entrypoint id "$DOCKER_IMAGE" -g)"
-            docker run --rm -v "$DATA_DIR:/data" --entrypoint chown "$DOCKER_IMAGE" -R "${APP_UID}:${APP_GID}" /data
+            docker run -u 0:0 --rm -v "$DATA_DIR:/data" --entrypoint chown "$DOCKER_IMAGE" -R "${APP_UID}:${APP_GID}" /data
             echo "Data dir:  $DATA_DIR (uid ${APP_UID}, gid ${APP_GID})"
 
             # 5. Chạy container mới với mapping Host Port -> Container Port
