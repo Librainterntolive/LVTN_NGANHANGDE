@@ -117,6 +117,7 @@ jobs:
       ALLOWED_ORIGIN: ${{ vars.ALLOWED_ORIGIN }}
       AWS_REGION: ${{ vars.AWS_REGION }}
       CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+      DATA_DIR: ${{ vars.DATA_DIR }}
       DOCKERHUB_PROJECT_NAME: ${{ vars.DOCKERHUB_PROJECT_NAME }}
       EC2_HOST: ${{ vars.EC2_HOST }}
       EC2_USER: ${{ vars.EC2_USER }}
@@ -140,7 +141,7 @@ jobs:
           host: ${{ vars.EC2_HOST }}
           username: ${{ vars.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,JWT_SECRET,FILE_ENCRYPTION_KEY,SMTP_PASSWORD,ALLOWED_ORIGIN,AWS_REGION,CONTAINER_NAME,DOCKERHUB_PROJECT_NAME,ENV_FILE_PATH,HOST_PORT,SERVER_PORT,SMTP_FROM,SMTP_HOST,SMTP_PORT,SMTP_USERNAME,SSM_PARAMETER_NAME,UPLOAD_DIR,DOCKER_IMAGE,IMAGE_TAG
+          envs: DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,JWT_SECRET,FILE_ENCRYPTION_KEY,SMTP_PASSWORD,ALLOWED_ORIGIN,AWS_REGION,CONTAINER_NAME,DATA_DIR,DOCKERHUB_PROJECT_NAME,ENV_FILE_PATH,HOST_PORT,SERVER_PORT,SMTP_FROM,SMTP_HOST,SMTP_PORT,SMTP_USERNAME,SSM_PARAMETER_NAME,UPLOAD_DIR,DOCKER_IMAGE,IMAGE_TAG
           script: |
             set -e
 
@@ -149,6 +150,10 @@ jobs:
             HOST_PORT="${HOST_PORT:-8080}"
             ENV_FILE_PATH="${ENV_FILE_PATH:-/tmp/app.env}"
             DOCKER_IMAGE="${DOCKER_IMAGE}"
+            # Thu muc tren EC2 giu tep bai nop cua sinh vien. Phai nam NGOAI
+            # container: buoc duoi co "docker rm" container cu, khong gan o ngoai
+            # thi moi lan trien khai la mat sach bai nop.
+            DATA_DIR="${DATA_DIR:-$HOME/quiz-backend/data}"
 
             if [ -z "$DOCKER_IMAGE" ]; then
               DOCKER_IMAGE="${DOCKERHUB_USERNAME}/${DOCKERHUB_PROJECT_NAME}:${IMAGE_TAG}"
@@ -180,6 +185,7 @@ jobs:
             SMTP_FROM=${SMTP_FROM}
             UPLOAD_DIR=${UPLOAD_DIR}
             AWS_REGION=${AWS_REGION}
+            TZ=Asia/Ho_Chi_Minh
             EOF
 
             # 2. Login DockerHub & pull image mới
@@ -190,17 +196,31 @@ jobs:
             docker stop "$CONTAINER_NAME" 2>/dev/null || true
             docker rm "$CONTAINER_NAME" 2>/dev/null || true
 
-            # 4. Chạy container mới với mapping Host Port -> Container Port
+            # 4. Chuẩn bị thư mục dữ liệu ngoài container.
+            # Container chạy bằng user thường (appuser trong Dockerfile), trong khi
+            # thư mục vừa tạo trên máy chủ thuộc về user SSH. Không chỉnh quyền thì
+            # container không ghi được và mọi lượt nộp bài đều lỗi, nên phải lấy
+            # đúng UID/GID trong ảnh rồi giao quyền cho nó.
+            mkdir -p "$DATA_DIR"
+            APP_UID="$(docker run --rm --entrypoint id "$DOCKER_IMAGE" -u)"
+            APP_GID="$(docker run --rm --entrypoint id "$DOCKER_IMAGE" -g)"
+            docker run --rm -v "$DATA_DIR:/data" --entrypoint chown "$DOCKER_IMAGE" -R "${APP_UID}:${APP_GID}" /data
+            echo "Data dir:  $DATA_DIR (uid ${APP_UID}, gid ${APP_GID})"
+
+            # 5. Chạy container mới với mapping Host Port -> Container Port
+            # --restart unless-stopped: khoi dong lai EC2 thi container tu len lai.
             docker run -d \
               --name "$CONTAINER_NAME" \
+              --restart unless-stopped \
               -p "${HOST_PORT}:${SERVER_PORT}" \
+              -v "$DATA_DIR:/app/data" \
               --env-file "$ENV_FILE_PATH" \
               "$DOCKER_IMAGE"
 
-            # 5. Dọn dẹp file .env tạm
+            # 6. Dọn dẹp file .env tạm
             rm -f "$ENV_FILE_PATH"
 
-            # 6. Cập nhật Parameter Store trên AWS SSM
+            # 7. Cập nhật Parameter Store trên AWS SSM
             export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
             export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
             export AWS_DEFAULT_REGION="$AWS_REGION"

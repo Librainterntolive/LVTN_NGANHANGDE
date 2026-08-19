@@ -1,4 +1,7 @@
 .env
+# Moi ban sao cua .env cung phai bo qua: .env.backup, .env.local, .env.prod...
+.env.*
+!.env.example
 *.exe
 /bin/
 /tmp/
