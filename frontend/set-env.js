@@ -9,7 +9,7 @@ if (!fs.existsSync(envDir)) {
 }
 
 // Lấy biến từ process.env của Vercel (kèm fallback nếu chạy local)
-const apiUrl = process.env.API_URL || 'https://api.yourdomain.com';
+const apiUrl = `${process.env.API_URL}/api` || 'https://api.yourdomain.com/api';
 // Nội dung file environment sẽ được sinh ra
 const envConfigFile = `// File này được sinh tự động trong quá trình build trên Vercel
 export const environment = {
