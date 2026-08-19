@@ -1,0 +1,211 @@
+name: Deploy Go Backend to EC2
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Chọn môi trường deploy'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+
+jobs:
+  # ────────────────────────────────────────────────────────────
+  # Job 1: Run Unit Tests
+  # ────────────────────────────────────────────────────────────
+  test:
+    name: Run Go Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          check-latest: true
+          cache-dependency-path: backend/go.sum
+
+      - name: Run Go tests
+        working-directory: ./backend
+        run: |
+          go vet ./...
+          go test -v -race ./...
+
+  # ────────────────────────────────────────────────────────────
+  # Job 2: Build Docker image & Push DockerHub
+  # ────────────────────────────────────────────────────────────
+  build-and-push:
+    name: Build & Push Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    environment: prod
+    outputs:
+      image_tag: ${{ steps.vars.outputs.image_tag }}
+      image_full: ${{ steps.vars.outputs.image_full }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Compute image tag (short commit SHA)
+        id: vars
+        run: |
+          SHORT_SHA=$(git rev-parse --short=7 HEAD)
+          USER_NAME="${{ secrets.DOCKERHUB_USERNAME }}"
+          PROJECT_NAME=$(echo "${{ vars.DOCKERHUB_PROJECT_NAME }}" | tr '[:upper:]' '[:lower:]')
+
+          IMAGE_FULL="${USER_NAME}/${PROJECT_NAME}:${SHORT_SHA}"
+
+          echo "image_tag=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "image_full=${IMAGE_FULL}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          build-args: |
+            AWS_REGION=${{ vars.AWS_REGION || 'ap-southeast-1' }}
+          tags: |
+            ${{ steps.vars.outputs.image_full }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_PROJECT_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ────────────────────────────────────────────────────────────
+  # Job 3: SSH Deploy to EC2
+  # ────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to EC2
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      # Secrets
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      FILE_ENCRYPTION_KEY: ${{ secrets.FILE_ENCRYPTION_KEY }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+
+      # Variables
+      ALLOWED_ORIGIN: ${{ vars.ALLOWED_ORIGIN }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+      DOCKERHUB_PROJECT_NAME: ${{ vars.DOCKERHUB_PROJECT_NAME }}
+      EC2_HOST: ${{ vars.EC2_HOST }}
+      EC2_USER: ${{ vars.EC2_USER }}
+      ENV_FILE_PATH: ${{ vars.ENV_FILE_PATH }}
+      HOST_PORT: ${{ vars.HOST_PORT }}
+      SERVER_PORT: ${{ vars.SERVER_PORT }}
+      SMTP_FROM: ${{ vars.SMTP_FROM }}
+      SMTP_HOST: ${{ vars.SMTP_HOST }}
+      SMTP_PORT: ${{ vars.SMTP_PORT }}
+      SMTP_USERNAME: ${{ vars.SMTP_USERNAME }}
+      SSM_PARAMETER_NAME: ${{ vars.SSM_PARAMETER_NAME }}
+      UPLOAD_DIR: ${{ vars.UPLOAD_DIR }}
+
+      # Outputs từ build job
+      DOCKER_IMAGE: ${{ needs.build-and-push.outputs.image_full }}
+      IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+    steps:
+      - name: SSH deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DOCKERHUB_USERNAME,DOCKERHUB_TOKEN,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,JWT_SECRET,FILE_ENCRYPTION_KEY,SMTP_PASSWORD,ALLOWED_ORIGIN,AWS_REGION,CONTAINER_NAME,DOCKERHUB_PROJECT_NAME,ENV_FILE_PATH,HOST_PORT,SERVER_PORT,SMTP_FROM,SMTP_HOST,SMTP_PORT,SMTP_USERNAME,SSM_PARAMETER_NAME,UPLOAD_DIR,DOCKER_IMAGE,IMAGE_TAG
+          script: |
+            set -e
+
+            CONTAINER_NAME="${CONTAINER_NAME:-go-backend}"
+            SERVER_PORT="${SERVER_PORT:-8080}"
+            HOST_PORT="${HOST_PORT:-8080}"
+            ENV_FILE_PATH="${ENV_FILE_PATH:-/tmp/app.env}"
+
+            echo "=== DEPLOYMENT INFO ==="
+            echo "Container: $CONTAINER_NAME"
+            echo "Image:     $DOCKER_IMAGE"
+            echo "Port Map:  Host ${HOST_PORT} -> Container ${SERVER_PORT}"
+            echo "Origin:    $ALLOWED_ORIGIN"
+            echo "======================="
+
+            # 1. Tạo file .env chứa đầy đủ config cho Go Backend
+            mkdir -p "$(dirname "$ENV_FILE_PATH")"
+            cat > "$ENV_FILE_PATH" <<EOF
+            SERVER_PORT=${SERVER_PORT}
+            ALLOWED_ORIGIN=${ALLOWED_ORIGIN}
+            DB_HOST=${DB_HOST}
+            DB_PORT=${DB_PORT}
+            DB_USER=${DB_USER}
+            DB_PASSWORD=${DB_PASSWORD}
+            DB_NAME=${DB_NAME}
+            RDS_CA_PATH=/app/certs/regional.pem
+            JWT_SECRET=${JWT_SECRET}
+            FILE_ENCRYPTION_KEY=${FILE_ENCRYPTION_KEY}
+            SMTP_HOST=${SMTP_HOST}
+            SMTP_PORT=${SMTP_PORT}
+            SMTP_USERNAME=${SMTP_USERNAME}
+            SMTP_PASSWORD=${SMTP_PASSWORD}
+            SMTP_FROM=${SMTP_FROM}
+            UPLOAD_DIR=${UPLOAD_DIR}
+            AWS_REGION=${AWS_REGION}
+            EOF
+
+            # 2. Login DockerHub & pull image mới
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker pull "$DOCKER_IMAGE"
+
+            # 3. Dừng và xoá container cũ nếu đang chạy
+            docker stop "$CONTAINER_NAME" 2>/dev/null || true
+            docker rm "$CONTAINER_NAME" 2>/dev/null || true
+
+            # 4. Chạy container mới với mapping Host Port -> Container Port
+            docker run -d \
+              --name "$CONTAINER_NAME" \
+              --restart=always \
+              -p "${HOST_PORT}:${SERVER_PORT}" \
+              --env-file "$ENV_FILE_PATH" \
+              "$DOCKER_IMAGE"
+
+            # 5. Dọn dẹp file .env tạm
+            rm -f "$ENV_FILE_PATH"
+
+            # 6. Cập nhật Parameter Store trên AWS SSM
+            export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
+            export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
+            export AWS_DEFAULT_REGION="$AWS_REGION"
+
+            aws ssm put-parameter \
+              --name "$SSM_PARAMETER_NAME" \
+              --value "$IMAGE_TAG" \
+              --type "String" \
+              --overwrite
+
+            echo "Deploy completed successfully for tag: $IMAGE_TAG"
